@@ -1,0 +1,7 @@
+name = input("Enter a name: ")
+print()
+print("Hello, {}!".format(name.title()))
+print()
+x = eval(input("Make a calculation: "))
+print(x)
+print()
