@@ -10,7 +10,6 @@ def party_planner(cookies, people):
     # TODO: Add a try-except block here to
     #       make sure no ZeroDivisionError occurs.
     
-
     return(num_each, leftovers)
 
 # The main code block is below; do not edit this
