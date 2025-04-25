@@ -6,6 +6,6 @@ f.close()
 # The file is then closed.
 
 f = open('some_file.txt', 'w')
-f.write('Hello, Germanchirris!' + '!')
+file_data = f.write('Hello, Germanchirris!!)
 print(file_data)
 f.close()
