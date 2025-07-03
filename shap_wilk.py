@@ -32,11 +32,20 @@ print(f"Margin of Error: £{E}")
 # Calculate required sample size
 n = int((z * std_price / E) ** 2)
 print(f"Required sample size for ±£{E} margin of error: {n}")
-k = space_size / n
-print(f"Sampling factor (k): {k}")
+k = int(round(space_size / n))
+print(f"Sampling factor (k, rounded): {k}")
+print()  # Print a blank line for spacing
+
+# Systematic sampling
+systematic_sample = prices.iloc[::k][:n]
+print(systematic_sample.head())
+print(f"Sample size: {len(systematic_sample)}")
+# To export:
+systematic_sample.to_frame().to_excel("systematic_sample_prices.xlsx", index=False)
+print()  # Print a blank line for spacing
 
 # Shapiro-Wilk test
-stat, p_value = shapiro(prices.sample(n=500, random_state=1)) # sample to avoid memory issues
+stat, p_value = shapiro(systematic_sample)
 print(f"Shapiro-Wilk Test Statistic: {stat}")
 print(f"p-value: {p_value}")
 print()  # Print a blank line for spacing
