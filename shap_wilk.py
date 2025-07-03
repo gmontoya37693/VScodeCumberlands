@@ -19,3 +19,5 @@ prices = df['Price (£)'].dropna()
 
 # Shapiro-Wilk test
 stat, p_value = shapiro(prices.sample(n=500, random_state=1)) # sample to avoid memory issues
+print(f"Shapiro-Wilk Test Statistic: {stat}")
+print(f"p-value: {p_value}")
