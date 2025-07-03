@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 
 # Correct file path based on the output
-file_path = "/kaggle/input/houses-in-london/london_houses.csv"
+file_path = "london_houses.csv"
 
 # Load the dataset 
 df = pd.read_csv(file_path)
