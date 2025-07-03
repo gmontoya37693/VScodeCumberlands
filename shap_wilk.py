@@ -13,17 +13,30 @@ print(df.head())
 
 # Inspect column names to confirm the correct one
 print(df.columns)
+print()  # Print a blank line for spacing
+space_size = len(df)
+print(f"Total number of rows in the file: {space_size}")
 
 # Use the correct column name 'Price (£)'
 prices = df['Price (£)'].dropna()
+print()  # Print a blank line for spacing
 
 # Set your sample size
 Conf_level = 0.95
 z = 1.96  # For a 95% confidence level
 std_price = df['Price (£)'].std()
+E = 100000  # Margin of error in pounds
 print(f"Standard Deviation of Price (£): {std_price}")
+print(f"Margin of Error: £{E}")
+
+# Calculate required sample size
+n = int((z * std_price / E) ** 2)
+print(f"Required sample size for ±£{E} margin of error: {n}")
+k = space_size / n
+print(f"Sampling factor (k): {k}")
 
 # Shapiro-Wilk test
 stat, p_value = shapiro(prices.sample(n=500, random_state=1)) # sample to avoid memory issues
 print(f"Shapiro-Wilk Test Statistic: {stat}")
 print(f"p-value: {p_value}")
+print()  # Print a blank line for spacing
