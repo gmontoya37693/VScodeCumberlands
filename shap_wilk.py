@@ -17,6 +17,12 @@ print(df.columns)
 # Use the correct column name 'Price (£)'
 prices = df['Price (£)'].dropna()
 
+# Set your sample size
+Conf_level = 0.95
+z = 1.96  # For a 95% confidence level
+std_price = df['Price (£)'].std()
+print(f"Standard Deviation of Price (£): {std_price}")
+
 # Shapiro-Wilk test
 stat, p_value = shapiro(prices.sample(n=500, random_state=1)) # sample to avoid memory issues
 print(f"Shapiro-Wilk Test Statistic: {stat}")
