@@ -37,11 +37,11 @@ print(f"Sampling factor (k, rounded): {k}")
 print()  # Print a blank line for spacing
 
 # Systematic sampling for the first sample
-systematic_sample = prices.iloc[::k][:n].to_frame(name='Price (£)')
-print(systematic_sample.head())
-print(f"Sample size: {len(systematic_sample)}")
+systematic_sample1 = prices.iloc[::k][:n].to_frame(name='Price (£)')
+print(systematic_sample1.head())
+print(f"Sample 1 size: {len(systematic_sample1)}")
 # To export:
-systematic_sample.to_excel("systematic_sample_prices.xlsx", index=False)
+systematic_sample1.to_excel("systematic_sample1_prices.xlsx", index=False)
 print()  # Print a blank line for spacing
 
 # Systematic sampling for the second sample (offset by 1 to avoid overlap)
@@ -59,7 +59,7 @@ print(f"Shapiro-Wilk Test (Full Data) p-value: {p_value_full}")
 print()  # Print a blank line for spacing
 
 # Shapiro-Wilk test on the systematic samples
-stat1, p_value1 = shapiro(systematic_sample)
+stat1, p_value1 = shapiro(systematic_sample1)
 print(f"Shapiro-Wilk Test (Systematic Sample 1) Statistic: {stat1}")
 print(f"Shapiro-Wilk Test (Systematic Sample 1) p-value: {p_value1}")
 print()  # Print a blank line for spacing
@@ -70,7 +70,7 @@ print(f"Shapiro-Wilk Test (Systematic Sample 2) p-value: {p_value2}")
 print()  # Print a blank line for spacing
 
 # Levene's test for homogeneity of variance between the two systematic samples
-stat_levene, p_value_levene = levene(systematic_sample.iloc[:, 0], systematic_sample2.iloc[:, 0])
+stat_levene, p_value_levene = levene(systematic_sample1.iloc[:, 0], systematic_sample2.iloc[:, 0])
 print(f"Levene's Test Statistic (Sample 1 vs Sample 2): {stat_levene}")
 print(f"Levene's Test p-value (Sample 1 vs Sample 2): {p_value_levene}")
 print()  # Print a blank line for spacing
