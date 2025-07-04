@@ -1,5 +1,5 @@
 import pandas as pd
-from scipy.stats import shapiro
+from scipy.stats import shapiro, levene
 import matplotlib.pyplot as plt
 import seaborn as sns
 
@@ -36,12 +36,20 @@ k = int(round(space_size / n))
 print(f"Sampling factor (k, rounded): {k}")
 print()  # Print a blank line for spacing
 
-# Systematic sampling
+# Systematic sampling for the first sample
 systematic_sample = prices.iloc[::k][:n].to_frame(name='Price (£)')
 print(systematic_sample.head())
 print(f"Sample size: {len(systematic_sample)}")
 # To export:
 systematic_sample.to_excel("systematic_sample_prices.xlsx", index=False)
+print()  # Print a blank line for spacing
+
+# Systematic sampling for the second sample (offset by 1 to avoid overlap)
+systematic_sample2 = prices.iloc[1::k][:n].to_frame(name='Price (£)')
+print(systematic_sample2.head())
+print(f"Sample 2 size: {len(systematic_sample2)}")
+# To export:
+systematic_sample2.to_excel("systematic_sample2_prices.xlsx", index=False)
 print()  # Print a blank line for spacing
 
 # Shapiro-Wilk test on the full dataset
@@ -50,8 +58,19 @@ print(f"Shapiro-Wilk Test (Full Data) Statistic: {stat_full}")
 print(f"Shapiro-Wilk Test (Full Data) p-value: {p_value_full}")
 print()  # Print a blank line for spacing
 
-# Shapiro-Wilk test
-stat, p_value = shapiro(systematic_sample)
-print(f"Shapiro-Wilk Test Statistic: {stat}")
-print(f"p-value: {p_value}")
+# Shapiro-Wilk test on the systematic samples
+stat1, p_value1 = shapiro(systematic_sample)
+print(f"Shapiro-Wilk Test (Systematic Sample 1) Statistic: {stat1}")
+print(f"Shapiro-Wilk Test (Systematic Sample 1) p-value: {p_value1}")
+print()  # Print a blank line for spacing
+
+stat2, p_value2 = shapiro(systematic_sample2)
+print(f"Shapiro-Wilk Test (Systematic Sample 2) Statistic: {stat2}")
+print(f"Shapiro-Wilk Test (Systematic Sample 2) p-value: {p_value2}")
+print()  # Print a blank line for spacing
+
+# Levene's test for homogeneity of variance between the two systematic samples
+stat_levene, p_value_levene = levene(systematic_sample.iloc[:, 0], systematic_sample2.iloc[:, 0])
+print(f"Levene's Test Statistic (Sample 1 vs Sample 2): {stat_levene}")
+print(f"Levene's Test p-value (Sample 1 vs Sample 2): {p_value_levene}")
 print()  # Print a blank line for spacing
