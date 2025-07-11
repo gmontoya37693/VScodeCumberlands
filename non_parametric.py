@@ -27,3 +27,5 @@ if p_value < 0.05:
     print("Result: The sample median is significantly different from the population median (p < 0.05).")
 else:
     print("Result: No significant difference between the sample median and the population median (p >= 0.05).")
+
+print("\n" + "-"*60 + "\n")
