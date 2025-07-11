@@ -1,6 +1,11 @@
 import pandas as pd
 from statsmodels.stats.descriptivestats import sign_test
 
+# Hypotheses for the one-sample Sign Test
+print("One-sample Sign Test Hypotheses:")
+print("H0 (Null Hypothesis): The median of the sample (systematic_sample1) is equal to the population median.")
+print("H1 (Alternative Hypothesis): The median of the sample (systematic_sample1) is different from the population median.\n")
+
 # Load the systematic sample 1 and the full dataset
 df1 = pd.read_excel('systematic_sample1_prices.xlsx')
 df_fp = pd.read_csv('london_houses.csv')
