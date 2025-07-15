@@ -92,6 +92,10 @@ pairedB_prices = sampleB['Price (£)']
 
 print(f"Number of paired samples: {len(pairedA_prices)}")
 
+print("\nWilcoxon Signed-Rank Test Hypotheses:")
+print("H0 (Null Hypothesis): The median of the differences between paired samples is zero.")
+print("H1 (Alternative Hypothesis): The median of the differences between paired samples is not zero.\n")
+
 print("\nWilcoxon signed-rank test for paired samples (Price (£)):")
 # Perform the Wilcoxon signed-rank test
 wilcoxon_stat, wilcoxon_p = wilcoxon(pairedA_prices, pairedB_prices)
