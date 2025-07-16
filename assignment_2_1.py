@@ -24,3 +24,4 @@ while len(prime) < 450:     # Find 450 prime numbers
 print(f"Total prime numbers found: {prime_count}")
 print("Primer number 450:", prime[-1])  # Print the 450th prime number
 print(prime)  # Print the list of prime numbers
+print(len(prime))  # Print the total number of prime numbers found  
