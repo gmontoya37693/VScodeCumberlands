@@ -24,8 +24,8 @@ while True:
             n += 1
 
         # Calculations and output inside the 'yes' block
-        prime_log = [(p, math.log(p)) for p in primes if p >= 2]
-        log_sum = sum(log for _, log in prime_log)
+        prime_log = [(p, math.log(p)) for p in primes if p >= 2]    # Calculate log(prime) for each prime number
+        log_sum = sum(log for _, log in prime_log)  # Sum of log(prime) for all primes found    
 
         print(f"Total prime numbers found [primes]: {len(primes)}") # Print total prime numbers found
         print("Last Prime number in [primes] is:", primes[-1])      # Print last prime number found
