@@ -23,5 +23,3 @@ while len(prime) < 450:     # Find 450 prime numbers
     
 print(f"Total prime numbers found: {prime_count}")
 print("Primer number 450:", prime[-1])  # Print the 450th prime number
-print("First 10 primes:", prime[:10])
-print("Last 10 primes:", prime[-10:])
