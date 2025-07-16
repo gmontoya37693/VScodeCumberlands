@@ -26,7 +26,6 @@ while True:
         # Calculations and output inside the 'yes' block
         prime_log = [(p, math.log(p)) for p in primes if p >= 2]
         log_sum = sum(log for _, log in prime_log)
-        avg_log = log_sum / len(prime_log) if prime_log else 0
 
         print(f"Total prime numbers found [primes]: {len(primes)}") # Print total prime numbers found
         print("Last Prime number in [primes] is:", primes[-1])      # Print last prime number found
