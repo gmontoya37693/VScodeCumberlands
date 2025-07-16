@@ -33,6 +33,7 @@ while True:
         print("Last (prime, log(prime)) in [prime_log] is:", prime_log[-1])
         print("Sum of log(prime) between 2 to n:", log_sum)
         print("Size of prime vector: ", len(primes))
+        print()  # Add a blank line after each run
 
 
 
