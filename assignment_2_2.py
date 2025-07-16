@@ -28,10 +28,11 @@ while True:
         log_sum = sum(log for _, log in prime_log)
         avg_log = log_sum / len(prime_log) if prime_log else 0
 
-        print(f"Total prime numbers found [primes]: {len(primes)}")
-        print("Last Prime number in [primes] is:", primes[-1])
-        print("Last (prime, log(prime)) in [prime_log] is:", prime_log[-1])
-        print("Sum of log(prime) between 2 to n:", log_sum)
+        print(f"Total prime numbers found [primes]: {len(primes)}") # Print total prime numbers found
+        print("Last Prime number in [primes] is:", primes[-1])      # Print last prime number found
+        print("Last (prime, log(prime)) in [prime_log] is:", prime_log[-1]) # Print last (prime, log(prime)) found
+        print("Sum of log(prime) between 2 to n:", log_sum) # Sum of log(prime)
+        print("Ratio of the sum and n between 2 to n:", avg_log) # Average of log(prime)
         print("Size of prime vector: ", len(primes))
         print()  # Add a blank line after each run
 
