@@ -17,7 +17,7 @@ while len(prime) < 450:     # Find 450 prime numbers
         prime.append(n)     # Append the prime number to the list
         prime_count += 1    # Increment the prime counter
         if prime_count % 150 == 0:
-        print(f"Found {prime_count} prime numbers so far")  # Print progress every 150 primes
+            print(f"Found {prime_count} prime numbers so far")  # Print progress every 150 primes
 
     n += 1  
     
