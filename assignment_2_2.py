@@ -32,7 +32,8 @@ while True:
         print("Last Prime number in [primes] is:", primes[-1])      # Print last prime number found
         print("Last (prime, log(prime)) in [prime_log] is:", prime_log[-1]) # Print last (prime, log(prime)) found
         print("Sum of log(prime) between 2 to n:", log_sum) # Sum of log(prime)
-        print("Ratio of the sum and n between 2 to n:", avg_log) # Average of log(prime)
+        print("n:", number) # Print the input number
+        print("Ratio of the sum and n between 2 to n:", log_sum / number)
         print("Size of prime vector: ", len(primes))
         print()  # Add a blank line after each run
 
