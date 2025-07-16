@@ -1,5 +1,5 @@
 """
-Assignment 1: Basic input and output for finding prime numbers.
+Assignment 1: Basic input and output for finding 450th prime numbers.
 July 16, 2025
 German Montoya
 """
