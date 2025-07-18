@@ -1,7 +1,7 @@
 import pandas as pd               # For data manipulation
 import numpy as np                # For numerical operations
 import matplotlib.pyplot as plt   # For plotting
-from scipy.cluster.hierarchy import dendrogram, linkage  # For hierarchical clustering
+from scipy.cluster.hierarchy import dendrogram, linkage, fcluster  # For hierarchical clustering
 from sklearn.preprocessing import StandardScaler         # For data normalization
 
 # Correct file path based on the output
@@ -62,4 +62,28 @@ dendrogram(linked,
 plt.title('Hierarchical Clustering Dendrogram (Chelsea, Single Linkage, Euclidean Distance)')
 plt.xlabel('Sample index')
 plt.ylabel('Distance')
+
+# Add a horizontal dashed line at y=0.34
+plt.axhline(y=0.34, color='r', linestyle='--', linewidth=2, label='Cut at y=0.34')
+plt.legend()
+
+plt.show()
+
+# Assign cluster labels based on the cut at y=0.34
+cluster_labels = fcluster(linked, t=0.34, criterion='distance')
+
+# Scatter plot of standardized values for Chelsea, colored by cluster
+plt.figure(figsize=(8, 6))
+for cluster in np.unique(cluster_labels):
+    plt.scatter(
+        X_zscore[cluster_labels == cluster, 0],
+        X_zscore[cluster_labels == cluster, 1],
+        label=f'Cluster {cluster}',
+        alpha=0.7
+    )
+plt.xlabel('Standardized Square Meters (z-score)')
+plt.ylabel('Standardized Price (£) (z-score)')
+plt.title('Chelsea: Clusters from Dendrogram Cut at 0.34')
+plt.legend()
+plt.grid(True)
 plt.show()
