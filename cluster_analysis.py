@@ -3,6 +3,7 @@ import numpy as np                # For numerical operations
 import matplotlib.pyplot as plt   # For plotting
 from scipy.cluster.hierarchy import dendrogram, linkage, fcluster  # For hierarchical clustering
 from sklearn.preprocessing import StandardScaler         # For data normalization
+from sklearn.cluster import KMeans
 
 # Correct file path based on the output
 file_path = "london_houses.csv"
@@ -84,6 +85,27 @@ for cluster in np.unique(cluster_labels):
 plt.xlabel('Standardized Square Meters (z-score)')
 plt.ylabel('Standardized Price (£) (z-score)')
 plt.title('Chelsea: Clusters from Dendrogram Cut at 0.34')
+plt.legend()
+plt.grid(True)
+plt.show()
+
+# Set number of clusters (e.g., 7 to match dendrogram)
+k = 7
+kmeans = KMeans(n_clusters=k, random_state=42)
+kmeans_labels = kmeans.fit_predict(X_zscore)
+
+# Scatter plot of standardized values for Chelsea, colored by k-means cluster
+plt.figure(figsize=(8, 6))
+for cluster in np.unique(kmeans_labels):
+    plt.scatter(
+        X_zscore[kmeans_labels == cluster, 0],
+        X_zscore[kmeans_labels == cluster, 1],
+        label=f'Cluster {cluster+1}',
+        alpha=0.7
+    )
+plt.xlabel('Standardized Square Meters (z-score)')
+plt.ylabel('Standardized Price (£) (z-score)')
+plt.title('Chelsea: K-Means Clusters (k=7)')
 plt.legend()
 plt.grid(True)
 plt.show()
