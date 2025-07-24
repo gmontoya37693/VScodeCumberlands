@@ -1,5 +1,5 @@
 """
-Assignment 3 Problem 2: Suggest closest feasible chicken nugget order, 
+Assignment 3 Problem 3: Suggest closest feasible chicken nugget order, 
                         and minimum cost combination (2nd Diophantine 
                         equation).
 July 24, 2025
