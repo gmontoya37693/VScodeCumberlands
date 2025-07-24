@@ -14,12 +14,12 @@ while True:
         # Prompt exactly as required
         print("How many chicken nuggets would you like to order? ", end="")
         order = int(input())
-        n_combinations = {}
-        n_combinations[order] = []
-        for a in range(order // 6 + 1):
-            for b in range(order // 9 + 1):
-                for c in range(order // 22 + 1):
-                    n = 6 * a + 9 * b + 22 * c
+        n_combinations = {}                         # Dictionary to store combinations for each order size
+        n_combinations[order] = []                  # Initialize list for this order size
+        for a in range(order // 6 + 1):             # Loop through possible counts of 6-piece boxes
+            for b in range(order // 9 + 1):         # Loop through possible counts of 9-piece boxes
+                for c in range(order // 22 + 1):    # Loop through possible counts of 22-piece boxes
+                    n = 6 * a + 9 * b + 22 * c      # Total number of nuggets equation
                     if n == order:
                         n_combinations[order].append((a, b, c))
 
