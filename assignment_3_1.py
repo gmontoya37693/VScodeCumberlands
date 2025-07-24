@@ -11,15 +11,14 @@ while True:
         print("Thank you for coming.")
         break
     elif test == "yes":
-        # Input for the quantity of chicken nuggets desired
-        order = int(input("Enter the order size: "))
-        # Initialize the dictionary of available order combinations
+        # Prompt exactly as required
+        print("How many chicken nuggets would you like to order? ", end="")
+        order = int(input())
         n_combinations = {}
         n_combinations[order] = []
         for a in range(order // 6 + 1):
             for b in range(order // 9 + 1):
                 for c in range(order // 22 + 1):
-                    # Diophantine equation for chicken nuggets :-) : 6a + 9b + 22c = n
                     n = 6 * a + 9 * b + 22 * c
                     if n == order:
                         n_combinations[order].append((a, b, c))
