@@ -27,7 +27,7 @@ while True:
         if n_combinations[order]:
             print(f"For an order size of {order}, choose from the following {len(n_combinations[order])} option(s):")
             for combo in n_combinations[order]:
-                print({'Six_piece': combo[0], 'Nine_piece': combo[1], 'Twenty_two_piece': combo[2]})
+                print({'Six piece': combo[0], 'Nine piece': combo[1], 'Twenty two piece': combo[2]})
         else:
             print(f"\nSorry, you cannot order exactly {order} chicken nuggets with boxes of 6, 9, and 22.")
 
