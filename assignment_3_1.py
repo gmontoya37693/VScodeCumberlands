@@ -11,9 +11,7 @@ while True:
         print("Thank you for coming.")
         break
     elif test == "yes":
-        # Prompt exactly as required
-        print("How many chicken nuggets would you like to order? ", end="")
-        order = int(input())
+        order = int(input("How many chicken nuggets would you like to order? "))
         n_combinations = {}                         # Dictionary to store combinations for each order size
         n_combinations[order] = []                  # Initialize list for this order size
         for a in range(order // 6 + 1):             # Loop through possible counts of 6-piece boxes
