@@ -54,7 +54,7 @@ while True:
             min_cost, min_combo = find_min_cost(combos)
             print(f"The minimum cost for {order} chicken nuggets is ${min_cost}:")
             print({'Six piece': min_combo[0], 'Nine piece': min_combo[1], 'Twenty two piece': min_combo[2]})
-        else:
+        else:   # Find the closest feasible n (search up and down), including cost
             closest_order, closest_combos = find_closest_feasible(order)
             min_cost, min_combo = find_min_cost(closest_combos)
             print(f"We don't have an exact match for {order} nuggets.")
