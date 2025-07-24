@@ -6,7 +6,7 @@ July 24, 2025
 German Montoya
 """
 
-# Define box sizes and their costs
+# Define box sizes combinations
 def find_combinations(n):
     combos = []
     for a in range(n // 6 + 1):
