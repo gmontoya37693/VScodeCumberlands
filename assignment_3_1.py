@@ -1,0 +1,35 @@
+"""
+Assignment 3 Problem 1: quantities of chicken nuggets that fit
+within available order quantities
+July 23, 2025
+German Montoya
+"""
+
+while True:
+    test = input("Do you want to buy chicken nuggets? (yes/no): ").lower()
+    if test == "no":
+        print("Thank you for coming.")
+        break
+    elif test == "yes":
+        # Input for the quantity of chicken nuggets desired
+        order = int(input("Enter the order size: "))
+        # Initialize the dictionary of available order combinations
+        n_combinations = {}
+        n_combinations[order] = []
+        for a in range(order // 6 + 1):
+            for b in range(order // 9 + 1):
+                for c in range(order // 22 + 1):
+                    # Diophantine equation for chicken nuggets :-) : 6a + 9b + 22c = n
+                    n = 6 * a + 9 * b + 22 * c
+                    if n == order:
+                        n_combinations[order].append((a, b, c))
+
+        # Output results
+        if n_combinations[order]:
+            print(f"For an order size of {order}, choose from the following {len(n_combinations[order])} option(s):")
+            for combo in n_combinations[order]:
+                print({'Six_piece': combo[0], 'Nine_piece': combo[1], 'Twenty_two_piece': combo[2]})
+        else:
+            print(f"\nSorry, you cannot order exactly {order} chicken nuggets with boxes of 6, 9, and 22.")
+
+
