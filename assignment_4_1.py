@@ -31,21 +31,25 @@ def countSubstrRecursive(srch_str, sub_str):
     of sub_str in srch_str recursively. It asks the user for a string
     and a substring, and returns the count of matches.
     """
-    pos = srch_str.find(sub_str)
-    if pos == -1:
+    pos = srch_str.find(sub_str)       # Find the position of the first occurrence of sub_str in srch_str
+    if pos == -1:                      # If no occurrence is found, return 0
         return 0
-    return 1 + countSubstrRecursive(srch_str[pos + len(sub_str):], sub_str)
+    return 1 + countSubstrRecursive(srch_str[pos + len(sub_str):], sub_str) # Count the current match and continue searching in the remaining string
 
 
 # Example usage
+# The following code allows the user to input a string and a substring
+# Cycles through the process until the user decides to stop.
 while True:
     test = input("Do you want to find a substring? (yes/no): ").lower()
     if test == "no":
         print("Thank you for using the program.")
         break
+    # Ask the user for a string and a substring to search
     elif test == "yes":
         srch_str = input("Enter the string to search in: ")
         sub_str = input("Enter the substring to find: ")
+        # Ask the user which method they want to use
         while True:
             method = input("Which function do you want to use? (iterative/recursive): ").lower()
             if method == "iterative":
@@ -57,7 +61,7 @@ while True:
                 print(f"The substring '{sub_str}' appears {count} times in the string (recursive).")
                 break
             else:
-                print("Invalid input. Please enter 'iterative' or 'recursive'.")
+                print("Invalid input. Please enter 'iterative' or 'recursive'.")    # Prompt for valid method input
         print()  # Add a blank line after each run
     else:
         print("Invalid input. Please enter 'yes' or 'no'.")
