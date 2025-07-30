@@ -20,6 +20,16 @@ def countSubstrMatches(srch_str, sub_str):
         start = pos + len(sub_str)     # Move start position to the end of the found substring
     return count                       # Return the count of matches
 
+# This function can be used to find and count the number of times a substring appears in a string recursively.
+def countSubstrRecursive(srch_str, sub_str):
+    """
+    Recursively counts the number of times sub_str appears in srch_str (non-overlapping).
+    """
+    pos = srch_str.find(sub_str)
+    if pos == -1:
+        return 0
+    return 1 + countSubstrRecursive(srch_str[pos + len(sub_str):], sub_str)
+
 
 # Example usage
 while True:
