@@ -1,10 +1,12 @@
 """
-Assignment 4 Problem 2: Count occurrences of a substring in a string
+Assignment 4 Problem 2: Find all start indices of occurrences 
+of a substring in a string
 July 30, 2025
 Germán Montoya
 """
 
-# This function find and counts the number of times a substring appears in a string iteratively.
+# This function find and counts the number of times a substring 
+# appears in a string iteratively.
 def allMatchesIndices(srch_str, sub_str):
     """
     allMatchesIndices will find all start indices of occurrences of sub_str 
