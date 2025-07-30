@@ -6,10 +6,10 @@ Germán Montoya
 
 # This function find and counts the number of times a substring appears in a string iteratively.
 def countSubstrMatches(srch_str, sub_str):
-"""
-Describe what the function does, what type of information goes
-into the arguments, and what is returned.
-"""
+    """
+    Describe what the function does, what type of information goes
+    into the arguments, and what is returned.
+    """
     count = 0   # Initialize count of matches to zero
     start = 0   # Start position for searching in the string at the beginning
     for i in range(len(srch_str)):      # Loop through the string to find all occurrences
@@ -18,7 +18,7 @@ into the arguments, and what is returned.
             break
         count += 1
         start = pos + len(sub_str)     # Move start position to the end of the found substring
-    return count                        # Return the count of matches
+    return count                       # Return the count of matches
 
 
 # Example usage
