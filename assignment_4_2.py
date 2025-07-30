@@ -20,6 +20,6 @@ def allMatchesIndices(srch_str, sub_str):
         pos = srch_str.find(sub_str, start)
         if pos == -1:
             break
-        indices.append(pos)
+        indices.append(pos) # Append the found start index to the list
         start = pos + 1  # Move start by 1 to allow overlapping matches
-    return
+    return tuple(indices)   
