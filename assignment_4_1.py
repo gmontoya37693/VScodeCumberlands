@@ -7,8 +7,9 @@ Germán Montoya
 # This function find and counts the number of times a substring appears in a string iteratively.
 def countSubstrMatches(srch_str, sub_str):
     """
-    Describe what the function does, what type of information goes
-    into the arguments, and what is returned.
+    countSubstrMatches function finds number of matches
+    of sub_str in srch_str iteratively. It asks the user for a string
+    and a substring, and returns the count of matches.
     """
     count = 0   # Initialize count of matches to zero
     start = 0   # Start position for searching in the string at the beginning
@@ -23,8 +24,9 @@ def countSubstrMatches(srch_str, sub_str):
 # This function can be used to find and count the number of times a substring appears in a string recursively.
 def countSubstrRecursive(srch_str, sub_str):
     """
-    Describe what the function does, what type of information goes
-    into the arguments, and what is returned.
+    countSubstrRecursive function finds number of matches
+    of sub_str in srch_str recursively. It asks the user for a string
+    and a substring, and returns the count of matches.
     """
     pos = srch_str.find(sub_str)
     if pos == -1:
