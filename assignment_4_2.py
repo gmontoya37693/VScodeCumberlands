@@ -21,4 +21,3 @@ def allMatchesIndices(srch_str, sub_str):
         indices.append(pos)
         start = pos + 1  # Move start by 1 to allow overlapping matches
     return
-
