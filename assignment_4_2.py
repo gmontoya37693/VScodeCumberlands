@@ -21,8 +21,6 @@ def countSubstrMatches(srch_str, sub_str):
         start = pos + len(sub_str)     # Move start position to the end of the found substring
     return count                       # Return the count of matches
 
-# create a function to count occurrences, and return a tuple of the 
-# start indices of all matches.
 def allMatchesIndices(srch_str, sub_str):
     """
     allMatchesIndices will find all start indices of occurrences of sub_str 
@@ -30,4 +28,12 @@ def allMatchesIndices(srch_str, sub_str):
     and sub_str (the substring to search for). It returns a tuple of the start
     indices of all matches.
     """
-    
+    indices = []
+    start = 0
+    while True:
+        pos = srch_str.find(sub_str, start)
+        if pos == -1:
+            break
+        indices.append(pos)
+        start = pos + 1  # Move start by 1 to allow overlapping matches
+
