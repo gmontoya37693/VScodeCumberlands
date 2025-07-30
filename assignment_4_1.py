@@ -17,7 +17,7 @@ into the arguments, and what is returned.
         if pos == -1:
             break
         count += 1
-        start += pos + len(sub_str)     # Move start position to the end of the found substring
+        start = pos + len(sub_str)     # Move start position to the end of the found substring
     return count                        # Return the count of matches
 
 
