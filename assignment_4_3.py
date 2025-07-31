@@ -4,6 +4,28 @@ July 30, 2025
 Germán Montoya
 """
 
+def allMatchesIndices(srch_str, sub_str):
+    """
+    Find all starting indices of occurrences of a substring within a string.
+
+    Arguments:
+        srch_str: the string to search within
+        sub_str: the substring to search for
+
+    Returns:
+        tuple of starting indices where the substring occurs within the string
+    """
+
+    indices = []
+    start = 0
+    while True:
+        pos = srch_str.find(sub_str, start)
+        if pos == -1:
+            break
+        indices.append(pos)
+        start = pos + 1
+    return tuple(indices)
+
 def fuzzyMatching(subOne, subTwo, len_subOne):
     """
     Finds start positions of potential occurrences of 
