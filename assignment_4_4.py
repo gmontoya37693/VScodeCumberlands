@@ -49,4 +49,3 @@ main_str = input("Enter the string to search in: ")
 sub_str = input("Enter the substring to find fuzzy matches for: ")
 result = fuzzyMatchesOnly(main_str, sub_str)
 print(f"fuzzyMatchesOnly({main_str!r}, {sub_str!r}) = {result}")
-
