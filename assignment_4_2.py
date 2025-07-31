@@ -10,9 +10,14 @@ Germán Montoya
 def allMatchesIndices(srch_str, sub_str):
     """
     allMatchesIndices will find all start indices of occurrences of sub_str 
-    in srch_str. It takes two arguments: srch_str (the string to search within),
-    and sub_str (the substring to search for). It returns a tuple of the start
-    indices of all matches.
+    in srch_str.
+
+    Parameters:
+    srch_str (str): The string to search in.
+    sub_str (str): The substring to find.
+
+    Returns:
+    tuple: A tuple containing all start indices of occurrences of sub_str in srch_str.
     """
     indices = []
     start = 0
