@@ -62,3 +62,7 @@ subTwo = allMatchesIndices(main_str, sub2)
 
 result = fuzzyMatching(subOne, subTwo, len(sub1))
 print(f"fuzzyMatching({subOne}, {subTwo}, {len(sub1)}) = {result}")
+
+# --- Testing code ---
+# The following code was used to test the fuzzyMatching function interactively.
+# The function was tested with various strings and substrings to ensure correct fuzzy matching behavior.
