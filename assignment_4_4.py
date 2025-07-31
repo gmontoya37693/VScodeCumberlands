@@ -55,4 +55,6 @@ print(f"fuzzyMatchesOnly({main_str!r}, {sub_str!r}) = {result}")
 # It finds fuzzy matches (with one wildcard) and excludes exact matches.
 # The results are printed in a tuple format.
 # The function was tested with various strings and substrings to ensure correct fuzzy matching behavior.
-# The results matched expectations for fuzzy matches with one character replaced.   
+# The results matched expectations for fuzzy matches with one character replaced.
+# All files presented errors mostly before testing and running; used in all testing by functions (parts),
+# also possible combinations of characters in the substring, exact matches, fuzzy matches, and spaces for case sensitivity.
