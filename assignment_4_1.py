@@ -76,3 +76,11 @@ while True:
     else:
         print("Invalid input. Please enter 'yes' or 'no'.")
     print()  # Add a blank line after each run
+
+# --- Testing code and sample cases ---
+# The interactive code was used to test both countSubstrMatches (iterative)
+# and countSubstrRecursive (recursive) functions.
+#
+# The functions were tested with various strings and substrings, including edge cases
+# (no matches, case sensitivity, overlapping matches, and different string lengths).
+# The results matched expectations for both iterative and recursive approaches.
