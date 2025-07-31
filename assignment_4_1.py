@@ -10,9 +10,14 @@ because find is built into Python’s str type.
 # This function find and counts the number of times a substring appears in a string iteratively.
 def countSubstrMatches(srch_str, sub_str):
     """
-    countSubstrMatches function finds number of matches
-    of sub_str in srch_str iteratively. It asks the user for a string
-    and a substring, and returns the count of matches.
+    Finds the number of times a substring appears in a string using iteration. 
+
+    Parameters:
+    srch_str (str): The string to search in.
+    sub_str (str): The substring to find.
+       
+    Returns:
+    int: The count of matches of sub_str in srch_str.
     """
     count = 0   # Initialize count of matches to zero
     start = 0   # Start position for searching in the string at the beginning
