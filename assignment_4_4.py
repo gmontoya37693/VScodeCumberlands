@@ -30,7 +30,7 @@ def fuzzyMatchesOnly(srch_str, sub_str):
         tuple of fuzzy match start positions (excluding exact matches)
     """
     fuzzy_indices = set()           # Define a set to avoid duplicates
-    chars = set(srch_str)           # Secure unique characters in the search
+    chars = set(srch_str) - {' '}   # Secure unique characters in the search string, excluding spaces
     for i in range(len(sub_str)):   # Loop through each character in sub_str
         for c in chars:             # Loop through each character in srch_str
             if c != sub_str[i]:
