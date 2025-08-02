@@ -9,41 +9,24 @@ import pandas as pd
 from sklearn.linear_model import LinearRegression
 import statsmodels.api as sm
 import matplotlib.pyplot as plt
-import seaborn as sns
-from mpl_toolkits.mplot3d import Axes3D
 import numpy as np
 
 # Load the dataset
 df = pd.read_csv('multiple_linear_regression_dataset.csv')
 
-# --- Data Exploration and Visualization ---
+# Define independent variables (X) and dependent variable (y)
+X = df[['age', 'experience']]
+y = df['income']
 
-# Show the first few rows
-print("First five rows of the dataset:")
-print(df.head())
+# Fit the model
+model = LinearRegression()
+model.fit(X, y)
 
-# Show the column headers
-print("\nColumn headers:")
-print(df.columns.tolist())
+# Add a constant for statsmodels
+X_sm = sm.add_constant(X)
+model_sm = sm.OLS(y, X_sm).fit()
 
-# Check for missing values
-print("\nMissing values in each column:")
-print(df.isnull().sum())
-
-# Show data types
-print("\nData types:")
-print(df.dtypes)
-
-# Show summary statistics
-print("\nSummary statistics:")
-print(df.describe())
-
-# --- Pairplot for quick visualization of relationships ---
-sns.pairplot(df)
-plt.suptitle("Pairplot of Age, Experience, and Income", y=1.02)
-plt.show()
-
-# --- 3D Scatter Plot with Regression Plane ---
+# --- 3D Scatter Plot with Regression Plane and Equation ---
 fig = plt.figure(figsize=(10, 7))
 ax = fig.add_subplot(111, projection='3d')
 ax.scatter(df['age'], df['experience'], df['income'], color='blue', label='Data')
@@ -60,78 +43,29 @@ ax.plot_surface(age_grid, exp_grid, income_pred, color='orange', alpha=0.5)
 ax.set_xlabel('Age')
 ax.set_ylabel('Experience')
 ax.set_zlabel('Income')
-ax.set_title('3D Scatter Plot of Age, Experience, and Income with Regression Plane')
-ax.legend(['Data', 'Regression Plane'])
+ax.set_title('3D Scatter Plot with Regression Plane')
+
+# Regression equation as a string
+eqn = f"Income = {model.intercept_:.2f} + ({model.coef_[0]:.2f} * Age) + ({model.coef_[1]:.2f} * Experience)"
+ax.text2D(0.05, 0.95, eqn, transform=ax.transAxes, fontsize=10, color='black', bbox=dict(facecolor='white', alpha=0.7))
+
 plt.show()
 
-# --- Regression Analysis ---
+# --- Print Statistics and Conclusions ---
+print("\n--- Regression Statistics ---")
+print(f"R^2: {model_sm.rsquared:.3f}")
+print(f"Adjusted R^2: {model_sm.rsquared_adj:.3f}")
+print(f"F-test p-value: {model_sm.f_pvalue:.4g}")
 
-# Define independent variables (X) and dependent variable (y)
-X = df[['age', 'experience']]
-y = df['income']
-
-# Fit the model
-model = LinearRegression()
-model.fit(X, y)
-
-# Print coefficients and intercept
-print("Coefficients:", model.coef_)
-print("Intercept:", model.intercept_)
-print("R^2 score:", model.score(X, y))
-
-# Add a constant (intercept) to the model
-X_sm = sm.add_constant(X)
-
-# Fit the model using statsmodels
-model_sm = sm.OLS(y, X_sm).fit()
-
-# Print the full summary
-print(model_sm.summary())
-
-# --- Bar Plot for Coefficients ---
-plt.figure(figsize=(6, 4))
-coef_names = ['Age', 'Experience']
-plt.bar(coef_names, model.coef_, color=['skyblue', 'salmon'])
-plt.title('Regression Coefficients')
-plt.ylabel('Coefficient Value')
-plt.xlabel('Predictor')
-plt.show()
-
-# --- Print Regression Equation ---
-print(f"\nRegression Equation: income = {model.intercept_:.2f} + ({model.coef_[0]:.2f} * age) + ({model.coef_[1]:.2f} * experience)")
-
-# --- Residual Plot ---
-y_pred = model.predict(X)
-residuals = y - y_pred
-
-plt.figure(figsize=(8, 5))
-sns.residplot(x=y_pred, y=residuals, lowess=True, line_kws={'color': 'red'})
-plt.xlabel('Predicted Income')
-plt.ylabel('Residuals')
-plt.title('Residual Plot: Predicted Income vs. Residuals')
-plt.axhline(0, color='black', linestyle='--')
-plt.show()
-
-# --- Conclusion on Hypothesis ---
-
-print("\n--- Conclusion on Hypothesis ---")
-print("Based on the regression output:")
-
-# F-test (overall model significance)
-f_pvalue = model_sm.f_pvalue
-if f_pvalue < 0.05:
-    print(f"The F-test p-value is {f_pvalue:.4g}, which is less than 0.05.")
-    print("We reject the null hypothesis: At least one predictor significantly explains income.")
+if model_sm.f_pvalue < 0.05:
+    print("Conclusion: The model is statistically significant (reject H0).")
 else:
-    print(f"The F-test p-value is {f_pvalue:.4g}, which is greater than 0.05.")
-    print("We fail to reject the null hypothesis: The model is not statistically significant.")
+    print("Conclusion: The model is NOT statistically significant (fail to reject H0).")
 
-# t-tests for individual predictors
-for name, pval in zip(['Age', 'Experience'], model_sm.pvalues[1:]):
+print("\n--- t-tests for Predictors ---")
+for name, coef, pval in zip(['Age', 'Experience'], model_sm.params[1:], model_sm.pvalues[1:]):
+    print(f"{name}: coefficient = {coef:.2f}, p-value = {pval:.4g}")
     if pval < 0.05:
-        print(f"{name} is a significant predictor (p = {pval:.4g}).")
+        print(f"  {name} is a significant predictor (reject H0).")
     else:
-        print(f"{name} is NOT a significant predictor (p = {pval:.4g}).")
-
-print(f"R^2 = {model_sm.rsquared:.3f}, Adjusted R^2 = {model_sm.rsquared_adj:.3f}")
-print("This indicates the proportion of variance in income explained by age and experience.")
+        print(f"  {name} is NOT a significant predictor (fail to reject H0).")
