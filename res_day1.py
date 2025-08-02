@@ -25,6 +25,7 @@ except Exception as e:
 # --- 2. Show Information of Dataset ---
 print("\nFirst five rows of the dataset:")
 print(df.head())
+print(f"\nNumber of rows (observations) in the dataset: {len(df)}")
 print("\nColumn headers:", df.columns.tolist())
 print("\nMissing values in each column:\n", df.isnull().sum())
 if df.isnull().sum().sum() == 0:
