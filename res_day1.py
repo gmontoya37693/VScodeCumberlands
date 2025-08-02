@@ -38,13 +38,12 @@ print(df.dtypes)
 print("\nSummary statistics:")
 print(df.describe())
 
-# Pairplot for quick visualization of relationships
+# --- Pairplot for quick visualization of relationships ---
 sns.pairplot(df)
 plt.suptitle("Pairplot of Age, Experience, and Income", y=1.02)
 plt.show()
 
 # --- 3D Scatter Plot with Regression Plane ---
-
 fig = plt.figure(figsize=(10, 7))
 ax = fig.add_subplot(111, projection='3d')
 ax.scatter(df['age'], df['experience'], df['income'], color='blue', label='Data')
@@ -62,7 +61,7 @@ ax.set_xlabel('Age')
 ax.set_ylabel('Experience')
 ax.set_zlabel('Income')
 ax.set_title('3D Scatter Plot of Age, Experience, and Income with Regression Plane')
-plt.legend()
+ax.legend(['Data', 'Regression Plane'])
 plt.show()
 
 # --- Regression Analysis ---
@@ -89,6 +88,18 @@ model_sm = sm.OLS(y, X_sm).fit()
 # Print the full summary
 print(model_sm.summary())
 
+# --- Bar Plot for Coefficients ---
+plt.figure(figsize=(6, 4))
+coef_names = ['Age', 'Experience']
+plt.bar(coef_names, model.coef_, color=['skyblue', 'salmon'])
+plt.title('Regression Coefficients')
+plt.ylabel('Coefficient Value')
+plt.xlabel('Predictor')
+plt.show()
+
+# --- Print Regression Equation ---
+print(f"\nRegression Equation: income = {model.intercept_:.2f} + ({model.coef_[0]:.2f} * age) + ({model.coef_[1]:.2f} * experience)")
+
 # --- Residual Plot ---
 y_pred = model.predict(X)
 residuals = y - y_pred
@@ -100,3 +111,27 @@ plt.ylabel('Residuals')
 plt.title('Residual Plot: Predicted Income vs. Residuals')
 plt.axhline(0, color='black', linestyle='--')
 plt.show()
+
+# --- Conclusion on Hypothesis ---
+
+print("\n--- Conclusion on Hypothesis ---")
+print("Based on the regression output:")
+
+# F-test (overall model significance)
+f_pvalue = model_sm.f_pvalue
+if f_pvalue < 0.05:
+    print(f"The F-test p-value is {f_pvalue:.4g}, which is less than 0.05.")
+    print("We reject the null hypothesis: At least one predictor significantly explains income.")
+else:
+    print(f"The F-test p-value is {f_pvalue:.4g}, which is greater than 0.05.")
+    print("We fail to reject the null hypothesis: The model is not statistically significant.")
+
+# t-tests for individual predictors
+for name, pval in zip(['Age', 'Experience'], model_sm.pvalues[1:]):
+    if pval < 0.05:
+        print(f"{name} is a significant predictor (p = {pval:.4g}).")
+    else:
+        print(f"{name} is NOT a significant predictor (p = {pval:.4g}).")
+
+print(f"R^2 = {model_sm.rsquared:.3f}, Adjusted R^2 = {model_sm.rsquared_adj:.3f}")
+print("This indicates the proportion of variance in income explained by age and experience.")
