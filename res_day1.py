@@ -11,27 +11,54 @@ import statsmodels.api as sm
 import matplotlib.pyplot as plt
 import numpy as np
 
-# Load the dataset
-df = pd.read_csv('multiple_linear_regression_dataset.csv')
+# --- 1. Upload and State Success ---
+print("="*80)
+print("Step 1: Data Upload and Verification")
+print("="*80)
+try:
+    df = pd.read_csv('multiple_linear_regression_dataset.csv')
+    print("Dataset loaded successfully.")
+except Exception as e:
+    print("Failed to load dataset:", e)
+    exit()
 
-# Define independent variables (X) and dependent variable (y)
+# --- 2. Show Information of Dataset ---
+print("\nFirst five rows of the dataset:")
+print(df.head())
+print("\nColumn headers:", df.columns.tolist())
+print("\nMissing values in each column:\n", df.isnull().sum())
+if df.isnull().sum().sum() == 0:
+    print("No missing values detected.")
+else:
+    print("Warning: Missing values detected!")
+print("\nData types:\n", df.dtypes)
+print("\nSummary statistics:\n", df.describe())
+
+# --- 3. State Hypothesis ---
+print("="*80)
+print("Step 2: State the Hypothesis")
+print("="*80)
+print("Null Hypothesis (H0): Age and experience do not significantly predict income.")
+print("Alternative Hypothesis (H1): At least one of age or experience significantly predicts income.")
+
+# --- 4. Model Fitting and Tests ---
+print("="*80)
+print("Step 3: Model Fitting and Statistical Tests")
+print("="*80)
 X = df[['age', 'experience']]
 y = df['income']
 
-# Fit the model
 model = LinearRegression()
 model.fit(X, y)
 
-# Add a constant for statsmodels
 X_sm = sm.add_constant(X)
 model_sm = sm.OLS(y, X_sm).fit()
 
-# --- 3D Scatter Plot with Regression Plane and Equation ---
+# --- 5. Graphics ---
 fig = plt.figure(figsize=(10, 7))
 ax = fig.add_subplot(111, projection='3d')
 ax.scatter(df['age'], df['experience'], df['income'], color='blue', label='Data')
 
-# Create grid to plot regression plane
 age_range = np.linspace(df['age'].min(), df['age'].max(), 10)
 exp_range = np.linspace(df['experience'].min(), df['experience'].max(), 10)
 age_grid, exp_grid = np.meshgrid(age_range, exp_range)
@@ -45,24 +72,25 @@ ax.set_ylabel('Experience')
 ax.set_zlabel('Income')
 ax.set_title('3D Scatter Plot with Regression Plane')
 
-# Regression equation as a string
 eqn = f"Income = {model.intercept_:.2f} + ({model.coef_[0]:.2f} * Age) + ({model.coef_[1]:.2f} * Experience)"
 ax.text2D(0.05, 0.95, eqn, transform=ax.transAxes, fontsize=10, color='black', bbox=dict(facecolor='white', alpha=0.7))
 
 plt.show()
 
-# --- Print Statistics and Conclusions ---
-print("\n--- Regression Statistics ---")
+# --- 6. Show Results ---
+print("="*80)
+print("Step 4: Results and Conclusions")
+print("="*80)
+print(f"Regression Equation: income = {model.intercept_:.2f} + ({model.coef_[0]:.2f} * age) + ({model.coef_[1]:.2f} * experience)")
 print(f"R^2: {model_sm.rsquared:.3f}")
 print(f"Adjusted R^2: {model_sm.rsquared_adj:.3f}")
 print(f"F-test p-value: {model_sm.f_pvalue:.4g}")
-
 if model_sm.f_pvalue < 0.05:
     print("Conclusion: The model is statistically significant (reject H0).")
 else:
     print("Conclusion: The model is NOT statistically significant (fail to reject H0).")
 
-print("\n--- t-tests for Predictors ---")
+print("\nt-tests for Predictors:")
 for name, coef, pval in zip(['Age', 'Experience'], model_sm.params[1:], model_sm.pvalues[1:]):
     print(f"{name}: coefficient = {coef:.2f}, p-value = {pval:.4g}")
     if pval < 0.05:
