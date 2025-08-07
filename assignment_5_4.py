@@ -32,3 +32,61 @@ def maximumExpensed(salary, p_rate, workRate, retiredRate, epsilon):
     Returns:
         float: maximum yearly expense
     """
+    # Calculate the investment balance during working years
+    # Assumed the personal investment <= 5% of salary, and matched
+    # by the employer. Employer's contribution is also 5% of salary.
+    investment = variableInvestor(salary, p_rate, workRate)
+    
+    # Get the final balance after working years
+    final_balance = investment[len(investment)]
+    
+    # Initialize binary search bounds
+    low = 0
+    high = final_balance
+    max_expense = 0
+
+    # Start with a value outside the epsilon range
+    balance = final_balance
+
+    while high - low > 0.01:
+        mid = round((low + high) / 2, 2)
+        retired = finallyRetired(final_balance, retiredRate, mid)
+        balance = retired[len(retired)]
+        if abs(balance) <= epsilon:
+            max_expense = mid
+            low = mid
+        elif balance > 0:
+            low = mid
+        else:
+            high = mid
+        print(f"Trying expense: {mid}, balance: {balance}")
+
+    return max_expense
+
+# Example usage
+if __name__ == "__main__":
+    while True:
+        cont = input("Do you want to estimate your maximum yearly retirement expense? (yes/no): ").lower()
+        if cont != "yes":
+            print("Thank you for using the estimator.")
+            break
+
+        salary = float(input("Enter your annual salary: "))
+        p_rate = float(input("Enter your personal savings rate (e.g., 5 for 5%): ")) / 100
+
+        work_years = int(input("How many years until retirement? "))
+        workRate = []
+        for i in range(1, work_years + 1):
+            rate = float(input(f"Enter the annual rate of return for working year {i} (e.g., 5 for 5%): ")) / 100
+            workRate.append(rate)
+
+        retired_years = int(input("How many years do you expect to deplete the fund in retirement? "))
+        retiredRate = []
+        for i in range(1, retired_years + 1):
+            rate = float(input(f"Enter the annual rate of return for retirement year {i} (e.g., 5 for 5%): ")) / 100
+            retiredRate.append(rate)
+
+        epsilon = float(input("Enter the acceptable margin for ending balance (epsilon, e.g., 1.0): "))
+
+        max_expense = maximumExpensed(salary, p_rate, workRate, retiredRate, epsilon)
+        print(f"Maximum yearly expense: ${max_expense:,.2f}")
