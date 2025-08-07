@@ -57,7 +57,7 @@ def maximumExpensed(salary, p_rate, workRate, retiredRate, epsilon):
         balance = retired[len(retired)]
         if abs(balance) <= epsilon:
             max_expense = mid
-            break  # Stops the cycle if balance is within epsilon
+            # Removed break to allow finer search for closest value within epsilon
         elif balance > 0:
             low = mid + 0.001    # Still positive balance, increase lower bound
         else:
