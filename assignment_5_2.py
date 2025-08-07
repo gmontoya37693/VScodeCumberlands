@@ -42,9 +42,31 @@ if __name__ == "__main__":
         print(f"Year {year}: ${balance:,.2f} (Growth rate: {v_rate[year-1]*100:.2f}%)")
 
 # Black-box testing:
-# Input: salary=50000, contribution=5%, years=3, growth rates=[5%, 4%, 6%]
+# Input: salary=50000, contribution=5%, years=3, growth rates=[5%, 5%, 5%]
 # Output:
 # Year 1: $7,500.00 (Growth rate: 5.00%)
-# Year 2: $15,060.00 (Growth rate: 4.00%)
-# Year 3: $23,443.60 (Growth rate: 6.00%)
-# Output matches expected year-by-year
+# Year 2: $15,375.00 (Growth rate: 5.00%)
+# Year 3: $23,643.75 (Growth rate: 5.00%)
+
+# Input: salary=50000, contribution=5%, years=3, growth rates=[1%, 2%, 3%]
+# Output:
+# Year 1: $7,500.00 (Growth rate: 1.00%)
+# Year 2: $15,150.00 (Growth rate: 2.00%)
+# Year 3: $23,104.50 (Growth rate: 3.00%)
+
+# Input: salary=100000, contribution=5%, years=3, growth rates=[1%, 2%, 3%]
+# Output:
+# Year 1: $15,000.00 (Growth rate: 1.00%)
+# Year 2: $30,300.00 (Growth rate: 2.00%)
+# Year 3: $46,209.00 (Growth rate: 3.00%)
+
+# Input: salary=1000, contribution=3%, years=10, growth rates=[1%, 2%, 3%, 4%, 5%, 6%, 7%, 8%, 9%, 10%]
+# Output:
+# Year 1: $110.00 (Growth rate: 1.00%)
+# Year 2: $222.20 (Growth rate: 2.00%)
+# Year 3: $338.87 (Growth rate: 3.00%)
+# Year 4: $462.42 (Growth rate: 4.00%)
+# Year 5: $595.54 (Growth rate: 5.00%)
+# Year 6: $741.27 (Growth rate: 6.00%)
+# Year 7: $903.16 (Growth rate: 7.00%)
+# Year 8: $1,085.42 (Growth rate: 8.00%)
