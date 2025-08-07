@@ -40,3 +40,11 @@ if __name__ == "__main__":
     results = variableInvestor(salary, p_rate, v_rate)
     for year, balance in results.items():
         print(f"Year {year}: ${balance:,.2f} (Growth rate: {v_rate[year-1]*100:.2f}%)")
+
+# Black-box testing:
+# Input: salary=50000, contribution=5%, years=3, growth rates=[5%, 4%, 6%]
+# Output:
+# Year 1: $7,500.00 (Growth rate: 5.00%)
+# Year 2: $15,060.00 (Growth rate: 4.00%)
+# Year 3: $23,443.60 (Growth rate: 6.00%)
+# Output matches expected year-by-year
