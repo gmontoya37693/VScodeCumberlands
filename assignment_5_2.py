@@ -39,4 +39,4 @@ if __name__ == "__main__":
         v_rate.append(rate)
     results = variableInvestor(salary, p_rate, v_rate)
     for year, balance in results.items():
-        print(f"Year {year}: ${balance:,.2f}")
+        print(f"Year {year}: ${balance:,.2f} (Growth rate: {v_rate[year-1]*100:.2f}%)")
