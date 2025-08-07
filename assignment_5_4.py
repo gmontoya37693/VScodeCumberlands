@@ -48,18 +48,22 @@ def maximumExpensed(salary, p_rate, workRate, retiredRate, epsilon):
     # Start with a value outside the epsilon range
     balance = final_balance
 
-    while high - low > 0.01:
+    max_iterations = 1000
+    iterations = 0
+
+    while high - low > 0.01 and iterations < max_iterations:
         mid = round((low + high) / 2, 2)
         retired = finallyRetired(final_balance, retiredRate, mid)
         balance = retired[len(retired)]
         if abs(balance) <= epsilon:
             max_expense = mid
-            low = mid
+            low = mid + 0.01  # Ensure progress
         elif balance > 0:
-            low = mid
+            low = mid + 0.01
         else:
-            high = mid
+            high = mid - 0.01
         print(f"Trying expense: {mid}, balance: {balance}")
+        iterations += 1
 
     return max_expense
 
