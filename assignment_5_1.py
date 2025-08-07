@@ -46,3 +46,11 @@ while True:
         results = fixedInvestor(salary, p_rate, f_rate, years)
         for year, balance in results.items():
             print(f"Year {year}: ${balance:,.2f}")
+
+# Testing:
+# Input: salary=50000, contribution=5%, interest=5%, years=3
+# Output:
+# Year 1: $7,500.00
+# Year 2: $15,375.00
+# Year 3: $23,643.75
+# Matches assignment
