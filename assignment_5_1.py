@@ -36,7 +36,7 @@ def fixedInvestor(salary, p_rate, f_rate, years):
 while True:
     test = input("Do you want to estimate your investment? (yes/no): ").lower()
     if test == "no":
-        print("Thank you for coming.")
+        print("Thank you for using our estimator.")
         break
     elif test == "yes":
         salary = float(input("Enter your annual salary: "))
