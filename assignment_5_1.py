@@ -40,8 +40,8 @@ while True:
         break
     elif test == "yes":
         salary = float(input("Enter your annual salary: "))
-        p_rate = float(input("Enter your contribution percentage (as a decimal): "))
-        f_rate = float(input("Enter the fixed interest rate (as a decimal): "))
+        p_rate = float(input("Enter your contribution percentage (e.g., 5 for 5%): ")) / 100
+        f_rate = float(input("Enter the fixed interest rate (e.g., 4 for 4%): ")) / 100
         years = int(input("Enter the number of years for the investment: "))
         results = fixedInvestor(salary, p_rate, f_rate, years)
         for year, balance in results.items():
