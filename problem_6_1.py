@@ -178,17 +178,8 @@ def playing_hands(hand, word_list, qty):
       hand: dictionary (string -> int)
       word_list: list of lowercase strings
     """
-    total_score = 0         # Step 1: Initialize total score
-    # Get the quantity of letters for this hand, make sure is integer
-    while True:
-        try:
-            qty = int(input("Enter the quantity of letters for this hand: "))
-            break
-        except ValueError:
-            print("Please enter a valid integer for the quantity of letters.")
-    # Deal the hand
-    hand = dealing_hands(qty)
-    # Ask user for a word
+    total_score = 0
+    # Main game loop
     while len(hand) > 0:
         print("Current hand:", end=" ")
         show_hand(hand)
@@ -222,25 +213,9 @@ def start_game(word_list):
     * 'e': exit the game
     * if anything other than n, r, or e is entered, ask let user know the options again
     """
-    # TO DO ...
-    print("start_game not implemented")                         # delete this once you've completed Problem #4
-    playing_hands(dealing_hands(letters_per_hand), word_list)   # delete this once you've completed Problem #4
-    
-    ## uncomment the following block of code once you've completed Problem #4
-#    hand = dealing_hands(letters_per_hand) # random init  /// this is redundant---- this shouldn't be here
-#    while True:
-#        user_prompted = raw_input('Enter n to start a new game, r to replay the last hand, or e to end game: ')
-#        if user_prompted == 'n':
-#            hand = dealing_hands(letters_per_hand)
-#            playing_hands(hand.copy(), word_list)
-#            print
-#        elif user_prompted == 'r':
-#            playing_hands(hand.copy(), word_list)
-#            print
-#        elif user_prompted == 'e':
-#            break
-#        else:
-#            print "You did not choose from the options provided."
+    qty = letters_per_hand
+    hand = dealing_hands(qty)
+    playing_hands(hand, word_list, qty)
 
 
 # Used for entire session; this starts the game
