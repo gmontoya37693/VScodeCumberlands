@@ -148,7 +148,16 @@ def word_is_valid(word, hand, word_list):
     hand: dictionary (string -> int)
     word_list: list of lowercase words
     """
-    # your code goes here
+    if word not in word_list:
+        print("Word not on list")
+        return False
+    hand_copy = hand.copy()
+    for letter in word:
+        if hand_copy.get(letter, 0) == 0:
+            print("Not enough letters in hand")
+            return False
+        hand_copy[letter] -= 1
+    return True
 
 # -----------------------------------
 # Problem #4: Playing a hand
