@@ -195,19 +195,21 @@ print("Word: zzz     | Score:", calc_word_score("zzz", 7))
 print("Word: ''      | Score:", calc_word_score("", 7))
 print("----------------------------------------------------------------------")
 print("Testing hand_updates...")
-test_hand_updates()
+SUCCESS = test_hand_update()
+if SUCCESS:
+    print("SUCCESS: test_hand_update()")
+else:
+    print("FAILED: test_hand_update()")
 print("----------------------------------------------------------------------")
 print("Testing word_is_valid...")
-test_word_validity(word_list)
-print("----------------------------------------------------------------------")
-print("Testing calc_word_score...")
-print(calc_word_score("reading", 7))  # Should include bonus if word uses all hand
-print(calc_word_score("read", 7))     # Should not include bonus
-print(calc_word_score("zzz", 7))      # Should score 30 + bonus if qty == 3
-print(calc_word_score("", 7))         # Should return 0
+SUCCESS = test_word_validity(word_list)
+if SUCCESS:
+    print("SUCCESS: test_word_is_valid()")
+else:
+    print("FAILED: test_word_is_valid()")
 print("----------------------------------------------------------------------")
 print("Extra scenario testing for hand_update (blank word):")
-extra_hand = {'a':1, 'b':2}
+extra_hand = {'a': 1, 'b': 2}
 print("Hand before:", extra_hand)
 print("Hand after blank word:", hand_update(extra_hand, ""))  # Blank word, should return the original hand
 print("----------------------------------------------------------------------")
@@ -218,6 +220,8 @@ word_list = import_wordlist()  # Make sure word_list is loaded
 print("Hand:", hand)
 print("Word:", word)
 print("Is valid?", word_is_valid(word, hand, word_list))
+print("----------------------------------------------------------------------")
+print("Words tested in extra scenarios: '', 'balin'")
 print("All done!")
 
 # -----------------------------------
