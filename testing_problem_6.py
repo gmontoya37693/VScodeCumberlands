@@ -203,6 +203,13 @@ print(calc_word_score("read", 7))     # Should not include bonus
 print(calc_word_score("zzz", 7))      # Should score 30 + bonus if qty == 3
 print(calc_word_score("", 7))         # Should return 0
 print("----------------------------------------------------------------------")
+print("Extra scenario testing for hand_update (blank word):")
+print(hand)
+print(hand_update({'a':1, 'b':2}, ""))  # Blank word, should return the original hand
+extra_hand = {'a':1, 'b':2}
+print(extra_hand)
+print(hand_update(extra_hand, ""))  # Blank word, should return the original hand
+print("----------------------------------------------------------------------")
 print("All done!")
 
 # -----------------------------------
