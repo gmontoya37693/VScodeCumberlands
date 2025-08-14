@@ -213,9 +213,24 @@ def start_game(word_list):
     * 'e': exit the game
     * if anything other than n, r, or e is entered, ask let user know the options again
     """
-    qty = letters_per_hand
-    hand = dealing_hands(qty)
-    playing_hands(hand, word_list, qty)
+    qty = letters_per_hand  # default number of letters per hand
+    hand = None             # current hand being played
+    # Main game loop, enables game replay
+    while True:
+        user_input = input("Enter 'n' for new hand, 'r' to replay last hand, or 'e' to exit: ").lower()
+        if user_input == 'n':
+            hand = dealing_hands(qty)
+            playing_hands(hand, word_list, qty)
+        elif user_input == 'r':
+            if hand is None:
+                print("No hand played yet. Please play a new hand first.")
+            else:
+                playing_hands(hand, word_list, qty)
+        elif user_input == 'e':
+            print("Thanks for playing!")
+            break
+        else:
+            print("Invalid command. Please enter 'n', 'r', or 'e'.")
 
 
 # Used for entire session; this starts the game
@@ -227,3 +242,10 @@ if __name__ == '__main__':
 # -----------------------------------
 # Testing:
 # - Ran the script; word list loaded successfully ("83667 words loaded.")
+# - Checked calc_word_score with manual and automated tests.
+# - Checked show_hand with manual tests.
+# - Checked dealing_hands with manual tests.
+# - Checked hand_update with manual and automated tests.
+# - Checked word_is_valid with manual and automated tests.
+# - Checked playing_hands with manual playthroughs and edge cases.
+# - Enabled game replay and hand replay by uncommenting and updating start_game logic as required in Problem 5; checked start_game with manual
