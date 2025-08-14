@@ -208,6 +208,14 @@ extra_hand = {'a':1, 'b':2}
 print("Hand before:", extra_hand)
 print("Hand after blank word:", hand_update(extra_hand, ""))  # Blank word, should return the original hand
 print("----------------------------------------------------------------------")
+print("Extra scenario testing for word_is_valid (word='balin', hand='ballot'):")
+hand = into_dictionary("ballot")
+word = "balin"
+word_list = import_wordlist()  # Make sure word_list is loaded
+print("Hand:", hand)
+print("Word:", word)
+print("Is valid?", word_is_valid(word, hand, word_list))
+print("----------------------------------------------------------------------")
 print("All done!")
 
 # -----------------------------------
