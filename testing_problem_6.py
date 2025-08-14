@@ -189,7 +189,10 @@ def test_word_validity(word_list):
 word_list = import_wordlist()
 print("----------------------------------------------------------------------")
 print("Testing calc_word_score...")
-test_scoring_words()
+print("Word: reading | Score:", calc_word_score("reading", 7))
+print("Word: read    | Score:", calc_word_score("read", 7))
+print("Word: zzz     | Score:", calc_word_score("zzz", 7))
+print("Word: ''      | Score:", calc_word_score("", 7))
 print("----------------------------------------------------------------------")
 print("Testing hand_updates...")
 test_hand_updates()
@@ -215,7 +218,6 @@ word_list = import_wordlist()  # Make sure word_list is loaded
 print("Hand:", hand)
 print("Word:", word)
 print("Is valid?", word_is_valid(word, hand, word_list))
-print("----------------------------------------------------------------------")
 print("All done!")
 
 # -----------------------------------
