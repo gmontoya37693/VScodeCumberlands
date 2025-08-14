@@ -210,9 +210,15 @@ print("Word:", word)
 print("Is valid?", word_is_valid(word, hand, word_list))
 print("----------------------------------------------------------------------")
 print("Extra scenario testing for calc_word_score:")
-print("Word: reading | Score:", calc_word_score("reading", 7))
-print("Word: read    | Score:", calc_word_score("read", 7))
-print("Word: zzz     | Score:", calc_word_score("zzz", 7))
-print("Word: ''      | Score:", calc_word_score("", 7))
+# Test with a word containing letters not in points_by_letter (e.g., punctuation)
+print("Word: hello! | Score:", calc_word_score("hello!", 7))  # '!' should score 0
+# Test with a word longer than qty
+print("Word: balloon | Score:", calc_word_score("balloon", 5))  # No bonus, word longer than hand
+# Test with a word exactly qty letters (should get bonus)
+print("Word: python | Score:", calc_word_score("python", 6))  # Should get bonus if qty == 6
+# Test with a word that uses only high-value letters
+print("Word: quiz | Score:", calc_word_score("quiz", 7))  # High-value letters
+# Test with an empty string
+print("Word: '' | Score:", calc_word_score("", 7))  # Should return 0
 print("----------------------------------------------------------------------")
 print("All done!")
