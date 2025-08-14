@@ -6,7 +6,6 @@ Add the data this code was started or revised
 Add your name
 """
 from problem_6_1 import *  # calls in Scrabble programming
-from problem_6_1 import calc_word_score
 
 # message colors
 oText = '\033[0m' # reset style to original
@@ -189,24 +188,13 @@ def test_word_validity(word_list):
 word_list = import_wordlist()
 print("----------------------------------------------------------------------")
 print("Testing calc_word_score...")
-print("Word: reading | Score:", calc_word_score("reading", 7))
-print("Word: read    | Score:", calc_word_score("read", 7))
-print("Word: zzz     | Score:", calc_word_score("zzz", 7))
-print("Word: ''      | Score:", calc_word_score("", 7))
+test_scoring_words()
 print("----------------------------------------------------------------------")
 print("Testing hand_updates...")
-SUCCESS = test_hand_update()
-if SUCCESS:
-    print("SUCCESS: test_hand_update()")
-else:
-    print("FAILED: test_hand_update()")
+test_hand_updates()
 print("----------------------------------------------------------------------")
 print("Testing word_is_valid...")
-SUCCESS = test_word_validity(word_list)
-if SUCCESS:
-    print("SUCCESS: test_word_is_valid()")
-else:
-    print("FAILED: test_word_is_valid()")
+test_word_validity(word_list)
 print("----------------------------------------------------------------------")
 print("Extra scenario testing for hand_update (blank word):")
 extra_hand = {'a': 1, 'b': 2}
@@ -221,13 +209,10 @@ print("Hand:", hand)
 print("Word:", word)
 print("Is valid?", word_is_valid(word, hand, word_list))
 print("----------------------------------------------------------------------")
-print("Words tested in extra scenarios: '', 'balin'")
+print("Extra scenario testing for calc_word_score:")
+print("Word: reading | Score:", calc_word_score("reading", 7))
+print("Word: read    | Score:", calc_word_score("read", 7))
+print("Word: zzz     | Score:", calc_word_score("zzz", 7))
+print("Word: ''      | Score:", calc_word_score("", 7))
+print("----------------------------------------------------------------------")
 print("All done!")
-
-# -----------------------------------
-# Testing:
-# - Ran the script; word list loaded successfully ("83667 words loaded.")
-# - calc_word_score passed all automated tests.
-# - hand_update returned None for test_hand_update('quail', ...); expected a dictionary.
-# - word_is_valid returned False for valid words and hands; needs fixing.
-# - Manual calc_word_score tests: "reading"=59, "read"=5, "zzz"=30, ""=0.
