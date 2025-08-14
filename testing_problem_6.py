@@ -6,6 +6,7 @@ Add the data this code was started or revised
 Add your name
 """
 from problem_6_1 import *  # calls in Scrabble programming
+from problem_6_1 import calc_word_score
 
 # message colors
 oText = '\033[0m' # reset style to original
@@ -195,5 +196,11 @@ test_hand_updates()
 print("----------------------------------------------------------------------")
 print("Testing word_is_valid...")
 test_word_validity(word_list)
+print("----------------------------------------------------------------------")
+print("Testing calc_word_score...")
+print(calc_word_score("reading", 7))  # Should include bonus if word uses all hand
+print(calc_word_score("read", 7))     # Should not include bonus
+print(calc_word_score("zzz", 7))      # Should score 30 + bonus if qty == 3
+print(calc_word_score("", 7))         # Should return 0
 print("----------------------------------------------------------------------")
 print("All done!")
