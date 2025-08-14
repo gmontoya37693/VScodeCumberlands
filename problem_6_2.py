@@ -69,7 +69,7 @@ def get_valid_letter(player_name):
 
 # Load the word dictionary by assignment the file name to 
 # the wordlist variable 
-wordlist = import_wordlist(wordlist_file)
+wordlist = import_wordlist()
 while True:
     # Start the game asking for player names
     # and initializing fragment empty
