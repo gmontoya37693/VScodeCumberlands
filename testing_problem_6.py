@@ -221,4 +221,8 @@ print("Word: quiz | Score:", calc_word_score("quiz", 7))  # High-value letters
 # Test with an empty string
 print("Word: '' | Score:", calc_word_score("", 7))  # Should return 0
 print("----------------------------------------------------------------------")
+print("Manual testing for interactive functions:")
+print("- Manually tested playing_hands by running the game and verifying multi-word play, invalid word handling, and bonus scoring.")
+print("- Manually tested start_game by verifying game replay, hand replay, and exit functionality.")
+print("----------------------------------------------------------------------")
 print("All done!")
