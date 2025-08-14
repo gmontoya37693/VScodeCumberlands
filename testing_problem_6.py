@@ -204,3 +204,11 @@ print(calc_word_score("zzz", 7))      # Should score 30 + bonus if qty == 3
 print(calc_word_score("", 7))         # Should return 0
 print("----------------------------------------------------------------------")
 print("All done!")
+
+# -----------------------------------
+# Testing:
+# - Ran the script; word list loaded successfully ("83667 words loaded.")
+# - calc_word_score passed all automated tests.
+# - hand_update returned None for test_hand_update('quail', ...); expected a dictionary.
+# - word_is_valid returned False for valid words and hands; needs fixing.
+# - Manual calc_word_score tests: "reading"=59, "read"=5, "zzz"=30, ""=0.

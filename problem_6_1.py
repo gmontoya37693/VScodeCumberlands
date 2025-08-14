@@ -209,3 +209,7 @@ def start_game(word_list):
 if __name__ == '__main__':
     word_list = import_wordlist()
     start_game(word_list)
+
+# -----------------------------------
+# Testing:
+# - Ran the script; word list loaded successfully ("83667 words loaded.")
