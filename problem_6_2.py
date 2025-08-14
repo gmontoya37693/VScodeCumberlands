@@ -1,11 +1,12 @@
 """
-Fill in these comments as required for this assignment
-
-Add the programming purpose here
-Add the data this code was started or revised
-Add your name
-
+Assignment 6 problem 2: Create a Ghost-like game
+where players take turns adding letters to a growing 
+word fragment, with the goal of avoiding completion 
+of a valid word.
+August 14, 2025
+German Montoya
 """
+
 import random
 
 # -----------------------------------
@@ -50,3 +51,9 @@ def into_dictionary(sequence):
 wordlist = import_wordlist()
 
 # Your programming begins here
+
+# -----------------------------------
+# Testing:
+# - Changed the filename to match assignment standard (problem_6_2.py).
+# - Verified word list loads successfully ("83667 words loaded.").
+# - Confirmed helper functions (import_wordlist, into_dictionary) work as expected.
