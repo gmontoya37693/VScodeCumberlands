@@ -103,4 +103,7 @@ while True:
 # - Secured loss condition for completing an existing word (player loses if fragment is a valid word longer than 3 letters).
 # - Included a loop for multi-game play (ask to play another round).
 # - Made sure all player inputs and fragments are strings.
-# - Made sure letter input is a single, valid
+# - Made sure letter input is a single, valid alphabetic character.
+# - Tested entering two letters ("ab") as input; program rejected and asked again.
+# - Tested entering uppercase letter ("A"); program accepted and converted to lowercase.
+# - Tested entering a space (" "); program rejected
