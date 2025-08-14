@@ -1,10 +1,11 @@
 """
-Fill in these comments as required for this assignment
-
-Add the programming purpose here
-Add the data this code was started or revised
-Add your name
+Assignment 6 Testing_problem_6: Modifying a script to test 
+a one-player word game similar to Scrabble, including unit 
+tests for all functions.
+August 14, 2025
+German Montoya
 """
+
 from problem_6_1 import *  # calls in Scrabble programming
 
 # message colors
