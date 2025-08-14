@@ -67,9 +67,9 @@ def calc_word_score(word, qty):
     """
     # Validate word before scoring
     # (Secure access to word_list and hand in game logic)
-    score = sum(points_by_letter.get(letter, 0) for letter in word)
-    if len(word) == qty:
-        score += 50
+    score = sum(points_by_letter.get(letter, 0) for letter in word) # sum points for each letter in word
+    if len(word) == qty:                                            # if all letters are used
+        score += 50                                                 # add 50 bonus points
     return score
 
 
@@ -107,8 +107,8 @@ def dealing_hands(qty):
     num_vowels = qty // 3         # changed from divide to floor
     # collect the vowels
     for i in range(num_vowels):
-        letter = vowels[random.randrange(0, len(vowels))]
-        hand[letter] = hand.get(letter, 0) + 1
+        letter = vowels[random.randrange(0, len(vowels))]   # Random letter from vowels
+        hand[letter] = hand.get(letter, 0) + 1              # Update frequency count
     # collect the consonants
     for i in range(num_vowels, qty):    
         letter = not_vowels[random.randrange(0, len(not_vowels))]
@@ -121,15 +121,19 @@ def dealing_hands(qty):
 
 def hand_update(hand, word):
     """
-    After word played and validated, 
-    removes letters in word from hand
-    if hand has 2 a's & an 'a' was used,
-    this updates hand to 1 'a'
+    After word played and validated, removes letters in word from hand
+    if hand has 2 a's & an 'a' was used, this updates hand to 1 'a'
     word: string
     hand: dictionary (string -> int)    
     returns: dictionary (string -> int)
     """
-    # your code goes here
+    updated_hand = hand.copy()              # create a copy of hand
+    for letter in word:                     # iterate over each letter in the word
+        if letter in updated_hand:          # check if letter is in updated_hand
+            updated_hand[letter] -= 1       # decrement the count of the letter
+            if updated_hand[letter] == 0:
+                del updated_hand[letter]    # remove letter from hand if count is 0
+    return updated_hand
 
 # -----------------------------------#
 # Problem #3: Test the word validity
@@ -138,10 +142,8 @@ def word_is_valid(word, hand, word_list):
     """
     Returns boolean
     if all the letters in the word played are in the hand
-    and
-    if the word is in the wordlist
-    returns true
-    if either false, returns false
+    and, if the word is in the wordlist,returns true;
+    if either false, returns false.
     word: string
     hand: dictionary (string -> int)
     word_list: list of lowercase words
