@@ -154,7 +154,7 @@ def word_is_valid(word, hand, word_list):
     hand_copy = hand.copy()
     for letter in word:
         if hand_copy.get(letter, 0) == 0:
-            print("Not enough letters in hand")
+            print(f"Not enough '{letter}' in hand")
             return False
         hand_copy[letter] -= 1
     return True
@@ -162,7 +162,7 @@ def word_is_valid(word, hand, word_list):
 # -----------------------------------
 # Problem #4: Playing a hand
 
-def playing_hands(hand, word_list):
+def playing_hands(hand, word_list, qty):
     """
     Allows the user to play the given hand, as follows:
     * hand shown
@@ -178,8 +178,36 @@ def playing_hands(hand, word_list):
       hand: dictionary (string -> int)
       word_list: list of lowercase strings
     """
-    # TO DO ...
-    print("playing_hands not implemented") # replace this with your programming
+    total_score = 0         # Step 1: Initialize total score
+    # Get the quantity of letters for this hand, make sure is integer
+    while True:
+        try:
+            qty = int(input("Enter the quantity of letters for this hand: "))
+            break
+        except ValueError:
+            print("Please enter a valid integer for the quantity of letters.")
+    # Deal the hand
+    hand = dealing_hands(qty)
+    # Ask user for a word
+    while len(hand) > 0:
+        print("Current hand:", end=" ")
+        show_hand(hand)
+        word = input("Given the letters in your hand, make a word to earn points or enter '.' to end your game.\n").lower()
+        if word == '.':
+            print(f"Game ended. Total score: {total_score}")
+            break
+        if not word_is_valid(word, hand, word_list):
+            print("Invalid word; please try again.")
+            continue
+        score = calc_word_score(word, qty)
+        total_score += score
+        if len(word) == qty:
+            print("You earned an additional 50 points for using all of the letters in one word.")
+        print(f"The word {word} got you {score} points. Your total score is {total_score}.")
+        hand = hand_update(hand, word)
+    if len(hand) == 0:
+        print(f"Run out of letters. Total score: {total_score} points.")
+
 
 # -----------------------------------
 # Problem #5: Playing the game
