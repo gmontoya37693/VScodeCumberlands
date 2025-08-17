@@ -31,13 +31,14 @@ print()
 
 print("Missing values per column:")  # Show count of missing values for
 print(df.isnull().sum())
+print()  
 
 print("Skewness of numeric columns:")  # Assess asymmetry of numeric distributions
 print(df.skew(numeric_only=True))
 
 print("Kurtosis of numeric columns:")  # Assess peakedness of numeric distributions
 print(df.kurtosis(numeric_only=True))
-
+print()
 # -----------------------------------
 # Step 1a: Dive deeper into data understanding
 # -----------------------------------
@@ -92,5 +93,112 @@ Confirmation of Initial Findings:
 - The most frequent models, body types, fuel types, and colors have been 
   identified.
 - No duplicate rows are present in the dataset.
+"""
+
+# Rows with all missing values
+print("Rows with all missing values:", df.isnull().all(axis=1).sum())
+
+# Check for duplicated Adv_IDs
+print("Duplicated Adv_IDs:", df['Adv_ID'].duplicated().sum())
+
+# Non-numeric values in numeric columns
+print("Non-numeric Price values:")
+print(df[~df['Price'].apply(lambda x: str(x).replace('.', '', 1).isdigit())]['Price'].unique())
+print()
+
+# Non-standard or unexpected values in categorical columns
+print("Unexpected Fuel_type values:")
+print(df['Fuel_type'].value_counts())
+
+# Tabulate min/max values for key numeric columns for better readability
+min_max_data = {
+    'Column': ['Adv_year', 'Reg_year', 'Price', 'Seat_num', 'Door_num'],
+    'Min': [
+        df['Adv_year'].min(),
+        df['Reg_year'].min(),
+        pd.to_numeric(df['Price'], errors='coerce').min(),
+        df['Seat_num'].min(),
+        df['Door_num'].min()
+    ],
+    'Max': [
+        df['Adv_year'].max(),
+        df['Reg_year'].max(),
+        pd.to_numeric(df['Price'], errors='coerce').max(),
+        df['Seat_num'].max(),
+        df['Door_num'].max()
+    ]
+}
+
+min_max_df = pd.DataFrame(min_max_data)
+print("\nMin/Max values for key numeric columns:")
+print(min_max_df.to_string(index=False))
+print()
+
+# -----------------------------------
+# Step 1c: Data Integrity Confirmation and Next Steps
+# -----------------------------------
+"""
+Data Integrity Confirmation:
+- No duplicate rows found in the dataset.
+- No duplicated Adv_IDs; each advertisement is unique.
+"""
+
+# -----------------------------------
+# Step 2: Filtering by Assignment Requirements
+# -----------------------------------
+"""
+Filtering will be performed according to assignment instructions:
+- Only include vehicle models: L200, XC90, Sorento, Outlander
+- Only include body types: SUV, Pickup
+- Only include fuel type: Diesel
+- Only include the six most frequently advertised colors among filtered vehicles
+"""
+
+# Filter by vehicle models
+models_required = ['L200', 'XC90', 'Sorento', 'Outlander']
+df_filtered = df[df['Genmodel'].isin(models_required)]
+print(f"Observations after model filter: {df_filtered.shape[0]}")
+
+# Filter by body types
+bodytypes_required = ['SUV', 'Pickup']
+df_filtered = df_filtered[df_filtered['Bodytype'].isin(bodytypes_required)]
+print(f"Observations after body type filter: {df_filtered.shape[0]}")
+
+# Filter by fuel type
+df_filtered = df_filtered[df_filtered['Fuel_type'] == 'Diesel']
+print(f"Observations after fuel type filter: {df_filtered.shape[0]}")
+
+# Filter by top 6 colors among filtered vehicles
+top6_colors = df_filtered['Color'].value_counts().nlargest(6).index.tolist()
+df_filtered = df_filtered[df_filtered['Color'].isin(top6_colors)]
+print(f"Observations after color filter: {df_filtered.shape[0]}")
+
+# Final filtered dataset
+print("\nFinal number of observations after all filters:")
+print(df_filtered.shape[0])
+print("Filtered columns:", df_filtered.columns.tolist())
+print("Filtered unique models:", df_filtered['Genmodel'].unique())
+print("Filtered unique body types:", df_filtered['Bodytype'].unique())
+print("Filtered unique fuel types:", df_filtered['Fuel_type'].unique())
+print("Filtered top 6 colors:", top6_colors)
+print()
+
+# -----------------------------------
+# Step 2 Results Summary
+# -----------------------------------
+"""
+Step 2 Results Summary:
+- Observations after model filter (L200, XC90, Sorento, Outlander): 3091
+- Observations after body type filter (SUV, Pickup): 3014
+- Observations after fuel type filter (Diesel): 2604
+- Observations after color filter (top 6 colors): 2380
+
+Final filtered dataset:
+- Number of observations: 2380
+- Columns retained: Maker, Genmodel, Genmodel_ID, Adv_ID, Adv_year, Adv_month, Color, Reg_year, Bodytype, Runned_Miles, Engin_size, Gearbox, Fuel_type, Price, Seat_num, Door_num
+- Unique models: Sorento, L200, Outlander, XC90
+- Unique body types: SUV, Pickup
+- Unique fuel type: Diesel
+- Top 6 colors: Black, Silver, Grey, White, Blue, Red
 """
 
