@@ -609,3 +609,44 @@ Adv_year Outlier Decision:
 - The reference states the advertising year range is approximately 2000 to 2020.
 - Therefore, all Adv_year values in the filtered dataset are retained for analysis.
 """
+
+# -----------------------------------
+# Step 4: Extremely Randomized Trees Regression Model
+# -----------------------------------
+"""
+Build an Extremely Randomized Trees (ExtraTreesRegressor) model to predict vehicle price.
+- Encode categorical variables.
+- Split data into train/test sets.
+- Fit the model and print feature importances and score.
+"""
+
+from sklearn.ensemble import ExtraTreesRegressor
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import OneHotEncoder
+
+# Select features and target
+features = ['Genmodel', 'Reg_year', 'Bodytype', 'Runned_Miles', 'Engin_size', 'Gearbox', 'Fuel_type', 'Seat_num', 'Door_num', 'Color', 'Adv_year', 'Adv_month']
+target = 'Price'
+
+X = df_filtered[features]
+y = df_filtered[target]
+
+# One-hot encode categorical variables
+categorical_cols = ['Genmodel', 'Bodytype', 'Gearbox', 'Fuel_type', 'Color']
+X_encoded = pd.get_dummies(X, columns=categorical_cols, drop_first=True)
+
+# Train/test split
+X_train, X_test, y_train, y_test = train_test_split(X_encoded, y, test_size=0.2, random_state=42)
+
+# Build and fit ExtraTreesRegressor
+etr = ExtraTreesRegressor(n_estimators=100, random_state=42)
+etr.fit(X_train, y_train)
+
+# Print feature importances
+importances = pd.Series(etr.feature_importances_, index=X_train.columns).sort_values(ascending=False)
+print("\nFeature importances (ExtraTreesRegressor):")
+print(importances)
+
+# Print model score
+score = etr.score(X_test, y_test)
+print(f"\nExtraTreesRegressor R^2 score on test set: {score:.3f}")
