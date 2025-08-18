@@ -664,6 +664,27 @@ Show R² scores and RMSE for all models in a table with lines for easy copy-past
 Also, plot Actual vs Predicted Price for the 6-variable model.
 """
 
+# 1. Full feature set (already fitted above)
+y_pred_full = etr.predict(X_test)
+r2_full = etr.score(X_test, y_test)
+rmse_full = mean_squared_error(y_test, y_pred_full, squared=False)
+
+# 2. Reduced feature set
+features_reduced = ['Reg_year', 'Engin_size', 'Runned_Miles', 'Genmodel']
+X_reduced = df_filtered[features_reduced]
+y_reduced = df_filtered[target]
+
+X_reduced_encoded = pd.get_dummies(X_reduced, columns=['Genmodel'], drop_first=True)
+if X_reduced_encoded['Runned_Miles'].dtype == 'object':
+    X_reduced_encoded['Runned_Miles'] = pd.to_numeric(X_reduced_encoded['Runned_Miles'], errors='coerce')
+
+X_train_r, X_test_r, y_train_r, y_test_r = train_test_split(X_reduced_encoded, y_reduced, test_size=0.2, random_state=42)
+etr_reduced = ExtraTreesRegressor(n_estimators=100, random_state=42)
+etr_reduced.fit(X_train_r, y_train_r)
+y_pred_reduced = etr_reduced.predict(X_test_r)
+r2_reduced = etr_reduced.score(X_test_r, y_test_r)
+rmse_reduced = mean_squared_error(y_test_r, y_pred_reduced, squared=False)
+
 # 3. Six-variable feature set
 features_six = ['Reg_year', 'Engin_size', 'Runned_Miles', 'Genmodel', 'Gearbox', 'Adv_month']
 X_six = df_filtered[features_six]
