@@ -202,3 +202,410 @@ Final filtered dataset:
 - Top 6 colors: Black, Silver, Grey, White, Blue, Red
 """
 
+# -----------------------------------
+# Step 3: Inspection of Filtered Dataset
+# -----------------------------------
+
+# 1. Check for missing values in each column
+print("Missing values per column in filtered dataset:")
+print(df_filtered.isnull().sum())
+print()
+
+# 2. Check for non-numeric Price values
+print("Non-numeric Price values in filtered dataset:")
+print(df_filtered[~df_filtered['Price'].apply(lambda x: str(x).replace('.', '', 1).isdigit())]['Price'].unique())
+print()
+
+# 3. Tabulate min/max values for key numeric columns
+min_max_data = {
+    'Column': ['Adv_year', 'Reg_year', 'Price', 'Seat_num', 'Door_num', 'Runned_Miles'],
+    'Min': [
+        df_filtered['Adv_year'].min(),
+        df_filtered['Reg_year'].min(),
+        pd.to_numeric(df_filtered['Price'], errors='coerce').min(),
+        df_filtered['Seat_num'].min(),
+        df_filtered['Door_num'].min(),
+        pd.to_numeric(df_filtered['Runned_Miles'], errors='coerce').min()
+    ],
+    'Max': [
+        df_filtered['Adv_year'].max(),
+        df_filtered['Reg_year'].max(),
+        pd.to_numeric(df_filtered['Price'], errors='coerce').max(),
+        df_filtered['Seat_num'].max(),
+        df_filtered['Door_num'].max(),
+        pd.to_numeric(df_filtered['Runned_Miles'], errors='coerce').max()
+    ]
+}
+min_max_df = pd.DataFrame(min_max_data)
+print("Min/Max values for key numeric columns in filtered dataset:")
+print(min_max_df.to_string(index=False))
+print()
+
+# 4. Check for outliers using IQR method
+numeric_cols = ['Price', 'Reg_year', 'Seat_num', 'Door_num', 'Runned_Miles', 'Adv_year']
+for col in numeric_cols:
+    col_data = pd.to_numeric(df_filtered[col], errors='coerce')
+    Q1 = col_data.quantile(0.25)
+    Q3 = col_data.quantile(0.75)
+    IQR = Q3 - Q1
+    outliers = df_filtered[(col_data < Q1 - 1.5 * IQR) | (col_data > Q3 + 1.5 * IQR)]
+    print(f"{col}: {outliers.shape[0]} outliers")
+print()
+
+# 5. Check for values outside expected ranges (example thresholds)
+print("Reg_year < 1980:")
+print(df_filtered[df_filtered['Reg_year'] < 1980])
+print()
+print("Seat_num > 8:")
+print(df_filtered[df_filtered['Seat_num'] > 8])
+print()
+print("Price < 500:")
+print(df_filtered[pd.to_numeric(df_filtered['Price'], errors='coerce') < 500])
+print()
+
+# 6. Check for duplicates in Adv_ID
+print("Duplicated Adv_IDs in filtered dataset:", df_filtered['Adv_ID'].duplicated().sum())
+print()
+
+# -----------------------------------
+# Step 3: Convert Numeric Columns to Numeric Types
+# -----------------------------------
+"""
+After filtering, convert all columns that will be used as numeric to numeric types.
+This ensures all subsequent analysis (imputation, outlier detection, etc.) is accurate.
+"""
+numeric_columns = ['Adv_year', 'Reg_year', 'Price', 'Seat_num', 'Door_num', 'Runned_Miles', 'Engin_size']
+df_filtered['Engin_size'] = df_filtered['Engin_size'].str.replace('L', '', regex=False)
+for col in numeric_columns:
+    df_filtered[col] = pd.to_numeric(df_filtered[col], errors='coerce')
+
+# -----------------------------------
+# Step 3b: Handling Missing Values in Numeric Variables
+# -----------------------------------
+"""
+Missing values in numeric variables:
+- Engin_size: 2 missing
+- Seat_num: 114 missing
+- Door_num: 17 missing
+
+Impute missing values in Engin_size, Seat_num, and Door_num using the median value for each variable.
+Verified that all missing values in these numeric columns have been filled.
+The dataset is now complete for these variables and ready for further outlier analysis and modeling.
+"""
+for column in ['Engin_size', 'Seat_num', 'Door_num']:
+    median_value = df_filtered[column].median()
+    df_filtered[column] = df_filtered[column].fillna(median_value)
+    print(f"Imputed missing values in {column} with median: {median_value}")
+print("Missing values in numeric variables after imputation:")
+print(df_filtered[['Engin_size', 'Seat_num', 'Door_num']].isnull().sum())
+print()
+
+# -----------------------------------
+# Step 3c: Outlier Detection and Visualization for Runned_Miles (Before Capping)
+# -----------------------------------
+"""
+Detect outliers in Runned_Miles using the IQR method and visualize them.
+- Outliers above Q3 + 1.5*IQR and below Q1 - 1.5*IQR are highlighted in red.
+- This plot documents the reason for capping or correcting outliers.
+"""
+df_filtered['Runned_Miles'] = pd.to_numeric(df_filtered['Runned_Miles'], errors='coerce')
+Q1 = df_filtered['Runned_Miles'].quantile(0.25)
+Q3 = df_filtered['Runned_Miles'].quantile(0.75)
+IQR = Q3 - Q1
+lower_bound = Q1 - 1.5 * IQR
+upper_bound = Q3 + 1.5 * IQR
+
+import matplotlib.pyplot as plt
+reg_year = df_filtered['Reg_year'].astype(int)
+runned_miles = df_filtered['Runned_Miles']
+outlier_mask = (runned_miles < lower_bound) | (runned_miles > upper_bound)
+normal_mask = ~outlier_mask
+
+plt.figure(figsize=(10,6))
+plt.scatter(reg_year[normal_mask], runned_miles[normal_mask], alpha=0.5, label='Normal', color='blue')
+plt.scatter(reg_year[outlier_mask], runned_miles[outlier_mask], alpha=0.7, label='Outlier', color='red')
+plt.xlabel('Reg_year')
+plt.ylabel('Runned_Miles')
+plt.title('Scatter Plot of Runned_Miles vs Reg_year (Outliers Highlighted)')
+plt.legend()
+plt.grid(True)
+years_full = list(range(reg_year.min(), reg_year.max() + 1))
+plt.xticks(years_full, [str(year) for year in years_full], rotation=45)
+plt.tight_layout()
+plt.show()
+
+# -----------------------------------
+# Step 3d: Outlier Capping and Correction for Runned_Miles
+# -----------------------------------
+"""
+Cap outliers in Runned_Miles:
+- Outliers above Q3 + 1.5*IQR are capped to the upper bound.
+- Outliers below Q1 - 1.5*IQR (including negatives) are capped to the lower bound.
+Replace negative Runned_Miles values with the median for the same Reg_year.
+"""
+df_filtered.loc[df_filtered['Runned_Miles'] > upper_bound, 'Runned_Miles'] = upper_bound
+df_filtered.loc[df_filtered['Runned_Miles'] < lower_bound, 'Runned_Miles'] = lower_bound
+
+print("Max Runned_Miles after capping:", df_filtered['Runned_Miles'].max())
+print("Min Runned_Miles after capping:", df_filtered['Runned_Miles'].min())
+print()
+
+# Replace negative Runned_Miles with median for the same Reg_year
+neg_miles_mask = df_filtered['Runned_Miles'] < 0
+for reg_year in df_filtered.loc[neg_miles_mask, 'Reg_year'].unique():
+    median_miles = df_filtered.loc[
+        (df_filtered['Reg_year'] == reg_year) & (df_filtered['Runned_Miles'] >= 0),
+        'Runned_Miles'
+    ].median()
+    df_filtered.loc[
+        (df_filtered['Reg_year'] == reg_year) & (df_filtered['Runned_Miles'] < 0),
+        'Runned_Miles'
+    ] = median_miles
+
+# Verify correction
+print("Negative Runned_Miles after replacement:", (df_filtered['Runned_Miles'] < 0).sum())
+print()
+
+# -----------------------------------
+# Step 3: Outlier Detection for Price (Do Not Cap Yet)
+# -----------------------------------
+"""
+Detect outliers in Price using the IQR method.
+- Outliers above Q3 + 1.5*IQR and below Q1 - 1.5*IQR are identified.
+- Outliers are not capped yet; decision pending further analysis.
+"""
+
+# Calculate IQR bounds for Price
+Q1 = df_filtered['Price'].quantile(0.25)
+Q3 = df_filtered['Price'].quantile(0.75)
+IQR = Q3 - Q1
+lower_bound = Q1 - 1.5 * IQR
+upper_bound = Q3 + 1.5 * IQR
+
+# Extract outlier rows
+price_outliers = df_filtered[(df_filtered['Price'] < lower_bound) | (df_filtered['Price'] > upper_bound)]
+
+# Inspect the outliers (summary only)
+print(f"Total price outliers: {price_outliers.shape[0]}")
+print()
+
+# -----------------------------------
+# Step 3d: Visualize Price Outliers (Before Any Capping)
+# -----------------------------------
+"""
+Scatter Plot Analysis for Price:
+- The scatter plot below shows Price vs Reg_year, with outliers highlighted in red.
+- This visualization helps assess whether price outliers are concentrated in specific years or models.
+- If outliers are clustered for a single model/year, it may indicate a market anomaly or rare case.
+- If outliers are spread across models/years, further investigation is needed.
+"""
+
+import matplotlib.pyplot as plt
+
+reg_year = df_filtered['Reg_year'].astype(int)
+price = df_filtered['Price']
+
+outlier_mask = (price < lower_bound) | (price > upper_bound)
+normal_mask = ~outlier_mask
+
+plt.figure(figsize=(10,6))
+plt.scatter(reg_year[normal_mask], price[normal_mask], alpha=0.5, label='Normal', color='blue')
+plt.scatter(reg_year[outlier_mask], price[outlier_mask], alpha=0.7, label='Outlier', color='red')
+plt.xlabel('Reg_year')
+plt.ylabel('Price')
+plt.title('Scatter Plot of Price vs Reg_year (Outliers Highlighted)')
+plt.legend()
+plt.grid(True)
+years_full = list(range(reg_year.min(), reg_year.max() + 1))
+plt.xticks(years_full, [str(year) for year in years_full], rotation=45)
+plt.tight_layout()
+plt.show()
+
+# -----------------------------------
+# Step 3e: Visualize Median Price Trends by Genmodel and Reg_year
+# -----------------------------------
+"""
+Trend Analysis:
+- Plot the median Price by Reg_year for each Genmodel.
+- This visualization helps determine if price growth is unique to XC90 or seen in other models.
+- If only XC90 shows a sharp increase, it supports the market anomaly conclusion.
+"""
+
+price_trend = df_filtered.groupby(['Genmodel', 'Reg_year'])['Price'].median().reset_index()
+
+plt.figure(figsize=(10,6))
+for model in df_filtered['Genmodel'].unique():
+    subset = price_trend[price_trend['Genmodel'] == model]
+    plt.plot(subset['Reg_year'], subset['Price'], marker='o', label=model)
+plt.xlabel('Reg_year')
+plt.ylabel('Median Price')
+plt.title('Median Price Growth by Genmodel')
+plt.legend()
+plt.grid(True)
+# Remove decimals from x-axis (Reg_year)
+years_full = sorted(df_filtered['Reg_year'].dropna().astype(int).unique())
+plt.xticks(years_full, years_full, rotation=45)  # Use integer years directly
+plt.tight_layout()
+plt.show()
+
+# -----------------------------------
+# Step 3f: Visualize Reg_year Outliers and Print All Columns for Outlier Row(s)
+# -----------------------------------
+"""
+Visualize Reg_year outliers to assess if they are data errors or rare cases.
+Print all columns for any Reg_year outlier row(s) for further inspection.
+"""
+
+reg_year_data = df_filtered['Reg_year']
+Q1 = reg_year_data.quantile(0.25)
+Q3 = reg_year_data.quantile(0.75)
+IQR = Q3 - Q1
+lower_bound = Q1 - 1.5 * IQR
+upper_bound = Q3 + 1.5 * IQR
+
+outlier_mask = (reg_year_data < lower_bound) | (reg_year_data > upper_bound)
+normal_mask = ~outlier_mask
+
+plt.figure(figsize=(8,4))
+plt.scatter(range(len(reg_year_data[normal_mask])), reg_year_data[normal_mask], alpha=0.5, label='Normal', color='blue')
+plt.scatter(np.where(outlier_mask)[0], reg_year_data[outlier_mask], alpha=0.7, label='Outlier', color='red')
+plt.xlabel('Index')
+plt.ylabel('Reg_year')
+plt.title('Reg_year Outliers Highlighted')
+plt.legend()
+plt.grid(True)
+plt.yticks(sorted(df_filtered['Reg_year'].dropna().astype(int).unique()), 
+           [str(int(year)) for year in sorted(df_filtered['Reg_year'].dropna().astype(int).unique())])
+plt.tight_layout()
+plt.show()
+
+# Print all columns for Reg_year outlier row(s)
+outlier_rows = df_filtered[outlier_mask]
+print("Reg_year outlier row(s) (all columns):")
+for idx, row in outlier_rows.iterrows():
+    print(f"\nReg_year outlier at index {idx}:")
+    for col in outlier_rows.columns:
+        print(f"{col}: {row[col]}")
+# -----------------------------------
+# Step 3g: Reg_year Outlier Decision Documentation
+# -----------------------------------
+"""
+Reg_year Outlier Decision:
+- The only Reg_year outlier in the filtered dataset is 2001 (Mitsubishi L200).
+- This value is valid and plausible for a vehicle registration year.
+- It is flagged as an outlier only because most vehicles in the filtered data are newer.
+- Decision: KEEP the 2001 Reg_year outlier for modeling and analysis.
+- This preserves all available information and avoids unnecessary bias.
+"""
+
+# -----------------------------------
+# Step 3h: Visualize Door_num Outliers
+# -----------------------------------
+"""
+Visualize outliers for Door_num.
+- Outliers are detected using the IQR method.
+- Only the graph is shown; no printing of outlier rows.
+"""
+
+door_num_data = df_filtered['Door_num']
+Q1 = door_num_data.quantile(0.25)
+Q3 = door_num_data.quantile(0.75)
+IQR = Q3 - Q1
+lower_bound = Q1 - 1.5 * IQR
+upper_bound = Q3 + 1.5 * IQR
+
+door_outlier_mask = (door_num_data < lower_bound) | (door_num_data > upper_bound)
+door_normal_mask = ~door_outlier_mask
+
+plt.figure(figsize=(8,4))
+plt.scatter(range(len(door_num_data[door_normal_mask])), door_num_data[door_normal_mask], alpha=0.5, label='Normal', color='blue')
+plt.scatter(np.where(door_outlier_mask)[0], door_num_data[door_outlier_mask], alpha=0.7, label='Outlier', color='red')
+plt.xlabel('Index')
+plt.ylabel('Door_num')
+plt.title('Door_num Outliers Highlighted')
+plt.legend()
+plt.grid(True)
+plt.yticks(sorted(df_filtered['Door_num'].dropna().astype(int).unique()), 
+           [str(int(val)) for val in sorted(df_filtered['Door_num'].dropna().astype(int).unique())])
+plt.tight_layout()
+plt.show()
+
+# After Door_num outlier graph
+print("\nDoor_num outlier Genmodel/Bodytype summary:")
+print(df_filtered[door_outlier_mask][['Genmodel', 'Bodytype', 'Door_num']].value_counts())
+
+# Tabulate Door_num outlier summary for better readability
+print("\nDoor_num outlier Genmodel/Bodytype summary (tabulated):")
+door_outlier_summary = df_filtered[door_outlier_mask][['Genmodel', 'Bodytype', 'Door_num']].value_counts().reset_index(name='Count')
+print(door_outlier_summary.to_string(index=False))
+
+# -----------------------------------
+# Step 3i: Visualize Adv_year Outliers
+# -----------------------------------
+"""
+Visualize outliers for Adv_year.
+- Outliers are detected using the IQR method.
+- Only the graph is shown; no printing of outlier rows.
+"""
+
+adv_year_data = df_filtered['Adv_year']
+Q1 = adv_year_data.quantile(0.25)
+Q3 = adv_year_data.quantile(0.75)
+IQR = Q3 - Q1
+lower_bound = Q1 - 1.5 * IQR
+upper_bound = Q3 + 1.5 * IQR
+
+adv_outlier_mask = (adv_year_data < lower_bound) | (adv_year_data > upper_bound)
+adv_normal_mask = ~adv_outlier_mask
+
+plt.figure(figsize=(8,4))
+plt.scatter(range(len(adv_year_data[adv_normal_mask])), adv_year_data[adv_normal_mask], alpha=0.5, label='Normal', color='blue')
+plt.scatter(np.where(adv_outlier_mask)[0], adv_year_data[adv_outlier_mask], alpha=0.7, label='Outlier', color='red')
+plt.xlabel('Index')
+plt.ylabel('Adv_year')
+plt.title('Adv_year Outliers Highlighted')
+plt.legend()
+plt.grid(True)
+plt.yticks(sorted(df_filtered['Adv_year'].dropna().astype(int).unique()), 
+           [str(int(val)) for val in sorted(df_filtered['Adv_year'].dropna().astype(int).unique())])
+plt.tight_layout()
+plt.show()
+
+# -----------------------------------
+# Count the number of doors for L200 marked as SUV
+l200_suv_doors = df_filtered[(df_filtered['Genmodel'] == 'L200') & (df_filtered['Bodytype'] == 'SUV')]['Door_num'].value_counts()
+print("Number of doors for L200 marked as SUV:")
+print(l200_suv_doors)
+
+# -----------------------------------
+# Step 3j: Correct Door_num and Bodytype for L200 SUV Outliers
+# -----------------------------------
+"""
+Data Correction:
+- Change the single L200 SUV with 2 doors to Bodytype 'Pickup' (valid configuration).
+- Change the single L200 SUV with 4 doors to Door_num 5 (most common for L200 SUV).
+"""
+
+# Change L200 SUV with 2 doors to Pickup
+mask_2door_suv = (df_filtered['Genmodel'] == 'L200') & (df_filtered['Bodytype'] == 'SUV') & (df_filtered['Door_num'] == 2)
+df_filtered.loc[mask_2door_suv, 'Bodytype'] = 'Pickup'
+
+# Change L200 SUV with 4 doors to 5 doors
+mask_4door_suv = (df_filtered['Genmodel'] == 'L200') & (df_filtered['Bodytype'] == 'SUV') & (df_filtered['Door_num'] == 4)
+df_filtered.loc[mask_4door_suv, 'Door_num'] = 5
+
+# Verify corrections
+corrected_outliers = df_filtered[mask_2door_suv | mask_4door_suv]
+print("Corrected L200 SUV outlier(s):")
+print(corrected_outliers[['Genmodel', 'Bodytype', 'Door_num']])
+
+# -----------------------------------
+# Step 3i: Adv_year Outlier Decision Documentation
+# -----------------------------------
+"""
+Adv_year Outlier Decision:
+- Although some Adv_year values are flagged as outliers by the IQR method, they 
+  are valid and consistent with the DVM-CAR dataset documentation.
+- The reference states the advertising year range is approximately 2000 to 2020.
+- Therefore, all Adv_year values in the filtered dataset are retained for analysis.
+"""
