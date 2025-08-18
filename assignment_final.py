@@ -623,6 +623,7 @@ Build an Extremely Randomized Trees (ExtraTreesRegressor) model to predict vehic
 from sklearn.ensemble import ExtraTreesRegressor
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import OneHotEncoder
+from sklearn.metrics import mean_squared_error
 
 # Select features and target
 features = ['Genmodel', 'Reg_year', 'Bodytype', 'Runned_Miles', 'Engin_size', 'Gearbox', 'Fuel_type', 'Seat_num', 'Door_num', 'Color', 'Adv_year', 'Adv_month']
@@ -650,3 +651,63 @@ print(importances)
 # Print model score
 score = etr.score(X_test, y_test)
 print(f"\nExtraTreesRegressor R^2 score on test set: {score:.3f}")
+
+# -----------------------------------
+# Step 4: Compare ExtraTreesRegressor with 6-Variable Feature Set
+# -----------------------------------
+"""
+Compare model performance using:
+- All relevant variables
+- Reduced set: Reg_year, Engin_size, Runned_Miles, Genmodel
+- 6-variable set: Reg_year, Engin_size, Runned_Miles, Genmodel, Gearbox, Adv_month
+Show R² scores and RMSE for all models in a table with lines for easy copy-paste.
+Also, plot Actual vs Predicted Price for the 6-variable model.
+"""
+
+# 3. Six-variable feature set
+features_six = ['Reg_year', 'Engin_size', 'Runned_Miles', 'Genmodel', 'Gearbox', 'Adv_month']
+X_six = df_filtered[features_six]
+y_six = df_filtered[target]
+
+# Encode categorical variables
+X_six_encoded = pd.get_dummies(X_six, columns=['Genmodel', 'Gearbox'], drop_first=True)
+if X_six_encoded['Runned_Miles'].dtype == 'object':
+    X_six_encoded['Runned_Miles'] = pd.to_numeric(X_six_encoded['Runned_Miles'], errors='coerce')
+
+X_train_six, X_test_six, y_train_six, y_test_six = train_test_split(X_six_encoded, y_six, test_size=0.2, random_state=42)
+etr_six = ExtraTreesRegressor(n_estimators=100, random_state=42)
+etr_six.fit(X_train_six, y_train_six)
+y_pred_six = etr_six.predict(X_test_six)
+r2_six = etr_six.score(X_test_six, y_test_six)
+rmse_six = mean_squared_error(y_test_six, y_pred_six, squared=False)
+
+# 4. Compare results in a table with lines
+results = pd.DataFrame({
+    'Model': [
+        'All Relevant Variables',
+        'Reduced Set (Reg_year, Engin_size, Runned_Miles, Genmodel)',
+        '6-Variable Set (Reg_year, Engin_size, Runned_Miles, Genmodel, Gearbox, Adv_month)'
+    ],
+    'R2 Score': [r2_full, r2_reduced, r2_six],
+    'RMSE': [rmse_full, rmse_reduced, rmse_six]
+})
+
+print("\nModel Comparison Table:")
+print("+--------------------------------------------------------------+----------+----------+")
+print("| Model                                                        | R2 Score |   RMSE   |")
+print("+--------------------------------------------------------------+----------+----------+")
+for i, row in results.iterrows():
+    print(f"| {row['Model']:<60} | {row['R2 Score']:<8.3f} | {row['RMSE']:<8.2f} |")
+print("+--------------------------------------------------------------+----------+----------+")
+
+# 5. Plot Actual vs Predicted Price for 6-variable model
+plt.figure(figsize=(8,6))
+plt.scatter(y_test_six, y_pred_six, alpha=0.5, label='Predicted')
+plt.plot([y_test_six.min(), y_test_six.max()], [y_test_six.min(), y_test_six.max()], 'r--', label='Perfect Prediction')
+plt.xlabel('Actual Price')
+plt.ylabel('Predicted Price')
+plt.title('Actual vs Predicted Price (6-Variable ExtraTreesRegressor)')
+plt.legend()
+plt.grid(True)
+plt.tight_layout()
+plt.show()
