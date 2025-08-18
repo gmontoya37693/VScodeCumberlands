@@ -611,14 +611,19 @@ Adv_year Outlier Decision:
 """
 
 # -----------------------------------
-# Step 4: Extremely Randomized Trees Regression Model
+# Step 4: Modeling and Feature Comparison
 # -----------------------------------
 """
-Build an Extremely Randomized Trees (ExtraTreesRegressor) model to predict vehicle price.
-- Encode categorical variables.
-- Split data into train/test sets.
-- Fit the model and print feature importances and score.
+Step 4: Modeling and Feature Comparison
+- Build ExtraTreesRegressor models with different feature sets.
+- Compare R² and RMSE for each model.
+- Visualize actual vs predicted prices for the 6-variable model.
 """
+
+# Build an Extremely Randomized Trees (ExtraTreesRegressor) model to predict vehicle price.
+# Encode categorical variables.
+# Split data into train/test sets.
+# Fit the model and print feature importances and score.
 
 from sklearn.ensemble import ExtraTreesRegressor
 from sklearn.model_selection import train_test_split
