@@ -112,6 +112,31 @@ def get_summary_statistics(df):
     for dtype, count in dtype_counts.items():
         print(f"   {dtype}: {count} variables")
 
+def check_duplicates(df):
+    """
+    Check for duplicate values in each variable
+    
+    Args:
+        df (pd.DataFrame): Dataset to check for duplicates
+    """
+    print("\n" + "="*60)
+    print("DUPLICATE VALUES ANALYSIS")
+    print("="*60)
+    
+    for col in df.columns:
+        total_values = len(df[col])
+        unique_values = df[col].nunique()
+        duplicates = total_values - unique_values
+        
+        if duplicates > 0:
+            print(f"\n'{col}' has {duplicates} duplicate values")
+            
+            # Show the actual duplicate values
+            duplicate_values = df[col][df[col].duplicated(keep=False)].value_counts()
+            print(f"   Most frequent duplicates:")
+            for value, count in duplicate_values.head(10).items():
+                print(f"   '{value}': appears {count} times")
+
 def main():
     """Main function to process MODIVES data"""
     
@@ -138,6 +163,9 @@ def main():
     if df is not None:
         # Analyze variables
         analyze_variables(df)
+        
+        # Check for duplicates
+        check_duplicates(df)
         
         # Get summary statistics
         get_summary_statistics(df)
