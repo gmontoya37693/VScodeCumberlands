@@ -33,8 +33,17 @@ def load_excel_file(file_path):
         pd.DataFrame: Loaded data
     """
     try:
-        df = pd.read_excel(file_path)
+        # Try different parameters to handle potential formatting issues
+        df = pd.read_excel(file_path, na_values=['', ' ', 'nan', 'NaN', 'NULL', 'null'])
         print(f"✓ File loaded successfully: {file_path}")
+        
+        # Check for hidden characters or spaces in Status column
+        if 'Status' in df.columns:
+            # Strip whitespace and check for empty strings
+            df['Status'] = df['Status'].astype(str).str.strip()
+            df['Status'] = df['Status'].replace('nan', pd.NA)
+            df['Status'] = df['Status'].replace('', pd.NA)
+            
         return df
     except FileNotFoundError:
         print(f"✗ Error: File not found at {file_path}")
@@ -137,6 +146,76 @@ def check_duplicates(df):
             for value, count in duplicate_values.head(10).items():
                 print(f"   '{value}': appears {count} times")
 
+def check_unit_duplicates(df):
+    """
+    Check for duplicate values specifically in the Unit variable
+    
+    Args:
+        df (pd.DataFrame): Dataset to check for Unit duplicates
+    """
+    print("\n" + "="*60)
+    print("UNIT DUPLICATE VALUES ANALYSIS")
+    print("="*60)
+    
+    if 'Unit' not in df.columns:
+        print("✗ 'Unit' column not found in dataset")
+        return
+    
+    total_units = len(df['Unit'])
+    unique_units = df['Unit'].nunique()
+    duplicates = total_units - unique_units
+    
+    print(f"Total Unit entries: {total_units}")
+    print(f"Unique Unit values: {unique_units}")
+    print(f"Duplicate Unit entries: {duplicates}")
+    
+    if duplicates > 0:
+        # Show the actual duplicate values
+        duplicate_units = df['Unit'][df['Unit'].duplicated(keep=False)].value_counts()
+        print(f"\nDuplicate Units (showing all):")
+        for unit, count in duplicate_units.items():
+            print(f"   '{unit}': appears {count} times")
+    else:
+        print("✓ No duplicate Unit values found")
+
+def investigate_status_column(df):
+    """
+    Investigate the Status column to understand missing values
+    
+    Args:
+        df (pd.DataFrame): Dataset to investigate
+    """
+    print("\n" + "="*60)
+    print("STATUS COLUMN INVESTIGATION")
+    print("="*60)
+    
+    if 'Status' not in df.columns:
+        print("✗ 'Status' column not found")
+        return
+    
+    # Show value counts including NaN
+    print("Status value counts (including missing):")
+    status_counts = df['Status'].value_counts(dropna=False)
+    for value, count in status_counts.items():
+        if pd.isna(value):
+            print(f"   Missing/NaN: {count}")
+        else:
+            print(f"   '{value}': {count}")
+    
+    # Check for rows where Status is missing but other fields have data
+    missing_status = df[df['Status'].isna()]
+    print(f"\nRows with missing Status: {len(missing_status)}")
+    
+    if len(missing_status) > 0:
+        print("\nSample of rows with missing Status (first 5):")
+        print(missing_status[['Unit', 'Resident', 'Status', 'Carrier']].head())
+        
+        # Check if missing Status correlates with missing other fields
+        print(f"\nOf {len(missing_status)} missing Status entries:")
+        print(f"   Also missing Resident: {missing_status['Resident'].isna().sum()}")
+        print(f"   Also missing Carrier: {missing_status['Carrier'].isna().sum()}")
+        print(f"   Also missing Policy #: {missing_status['Policy #'].isna().sum()}")
+
 def main():
     """Main function to process MODIVES data"""
     
@@ -164,8 +243,11 @@ def main():
         # Analyze variables
         analyze_variables(df)
         
-        # Check for duplicates
-        check_duplicates(df)
+        # Investigate Status column
+        investigate_status_column(df)
+        
+        # Check for Unit duplicates only
+        check_unit_duplicates(df)
         
         # Get summary statistics
         get_summary_statistics(df)
