@@ -53,6 +53,57 @@ def load_excel_file(file_path):
         print(f"✗ Error loading file: {e}")
         return None
 
+def analyze_variables(df):
+    """
+    Analyze variables in the dataset
+    
+    Args:
+        df (pd.DataFrame): Dataset to analyze
+    """
+    print("\n" + "="*60)
+    print("VARIABLE ANALYSIS")
+    print("="*60)
+    
+    print(f"\nTotal Variables (Columns): {len(df.columns)}")
+    print(f"Total Observations (Rows): {len(df)}")
+    
+    print("\n" + "-"*60)
+    print("DETAILED VARIABLE INFORMATION")
+    print("-"*60)
+    
+    for i, col in enumerate(df.columns, 1):
+        print(f"\n{i}. Variable: '{col}'")
+        print(f"   Data Type: {df[col].dtype}")
+        print(f"   Missing Values: {df[col].isnull().sum()} ({df[col].isnull().sum()/len(df)*100:.1f}%)")
+        print(f"   Non-null Count: {df[col].count()}")
+        
+        # Determine variable nature
+        if df[col].dtype in ['object', 'string']:
+            print(f"   Nature: Categorical/Text")
+            unique_values = df[col].dropna().unique()
+            print(f"   Unique Values: {len(unique_values)}")
+            if len(unique_values) <= 15:
+                print(f"   Values: {list(unique_values)}")
+            else:
+                print(f"   Sample Values: {list(unique_values[:10])}...")
+        elif df[col].dtype in ['int64', 'float64', 'int32', 'float32']:
+            print(f"   Nature: Numerical")
+            print(f"   Min: {df[col].min()}")
+            print(f"   Max: {df[col].max()}")
+            print(f"   Mean: {df[col].mean():.2f}")
+            print(f"   Unique Values: {df[col].nunique()}")
+        elif df[col].dtype in ['datetime64[ns]', 'datetime64']:
+            print(f"   Nature: Date/Time")
+            print(f"   Earliest: {df[col].min()}")
+            print(f"   Latest: {df[col].max()}")
+            print(f"   Unique Values: {df[col].nunique()}")
+        elif df[col].dtype == 'bool':
+            print(f"   Nature: Boolean")
+            print(f"   Values: {df[col].value_counts().to_dict()}")
+        else:
+            print(f"   Nature: Other ({df[col].dtype})")
+            print(f"   Unique Values: {df[col].nunique()}")
+
 def main():
     """Main function to process MODIVES data"""
     
@@ -79,6 +130,10 @@ def main():
     if df is not None:
         print(f"\nDataset loaded with {len(df)} rows and {len(df.columns)} columns")
         print(f"Database key column added as first column")
+        
+        # Analyze variables
+        analyze_variables(df)
+        
         return df
     else:
         return None
