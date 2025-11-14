@@ -33,8 +33,8 @@ def load_excel_file(file_path):
         pd.DataFrame: Loaded data
     """
     try:
-        # Load the Excel file
-        df = pd.read_excel(file_path)
+        # Load the Excel file - don't convert "None" to NaN
+        df = pd.read_excel(file_path, keep_default_na=False, na_values=[''])
         print(f"✓ File loaded successfully: {file_path}")
         
         # Create database key by concatenating Property and Unit
