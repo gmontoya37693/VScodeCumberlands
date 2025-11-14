@@ -129,17 +129,34 @@ def calculate_risk_metrics(df):
         for status, count in status_counts.items():
             print(f"   {status}: {count:,} units ({count/total_units*100:.1f}%)")
         
-        # Key metrics
+        # Risk categorization
         none_policies = status_counts.get('None', 0)
         vacant_units = status_counts.get('Vacant', 0)
+        cancelled_policies = status_counts.get('Cancelled', 0)
+        active_policies = status_counts.get('Active', 0)
+        
+        print(f"\nRisk Assessment Categories:")
+        print(f"   HIGH RISK - No Policy (None): {none_policies:,} units")
+        print(f"   MEDIUM RISK - Expired/Cancelled: {cancelled_policies:,} units")
+        print(f"   LOW RISK - Active Policies: {active_policies:,} units")
+        print(f"   NO RISK - Vacant Units: {vacant_units:,} units")
         
         print(f"\nKey Metrics:")
-        print(f"   Units without policies (None): {none_policies:,}")
-        print(f"   Vacant apartments: {vacant_units:,}")
-        print(f"   Actual tenant count: {total_units - vacant_units:,}")
-        print(f"   Baseline compliant tenants: {total_units - vacant_units - none_policies:,}")
+        print(f"   Occupied units: {total_units - vacant_units:,}")
+        print(f"   Current baseline compliant: {total_units - vacant_units - none_policies:,}")
+        print(f"   True compliant (Active only): {active_policies:,}")
+        
+        # Compliance rates
+        occupied_units = total_units - vacant_units
+        if occupied_units > 0:
+            baseline_rate = ((occupied_units - none_policies) / occupied_units) * 100
+            true_compliance_rate = (active_policies / occupied_units) * 100
+            
+            print(f"\nCompliance Rates:")
+            print(f"   Baseline compliance rate: {baseline_rate:.1f}%")
+            print(f"   True compliance rate (Active only): {true_compliance_rate:.1f}%")
     
-    # Liability analysis for risk calculation
+    # Enhanced liability analysis
     if 'Liability' in df.columns:
         print(f"\nLiability Coverage Analysis:")
         
@@ -152,22 +169,39 @@ def calculate_risk_metrics(df):
         print(f"   Maximum coverage: ${liability_stats['max']:,.0f}")
         print(f"   Mean coverage: ${liability_stats['mean']:,.0f}")
         
-        # Minimum Risk Exposure calculation
+        # Risk exposure scenarios
         median_coverage = liability_stats['50%']
-        min_risk_exposure = none_policies * median_coverage
         
-        print(f"\nMinimum Risk Exposure Calculation:")
-        print(f"   Units without policies: {none_policies:,}")
-        print(f"   × Median liability coverage: ${median_coverage:,.0f}")
-        print(f"   = Minimum Risk Exposure: ${min_risk_exposure:,.0f}")
+        print(f"\nRisk Exposure Scenarios:")
         
-        # Additional risk metrics
-        if none_policies > 0:
-            risk_per_unit = min_risk_exposure / none_policies
-            print(f"   Average risk per uninsured unit: ${risk_per_unit:,.0f}")
+        # Scenario 1: Only None policies (immediate risk)
+        immediate_risk = none_policies * median_coverage
+        print(f"   Immediate Risk (None policies only):")
+        print(f"     Units: {none_policies:,} × Coverage: ${median_coverage:,.0f}")
+        print(f"     = ${immediate_risk:,.0f}")
+        
+        # Scenario 2: All non-active policies (potential risk if not renewed)
+        potential_risk_units = none_policies + cancelled_policies
+        potential_risk = potential_risk_units * median_coverage
+        print(f"   Potential Risk (None + Cancelled):")
+        print(f"     Units: {potential_risk_units:,} × Coverage: ${median_coverage:,.0f}")
+        print(f"     = ${potential_risk:,.0f}")
+        
+        # Risk comparison
+        if immediate_risk > 0:
+            additional_risk = potential_risk - immediate_risk
+            print(f"\n   Risk Analysis:")
+            print(f"     Additional exposure if cancelled not renewed: ${additional_risk:,.0f}")
+            print(f"     Potential risk multiplier: {potential_risk/immediate_risk:.1f}x")
             
-        risk_percentage = (min_risk_exposure / (total_units * median_coverage)) * 100
-        print(f"   Risk as % of total potential exposure: {risk_percentage:.1f}%")
+        # Risk as percentage of total exposure
+        total_exposure = total_units * median_coverage
+        immediate_pct = (immediate_risk / total_exposure) * 100
+        potential_pct = (potential_risk / total_exposure) * 100
+        
+        print(f"\n   Risk as % of Total Portfolio:")
+        print(f"     Immediate risk: {immediate_pct:.1f}%")
+        print(f"     Potential risk: {potential_pct:.1f}%")
 
 def main():
     """Main function to process MODIVES data"""
