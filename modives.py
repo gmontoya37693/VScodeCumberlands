@@ -104,25 +104,100 @@ def analyze_variables(df):
             print(f"   Nature: Other ({df[col].dtype})")
             print(f"   Unique Values: {df[col].nunique()}")
 
+def calculate_risk_metrics(df):
+    """
+    Calculate key risk and compliance metrics
+    
+    Args:
+        df (pd.DataFrame): Dataset to analyze
+    """
+    print("\n" + "="*80)
+    print("RISK EXPOSURE AND COMPLIANCE METRICS")
+    print("="*80)
+    
+    # Basic counts
+    total_units = len(df)
+    total_properties = df['Property'].nunique()
+    
+    print(f"Total Apartment Units: {total_units:,}")
+    print(f"Total Properties: {total_properties}")
+    
+    # Status analysis
+    if 'Status' in df.columns:
+        print("\nStatus Distribution:")
+        status_counts = df['Status'].value_counts()
+        for status, count in status_counts.items():
+            print(f"   {status}: {count:,} units ({count/total_units*100:.1f}%)")
+        
+        # Key metrics
+        none_policies = status_counts.get('None', 0)
+        vacant_units = status_counts.get('Vacant', 0)
+        
+        print(f"\nKey Metrics:")
+        print(f"   Units without policies (None): {none_policies:,}")
+        print(f"   Vacant apartments: {vacant_units:,}")
+        print(f"   Actual tenant count: {total_units - vacant_units:,}")
+        print(f"   Baseline compliant tenants: {total_units - vacant_units - none_policies:,}")
+    
+    # Liability analysis for risk calculation
+    if 'Liability' in df.columns:
+        print(f"\nLiability Coverage Analysis:")
+        
+        # Clean liability data - convert to numeric
+        liability_clean = pd.to_numeric(df['Liability'], errors='coerce')
+        liability_stats = liability_clean.describe()
+        
+        print(f"   Minimum coverage: ${liability_stats['min']:,.0f}")
+        print(f"   Median coverage: ${liability_stats['50%']:,.0f}")
+        print(f"   Maximum coverage: ${liability_stats['max']:,.0f}")
+        print(f"   Mean coverage: ${liability_stats['mean']:,.0f}")
+        
+        # Minimum Risk Exposure calculation
+        median_coverage = liability_stats['50%']
+        min_risk_exposure = none_policies * median_coverage
+        
+        print(f"\nMinimum Risk Exposure Calculation:")
+        print(f"   Units without policies: {none_policies:,}")
+        print(f"   × Median liability coverage: ${median_coverage:,.0f}")
+        print(f"   = Minimum Risk Exposure: ${min_risk_exposure:,.0f}")
+        
+        # Additional risk metrics
+        if none_policies > 0:
+            risk_per_unit = min_risk_exposure / none_policies
+            print(f"   Average risk per uninsured unit: ${risk_per_unit:,.0f}")
+            
+        risk_percentage = (min_risk_exposure / (total_units * median_coverage)) * 100
+        print(f"   Risk as % of total potential exposure: {risk_percentage:.1f}%")
+
 def main():
     """Main function to process MODIVES data"""
     
-    # Look for Excel files in current directory
-    excel_files = list(Path('.').glob('*.xlsx')) + list(Path('.').glob('*.xls'))
+    # Look for files containing "modives" (case insensitive)
+    all_excel_files = list(Path('.').glob('*.xlsx')) + list(Path('.').glob('*.xls'))
+    modives_files = [f for f in all_excel_files if 'modives' in f.name.lower()]
     
-    if not excel_files:
-        print("✗ No Excel files found in current directory")
+    if not modives_files:
+        print("✗ No MODIVES Excel files found in current directory")
+        print("   Looking for files containing 'modives' in filename")
         return None
     
-    if len(excel_files) == 1:
-        excel_file_path = str(excel_files[0])
-        print(f"Found Excel file: {excel_file_path}")
+    if len(modives_files) == 1:
+        excel_file_path = str(modives_files[0])
+        print(f"Found MODIVES file: {excel_file_path}")
     else:
-        print("Multiple Excel files found:")
-        for i, file in enumerate(excel_files, 1):
+        print("Multiple MODIVES files found:")
+        for i, file in enumerate(modives_files, 1):
             print(f"{i}. {file}")
-        choice = int(input("Select file number: ")) - 1
-        excel_file_path = str(excel_files[choice])
+        try:
+            choice = int(input("Select MODIVES file number: ")) - 1
+            if 0 <= choice < len(modives_files):
+                excel_file_path = str(modives_files[choice])
+            else:
+                print("✗ Invalid selection")
+                return None
+        except ValueError:
+            print("✗ Invalid input. Please enter a number.")
+            return None
     
     # Load the file and create database key
     df = load_excel_file(excel_file_path)
@@ -133,6 +208,9 @@ def main():
         
         # Analyze variables
         analyze_variables(df)
+        
+        # Calculate risk metrics
+        calculate_risk_metrics(df)
         
         return df
     else:
