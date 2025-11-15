@@ -22,6 +22,59 @@ from pathlib import Path
 SAMPLE_SIZE = 360
 RANDOM_STATE = 42  # For reproducible results
 
+def create_risk_chart(df):
+    """
+    Create a risk chart showing status distribution, counts, and exposure
+    
+    Args:
+        df (pd.DataFrame): Dataset to analyze
+    """
+    print("\n" + "="*80)
+    print("RISK EXPOSURE CHART")
+    print("="*80)
+    
+    if 'Status' not in df.columns or 'Liability' not in df.columns:
+        print("✗ Required columns (Status, Liability) not found for risk chart")
+        return None
+    
+    # Get liability median for calculations
+    liability_clean = pd.to_numeric(df['Liability'], errors='coerce')
+    median_coverage = liability_clean.median()
+    
+    # Status distribution with exposure calculations
+    status_counts = df['Status'].value_counts()
+    
+    # Create chart
+    total_units = 0
+    total_exposure = 0
+    
+    print(f"{'Status':<20} {'Count':<8} {'%':<6} {'Unit Exposure':<15} {'Total Exposure':<20}")
+    print("-" * 75)
+    
+    for status, count in status_counts.items():
+        percentage = (count / len(df)) * 100
+        
+        # Calculate exposure (None and Cancelled have exposure, others don't)
+        if status in ['None', 'Cancelled']:
+            unit_exposure = median_coverage
+            exposure = count * median_coverage
+        else:
+            unit_exposure = 0
+            exposure = 0
+        
+        total_units += count
+        total_exposure += exposure
+        
+        # Format and print row
+        print(f"{status:<20} {count:<8,} {percentage:<5.1f}% ${unit_exposure:<14,.0f} ${exposure:<19,.0f}")
+    
+    # Print totals
+    print("-" * 75)
+    print(f"{'TOTAL':<20} {total_units:<8,} {'100.0%':<6} {'':<15} ${total_exposure:<19,.0f}")
+    
+    print(f"\nTotal Risk Exposure: ${total_exposure:,.0f}")
+    print(f"Risk as % of Portfolio: {(total_exposure/(total_units * median_coverage))*100:.1f}%")
+
 def load_excel_file(file_path):
     """
     Load Excel file and return DataFrame
@@ -36,6 +89,12 @@ def load_excel_file(file_path):
         # Load the Excel file - don't convert "None" to NaN
         df = pd.read_excel(file_path, keep_default_na=False, na_values=[''])
         print(f"✓ File loaded successfully: {file_path}")
+        
+        # Fix case sensitivity issues in Status column
+        if 'Status' in df.columns:
+            # Standardize "active" to "Active"
+            df['Status'] = df['Status'].replace('active', 'Active')
+            print("✓ Status column standardized (active → Active)")
         
         # Create database key by concatenating Property and Unit
         if 'Property' in df.columns and 'Unit' in df.columns:
@@ -129,34 +188,28 @@ def calculate_risk_metrics(df):
         for status, count in status_counts.items():
             print(f"   {status}: {count:,} units ({count/total_units*100:.1f}%)")
         
-        # Risk categorization
+        # Key counts
         none_policies = status_counts.get('None', 0)
         vacant_units = status_counts.get('Vacant', 0)
         cancelled_policies = status_counts.get('Cancelled', 0)
         active_policies = status_counts.get('Active', 0)
         
-        print(f"\nRisk Assessment Categories:")
-        print(f"   HIGH RISK - No Policy (None): {none_policies:,} units")
-        print(f"   MEDIUM RISK - Expired/Cancelled: {cancelled_policies:,} units")
-        print(f"   LOW RISK - Active Policies: {active_policies:,} units")
-        print(f"   NO RISK - Vacant Units: {vacant_units:,} units")
-        
         print(f"\nKey Metrics:")
         print(f"   Occupied units: {total_units - vacant_units:,}")
-        print(f"   Current baseline compliant: {total_units - vacant_units - none_policies:,}")
-        print(f"   True compliant (Active only): {active_policies:,}")
+        print(f"   Baseline compliant: {total_units - vacant_units - none_policies:,}")
+        print(f"   Active policies: {active_policies:,}")
         
         # Compliance rates
         occupied_units = total_units - vacant_units
         if occupied_units > 0:
             baseline_rate = ((occupied_units - none_policies) / occupied_units) * 100
-            true_compliance_rate = (active_policies / occupied_units) * 100
+            active_rate = (active_policies / occupied_units) * 100
             
             print(f"\nCompliance Rates:")
-            print(f"   Baseline compliance rate: {baseline_rate:.1f}%")
-            print(f"   True compliance rate (Active only): {true_compliance_rate:.1f}%")
+            print(f"   Baseline compliance: {baseline_rate:.1f}%")
+            print(f"   Active compliance: {active_rate:.1f}%")
     
-    # Enhanced liability analysis
+    # Liability analysis
     if 'Liability' in df.columns:
         print(f"\nLiability Coverage Analysis:")
         
@@ -169,46 +222,37 @@ def calculate_risk_metrics(df):
         print(f"   Maximum coverage: ${liability_stats['max']:,.0f}")
         print(f"   Mean coverage: ${liability_stats['mean']:,.0f}")
         
-        # Risk exposure scenarios
+        # Risk exposure calculations
         median_coverage = liability_stats['50%']
         
-        print(f"\nRisk Exposure Scenarios:")
+        print(f"\nRisk Exposure:")
         
-        # Scenario 1: Only None policies (immediate risk)
-        immediate_risk = none_policies * median_coverage
-        print(f"   Immediate Risk (None policies only):")
-        print(f"     Units: {none_policies:,} × Coverage: ${median_coverage:,.0f}")
-        print(f"     = ${immediate_risk:,.0f}")
+        # None policies exposure
+        none_risk = none_policies * median_coverage
+        print(f"   None policies: {none_policies:,} × ${median_coverage:,.0f} = ${none_risk:,.0f}")
         
-        # Scenario 2: All non-active policies (potential risk if not renewed)
-        potential_risk_units = none_policies + cancelled_policies
-        potential_risk = potential_risk_units * median_coverage
-        print(f"   Potential Risk (None + Cancelled):")
-        print(f"     Units: {potential_risk_units:,} × Coverage: ${median_coverage:,.0f}")
-        print(f"     = ${potential_risk:,.0f}")
+        # Cancelled policies exposure  
+        cancelled_risk = cancelled_policies * median_coverage
+        print(f"   Cancelled policies: {cancelled_policies:,} × ${median_coverage:,.0f} = ${cancelled_risk:,.0f}")
         
-        # Risk comparison
-        if immediate_risk > 0:
-            additional_risk = potential_risk - immediate_risk
-            print(f"\n   Risk Analysis:")
-            print(f"     Additional exposure if cancelled not renewed: ${additional_risk:,.0f}")
-            print(f"     Potential risk multiplier: {potential_risk/immediate_risk:.1f}x")
-            
-        # Risk as percentage of total exposure
-        total_exposure = total_units * median_coverage
-        immediate_pct = (immediate_risk / total_exposure) * 100
-        potential_pct = (potential_risk / total_exposure) * 100
+        # Total potential risk
+        total_risk = none_risk + cancelled_risk
+        print(f"   Total potential exposure: ${total_risk:,.0f}")
         
-        print(f"\n   Risk as % of Total Portfolio:")
-        print(f"     Immediate risk: {immediate_pct:.1f}%")
-        print(f"     Potential risk: {potential_pct:.1f}%")
+        # Portfolio percentage
+        total_portfolio = total_units * median_coverage
+        risk_percentage = (total_risk / total_portfolio) * 100
+        print(f"   Risk as % of portfolio: {risk_percentage:.1f}%")
 
 def main():
     """Main function to process MODIVES data"""
     
     # Look for files containing "modives" (case insensitive)
     all_excel_files = list(Path('.').glob('*.xlsx')) + list(Path('.').glob('*.xls'))
-    modives_files = [f for f in all_excel_files if 'modives' in f.name.lower()]
+    
+    # Filter for modives files and exclude temporary Excel files (starting with ~$)
+    modives_files = [f for f in all_excel_files 
+                     if 'modives' in f.name.lower() and not f.name.startswith('~$')]
     
     if not modives_files:
         print("✗ No MODIVES Excel files found in current directory")
@@ -245,6 +289,9 @@ def main():
         
         # Calculate risk metrics
         calculate_risk_metrics(df)
+        
+        # Create risk chart
+        create_risk_chart(df)
         
         return df
     else:
