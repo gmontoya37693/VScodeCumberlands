@@ -96,6 +96,13 @@ def load_excel_file(file_path):
             # Standardize "active" to "Active"
             df['Status'] = df['Status'].replace('active', 'Active')
             print("✓ Status column standardized (active → Active)")
+            
+            # Handle missing/blank Status values - assign 'None' since they haven't received policies yet
+            missing_status_count = df['Status'].isnull().sum() + (df['Status'] == '').sum()
+            if missing_status_count > 0:
+                df['Status'] = df['Status'].fillna('None')
+                df['Status'] = df['Status'].replace('', 'None')
+                print(f"✓ Assigned 'None' status to {missing_status_count} records with missing status")
         
         # Create database key by concatenating Property and Unit
         if 'Property' in df.columns and 'Unit' in df.columns:
@@ -370,6 +377,103 @@ def calculate_sample_size_binary(df):
     
     return n_recommended
 
+def select_random_sample(df, sample_size=SAMPLE_SIZE):
+    """
+    Select random sample from units with active policies for audit
+    
+    Args:
+        df (pd.DataFrame): Dataset to sample from
+        sample_size (int): Number of units to sample
+        
+    Returns:
+        pd.DataFrame: Random sample of units with policies to audit
+    """
+    print(f"\n" + "="*80)
+    print(f"RANDOM SAMPLE SELECTION FOR AUDIT (n={sample_size})")
+    print("="*80)
+    
+    if 'Status' not in df.columns:
+        print("✗ 'Status' column not found for sampling")
+        return None
+    
+    # Filter for units that have policies to audit (exclude None, Vacant, and Cancelled)
+    auditable_statuses = ['Active', 'Override', 'Pending Cancellation', 'Future']
+    auditable_units = df[df['Status'].isin(auditable_statuses)].copy()
+    
+    # Show population breakdown
+    print(f"Population Breakdown for Audit Sampling:")
+    print(f"   Total units in dataset: {len(df):,}")
+    
+    # Show what's excluded from audit
+    excluded_counts = {
+        'None': (df['Status'] == 'None').sum(),
+        'Vacant': (df['Status'] == 'Vacant').sum(),
+        'Cancelled': (df['Status'] == 'Cancelled').sum()
+    }
+    
+    print(f"\n   Excluded from audit (no policies to verify):")
+    for status, count in excluded_counts.items():
+        if count > 0:
+            print(f"   {status}: {count:,} units")
+    
+    # Show what's included in audit sample
+    print(f"\n   Available for audit sampling (have policies to verify):")
+    auditable_counts = {}
+    for status in auditable_statuses:
+        count = (df['Status'] == status).sum()
+        if count > 0:
+            auditable_counts[status] = count
+            print(f"   {status}: {count:,} units")
+    
+    print(f"\n   Total auditable units: {len(auditable_units):,}")
+    
+    # Check if we have enough auditable units
+    if len(auditable_units) < sample_size:
+        print(f"⚠ Warning: Only {len(auditable_units)} auditable units available")
+        print(f"   Reducing sample size to {len(auditable_units)}")
+        sample_size = len(auditable_units)
+    
+    # Set random seed and select sample
+    np.random.seed(RANDOM_STATE)
+    sample_df = auditable_units.sample(n=sample_size, random_state=RANDOM_STATE)
+    
+    print(f"\nSample Selection Results:")
+    print(f"   Sample size: {len(sample_df):,}")
+    print(f"   Sampling rate: {(len(sample_df)/len(auditable_units))*100:.1f}% of auditable units")
+    print(f"   Random seed: {RANDOM_STATE}")
+    
+    # Sample composition by Status
+    print(f"\nSample Composition by Status:")
+    sample_status = sample_df['Status'].value_counts()
+    for status, count in sample_status.items():
+        print(f"   {status}: {count:,} units ({count/len(sample_df)*100:.1f}%)")
+    
+    # Sample composition by Property (top 5)
+    print(f"\nSample Composition by Property (Top 5):")
+    sample_properties = sample_df['Property'].value_counts()
+    for prop, count in sample_properties.head(5).items():
+        print(f"   {prop}: {count:,} units")
+    
+    print(f"\nAudit Sample Summary:")
+    print(f"   ✓ All {len(sample_df):,} units have verifiable policies")
+    print(f"   ✓ Excludes units without policies (None, Cancelled)")
+    print(f"   ✓ Ready for compliance audit")
+    
+    return sample_df
+
+def export_sample_to_excel(sample_df, filename="modives_audit_sample.xlsx"):
+    """
+    Export sample to Excel file
+    """
+    if sample_df is not None:
+        try:
+            sample_df.to_excel(filename, index=False)
+            print(f"\n✓ Sample exported to: {filename}")
+            print(f"   Location: {Path(filename).absolute()}")
+            print(f"   Records: {len(sample_df):,}")
+        except Exception as e:
+            print(f"✗ Error exporting: {e}")
+
 def main():
     """Main function to process MODIVES data"""
     
@@ -425,9 +529,14 @@ def main():
         # Calculate required sample size
         recommended_sample = calculate_sample_size_binary(df)
         
-        return df
+        # Select and export sample
+        sample_df = select_random_sample(df)
+        if sample_df is not None:
+            export_sample_to_excel(sample_df)
+        
+        return df, sample_df
     else:
-        return None
+        return None, None
 
 if __name__ == "__main__":
-    data = main()
+    data, sample = main()
