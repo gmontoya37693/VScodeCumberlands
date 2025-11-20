@@ -17,6 +17,7 @@ File: modives.py
 import pandas as pd
 import numpy as np
 from pathlib import Path
+import math
 
 # Configuration
 SAMPLE_SIZE = 360
@@ -244,6 +245,131 @@ def calculate_risk_metrics(df):
         risk_percentage = (total_risk / total_portfolio) * 100
         print(f"   Risk as % of portfolio: {risk_percentage:.1f}%")
 
+def property_summary_table(df):
+    """
+    Create a summary table showing properties and their unit counts
+    
+    Args:
+        df (pd.DataFrame): Dataset to analyze
+    """
+    print("\n" + "="*60)
+    print("PROPERTY SUMMARY TABLE")
+    print("="*60)
+    
+    if 'Property' not in df.columns:
+        print("✗ 'Property' column not found")
+        return None
+    
+    # Get property counts
+    property_counts = df['Property'].value_counts().sort_index()
+    
+    print(f"{'Property':<10} {'Units':<8}")
+    print("-" * 20)
+    
+    total_units = 0
+    for property_code, count in property_counts.items():
+        print(f"{property_code:<10} {count:<8,}")
+        total_units += count
+    
+    print("-" * 20)
+    print(f"{'TOTAL':<10} {total_units:<8,}")
+    
+    print(f"\nSummary:")
+    print(f"   Total Properties: {len(property_counts)}")
+    print(f"   Total Units: {total_units:,}")
+    print(f"   Average Units per Property: {total_units/len(property_counts):.1f}")
+    
+    return property_counts
+
+def calculate_sample_size_binary(df):
+    """
+    Calculate sample size for binary distribution (compliant/non-compliant)
+    Using 95% confidence interval and 5% margin of error
+    
+    Args:
+        df (pd.DataFrame): Dataset to analyze
+    """
+    print("\n" + "="*80)
+    print("SAMPLE SIZE CALCULATION FOR BINARY DISTRIBUTION")
+    print("="*80)
+    
+    if 'Status' not in df.columns:
+        print("✗ 'Status' column not found")
+        return None
+    
+    # Population parameters
+    N = len(df)  # Total population
+    vacant_units = (df['Status'] == 'Vacant').sum()
+    none_policies = (df['Status'] == 'None').sum()
+    
+    # Define compliant population (exclude Vacant and None)
+    compliant_population = N - vacant_units - none_policies
+    occupied_units = N - vacant_units
+    
+    # Estimated proportion (p̂) - current compliance rate
+    p_hat = compliant_population / occupied_units
+    
+    print(f"Population Parameters:")
+    print(f"   Total units (N): {N:,}")
+    print(f"   Vacant units: {vacant_units:,}")
+    print(f"   None policies: {none_policies:,}")
+    print(f"   Occupied units: {occupied_units:,}")
+    print(f"   Compliant units: {compliant_population:,}")
+    print(f"   Estimated compliance rate (p̂): {p_hat:.3f}")
+    
+    # Sample size calculation parameters
+    confidence_level = 0.95
+    z_score = 1.96  # For 95% confidence
+    margin_of_error = 0.05  # 5% accuracy
+    
+    print(f"\nSample Size Parameters:")
+    print(f"   Confidence Level: {confidence_level*100:.0f}%")
+    print(f"   Z-score: {z_score}")
+    print(f"   Margin of Error: ±{margin_of_error*100:.0f}%")
+    print(f"   Population proportion (p̂): {p_hat:.3f}")
+    print(f"   Complement (1-p̂): {1-p_hat:.3f}")
+    
+    # Formula for infinite population
+    # n = (Z²× p̂ × (1-p̂)) / E²
+    n_infinite = (z_score**2 * p_hat * (1 - p_hat)) / (margin_of_error**2)
+    
+    # Finite population correction
+    # n_finite = n_infinite / (1 + (n_infinite - 1) / N)
+    n_finite = n_infinite / (1 + (n_infinite - 1) / occupied_units)
+    
+    # Round up to nearest integer
+    n_recommended = math.ceil(n_finite)
+    
+    print(f"\nSample Size Calculations:")
+    print(f"   Infinite population formula: n = (Z²×p̂×(1-p̂))/E²")
+    print(f"   n_infinite = ({z_score}² × {p_hat:.3f} × {1-p_hat:.3f}) / {margin_of_error}²")
+    print(f"   n_infinite = {n_infinite:.1f}")
+    
+    print(f"\n   Finite population correction: n_finite = n_infinite / (1 + (n_infinite-1)/N)")
+    print(f"   n_finite = {n_infinite:.1f} / (1 + ({n_infinite:.1f}-1)/{occupied_units:,})")
+    print(f"   n_finite = {n_finite:.1f}")
+    
+    print(f"\n" + "="*50)
+    print(f"RECOMMENDED SAMPLE SIZE: {n_recommended:,}")
+    print(f"="*50)
+    
+    print(f"\nSample Characteristics:")
+    print(f"   Sample size: {n_recommended:,}")
+    print(f"   Percentage of occupied units: {(n_recommended/occupied_units)*100:.1f}%")
+    print(f"   Percentage of total population: {(n_recommended/N)*100:.1f}%")
+    
+    # Comparison with your current SAMPLE_SIZE
+    print(f"\nComparison with current setting:")
+    print(f"   Current SAMPLE_SIZE setting: {SAMPLE_SIZE}")
+    print(f"   Statistically required: {n_recommended:,}")
+    if SAMPLE_SIZE >= n_recommended:
+        print(f"   ✓ Current setting is adequate")
+    else:
+        print(f"   ⚠ Current setting is below statistical requirement")
+        print(f"   Recommendation: Update SAMPLE_SIZE to {n_recommended}")
+    
+    return n_recommended
+
 def main():
     """Main function to process MODIVES data"""
     
@@ -287,11 +413,17 @@ def main():
         # Analyze variables
         analyze_variables(df)
         
+        # Property summary table
+        property_summary_table(df)
+        
         # Calculate risk metrics
         calculate_risk_metrics(df)
         
         # Create risk chart
         create_risk_chart(df)
+        
+        # Calculate required sample size
+        recommended_sample = calculate_sample_size_binary(df)
         
         return df
     else:
