@@ -481,16 +481,45 @@ def select_random_sample(df, sample_size=SAMPLE_SIZE):
 
 def export_sample_to_excel(sample_df, filename="modives_audit_sample.xlsx"):
     """
-    Export sample to Excel file
+    Export sample to Excel file with enumerated first column
+    
+    Args:
+        sample_df (pd.DataFrame): Sample to export
+        filename (str): Output filename
     """
     if sample_df is not None:
         try:
-            sample_df.to_excel(filename, index=False)
-            print(f"\n✓ Sample exported to: {filename}")
+            # Create a copy to avoid modifying the original
+            export_df = sample_df.copy()
+            
+            # Add enumerated first column starting from 1
+            export_df.insert(0, '#', range(1, len(export_df) + 1))
+            
+            # Export to Excel
+            export_df.to_excel(filename, index=False)
+            
+            print(f"\n" + "="*60)
+            print("EXCEL EXPORT")
+            print("="*60)
+            print(f"✓ Sample exported successfully!")
+            print(f"   Filename: {filename}")
             print(f"   Location: {Path(filename).absolute()}")
-            print(f"   Records: {len(sample_df):,}")
+            print(f"   Records: {len(export_df):,}")
+            print(f"   Variables: {len(export_df.columns)}")
+            
+            # Show first few columns to confirm structure
+            print(f"\nExported columns:")
+            for i, col in enumerate(export_df.columns[:5], 1):
+                print(f"   {i}. {col}")
+            if len(export_df.columns) > 5:
+                print(f"   ... and {len(export_df.columns) - 5} more columns")
+                
+            print(f"\n✓ First column '#' contains sequential numbers 1-{len(export_df)}")
+            
         except Exception as e:
-            print(f"✗ Error exporting: {e}")
+            print(f"✗ Error exporting sample: {e}")
+    else:
+        print("✗ No sample data to export")
 
 def main():
     """Main function to process MODIVES data"""
