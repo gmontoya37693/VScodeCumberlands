@@ -396,8 +396,9 @@ def select_random_sample(df, sample_size=SAMPLE_SIZE):
         print("✗ 'Status' column not found for sampling")
         return None
     
-    # Filter for units that have policies to audit (exclude None, Vacant, and Cancelled)
-    auditable_statuses = ['Active', 'Override', 'Pending Cancellation', 'Future']
+    # Filter for units that have actual policies to audit
+    # Exclude: None, Vacant, Cancelled, Override (Override = waived requirement, no policy)
+    auditable_statuses = ['Active', 'Pending Cancellation', 'Future']
     auditable_units = df[df['Status'].isin(auditable_statuses)].copy()
     
     # Show population breakdown
@@ -408,22 +409,39 @@ def select_random_sample(df, sample_size=SAMPLE_SIZE):
     excluded_counts = {
         'None': (df['Status'] == 'None').sum(),
         'Vacant': (df['Status'] == 'Vacant').sum(),
-        'Cancelled': (df['Status'] == 'Cancelled').sum()
+        'Cancelled': (df['Status'] == 'Cancelled').sum(),
+        'Override': (df['Status'] == 'Override').sum()
     }
     
-    print(f"\n   Excluded from audit (no policies to verify):")
+    print(f"\n   Excluded from audit (no actual policies to verify):")
     for status, count in excluded_counts.items():
         if count > 0:
-            print(f"   {status}: {count:,} units")
+            reason = ""
+            if status == 'Override':
+                reason = " (requirement waived)"
+            elif status == 'None':
+                reason = " (no policy received)"
+            elif status == 'Cancelled':
+                reason = " (policy expired)"
+            elif status == 'Vacant':
+                reason = " (no tenant)"
+            print(f"   {status}: {count:,} units{reason}")
     
     # Show what's included in audit sample
-    print(f"\n   Available for audit sampling (have policies to verify):")
+    print(f"\n   Available for audit sampling (have actual policies to verify):")
     auditable_counts = {}
     for status in auditable_statuses:
         count = (df['Status'] == status).sum()
         if count > 0:
             auditable_counts[status] = count
-            print(f"   {status}: {count:,} units")
+            reason = ""
+            if status == 'Active':
+                reason = " (current valid policies)"
+            elif status == 'Pending Cancellation':
+                reason = " (still active, can audit)"
+            elif status == 'Future':
+                reason = " (upcoming policies)"
+            print(f"   {status}: {count:,} units{reason}")
     
     print(f"\n   Total auditable units: {len(auditable_units):,}")
     
@@ -455,9 +473,9 @@ def select_random_sample(df, sample_size=SAMPLE_SIZE):
         print(f"   {prop}: {count:,} units")
     
     print(f"\nAudit Sample Summary:")
-    print(f"   ✓ All {len(sample_df):,} units have verifiable policies")
-    print(f"   ✓ Excludes units without policies (None, Cancelled)")
-    print(f"   ✓ Ready for compliance audit")
+    print(f"   ✓ All {len(sample_df):,} units have actual policies to audit")
+    print(f"   ✓ Excludes Override (waived), None, Cancelled, Vacant")
+    print(f"   ✓ Ready for policy compliance verification")
     
     return sample_df
 
