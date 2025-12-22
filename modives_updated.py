@@ -204,11 +204,11 @@ def create_property_status_heatmap(df):
         # Create colorful heatmap with selective coloring
         fig, ax = plt.subplots(1, 1, figsize=(14, 10))
         
-        # Remove totals for visualization
-        crosstab_no_totals = crosstab.iloc[:-1, :-1]
+        # Keep totals for visualization
+        crosstab_with_totals = crosstab
         
         # Create base heatmap in neutral colors
-        sns.heatmap(crosstab_no_totals, 
+        sns.heatmap(crosstab_with_totals, 
                    annot=True, 
                    fmt='d', 
                    cmap='Greys',  # Base neutral color
@@ -217,11 +217,11 @@ def create_property_status_heatmap(df):
                    linewidths=0.5)
         
         # Apply red-to-green coloring only to Active column
-        if 'Active' in crosstab_no_totals.columns:
-            active_col_idx = list(crosstab_no_totals.columns).index('Active')
+        if 'Active' in crosstab_with_totals.columns:
+            active_col_idx = list(crosstab_with_totals.columns).index('Active')
             
-            # Get Active column data
-            active_values = crosstab_no_totals.iloc[:, active_col_idx]
+            # Get Active column data (excluding TOTAL row for color calculation)
+            active_values = crosstab_with_totals.iloc[:-1, active_col_idx]
             
             # Create colormap for Active column (red=low, green=high)
             from matplotlib.colors import LinearSegmentedColormap
@@ -232,8 +232,8 @@ def create_property_status_heatmap(df):
             # Normalize Active values for color mapping
             norm = plt.Normalize(vmin=active_values.min(), vmax=active_values.max())
             
-            # Color only the Active column cells
-            for i, prop in enumerate(crosstab_no_totals.index):
+            # Color only the Active column cells (excluding TOTAL row)
+            for i in range(len(crosstab_with_totals.index) - 1):  # Skip TOTAL row
                 active_count = active_values.iloc[i]
                 color = cmap(norm(active_count))
                 
@@ -248,7 +248,7 @@ def create_property_status_heatmap(df):
             cbar = plt.colorbar(sm, ax=ax, shrink=0.8)
             cbar.set_label('Active Units (Red=Low, Green=High)', rotation=270, labelpad=20)
         
-        ax.set_title('Property vs Status Distribution', fontsize=16, fontweight='bold', pad=20)
+        ax.set_title('Active Insurance Policy by Property', fontsize=16, fontweight='bold', pad=40)
         ax.set_xlabel('Status', fontsize=12)
         ax.set_ylabel('Property', fontsize=12)
         
@@ -257,12 +257,15 @@ def create_property_status_heatmap(df):
         ax.xaxis.set_label_position('top')
         
         # Set proper tick labels
-        ax.set_xticklabels(crosstab_no_totals.columns, rotation=45, ha='left')
-        ax.set_yticklabels(crosstab_no_totals.index, rotation=0)
+        ax.set_xticklabels(crosstab_with_totals.columns, rotation=45, ha='left')
+        ax.set_yticklabels(crosstab_with_totals.index, rotation=0)
         
         # Ensure ticks are visible and well formatted
         ax.tick_params(axis='x', which='major', labelsize=10, pad=5)
         ax.tick_params(axis='y', which='major', labelsize=10)
+        
+        # Make sure title appears above the top labels
+        plt.subplots_adjust(top=0.9)
         
         plt.tight_layout()
         # plt.savefig('property_status_heatmap.png', dpi=300, bbox_inches='tight')
