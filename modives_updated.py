@@ -58,6 +58,20 @@ def analyze_updated_file(file_path):
         print(f"\n✓ Added 'Unit_ID' column with enumeration starting from 1")
         print(f"  Updated dataset now has {len(df.columns)} columns")
         
+        # Clean Status column - replace NaN/missing values with "None"
+        if 'Status' in df.columns:
+            missing_status_count = df['Status'].isnull().sum() + (df['Status'] == '').sum()
+            if missing_status_count > 0:
+                df['Status'] = df['Status'].fillna('None')
+                df['Status'] = df['Status'].replace('', 'None')
+                print(f"\n✓ Data cleaning: Replaced {missing_status_count} missing Status values with 'None'")
+            
+            # Also standardize the lowercase "active" to "Active"
+            lowercase_active = (df['Status'] == 'active').sum()
+            if lowercase_active > 0:
+                df['Status'] = df['Status'].replace('active', 'Active')
+                print(f"✓ Data cleaning: Standardized {lowercase_active} lowercase 'active' to 'Active'")
+        
         # Display first few rows
         print(f"\nDATA PREVIEW (first 5 rows):")
         print("-" * 120)
@@ -109,6 +123,32 @@ def analyze_updated_file(file_path):
                     print(f"  ... and {len(unique_vals) - 10} more")
                 print()
         
+        # Status column distribution analysis
+        print(f"\nSTATUS COLUMN DISTRIBUTION:")
+        print("-" * 80)
+        if 'Status' in df.columns:
+            status_counts = df['Status'].value_counts(dropna=False)
+            status_pct = df['Status'].value_counts(normalize=True, dropna=False) * 100
+            
+            print(f"{'Status':<25} {'Count':<10} {'Percentage'}")
+            print("-" * 50)
+            for status, count in status_counts.items():
+                pct = status_pct[status]
+                print(f'{status:<25}: {count:>6,} units ({pct:>5.1f}%)')
+            
+            print(f"\nTotal units: {len(df):,}")
+        
+        # Examine missing status observations (after cleaning)
+        print(f"\nMISSING STATUS OBSERVATIONS (after cleaning):")
+        print("-" * 80)
+        missing_status = df[df['Status'].isnull() | (df['Status'] == '')]
+        if len(missing_status) > 0:
+            print(f'Found {len(missing_status)} observations still with missing Status')
+            print(f'\nDetails of remaining missing Status observations:')
+            print(missing_status[['Unit_ID', 'Key', 'Property', 'Unit', 'Resident', 'Carrier', 'Status']].to_string(index=False))
+        else:
+            print('✓ No missing Status observations found - all cleaned successfully!')
+
         print("="*80)
         print("ANALYSIS COMPLETE")
         print("="*80)
