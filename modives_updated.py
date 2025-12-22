@@ -183,52 +183,69 @@ def create_property_status_heatmap(df):
         # Create crosstab with totals
         crosstab = pd.crosstab(df['Property'], df['Status'], margins=True, margins_name='TOTAL')
         
+        # Format the table for better readability
         print("PROPERTY vs STATUS CROSS-TABULATION TABLE:")
-        print("=" * 120)
-        print(crosstab)
+        print("=" * 100)
         
-        # Create heatmap focusing on Active status for color coding
-        fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(20, 12))
+        # Get column widths for consistent formatting
+        col_width = 10
         
-        # Heatmap 1: Full crosstab (without totals row/column for better visualization)
-        crosstab_no_totals = crosstab.iloc[:-1, :-1]  # Remove totals
+        # Print header
+        header = f"{'Property':<10}"
+        for col in crosstab.columns:
+            header += f"{col:>{col_width}}"
+        print(header)
+        print("-" * len(header))
         
-        # Create heatmap with all status values
+        # Print data rows
+        for prop in crosstab.index:
+            row = f"{prop:<10}"
+            for col in crosstab.columns:
+                row += f"{crosstab.loc[prop, col]:>{col_width}}"
+            print(row)
+        
+        # Create focused heatmap with only Property and Active colored
+        fig, ax = plt.subplots(1, 1, figsize=(16, 10))
+        
+        # Remove totals for visualization
+        crosstab_no_totals = crosstab.iloc[:-1, :-1]
+        
+        # Create the base heatmap in grayscale
         sns.heatmap(crosstab_no_totals, 
                    annot=True, 
                    fmt='d', 
-                   cmap='Blues',
-                   ax=ax1,
-                   cbar_kws={'label': 'Number of Units'})
-        ax1.set_title('Property vs Status Distribution\n(All Status Categories)', 
-                     fontsize=14, fontweight='bold')
-        ax1.set_xlabel('Status', fontsize=12)
-        ax1.set_ylabel('Property', fontsize=12)
-        plt.setp(ax1.get_xticklabels(), rotation=45, ha='right')
+                   cmap='Greys',
+                   ax=ax,
+                   cbar=False)
         
-        # Heatmap 2: Active status only with Red-Green color scheme
+        # Overlay colors only on Active column if it exists
         if 'Active' in crosstab_no_totals.columns:
-            active_data = crosstab_no_totals[['Active']].copy()
+            active_col_idx = list(crosstab_no_totals.columns).index('Active')
+            active_data = crosstab_no_totals.iloc[:, active_col_idx:active_col_idx+1]
             
-            # Create custom colormap from red (low) to green (high)
+            # Create a mask for only the Active column
+            mask = np.ones_like(crosstab_no_totals, dtype=bool)
+            mask[:, active_col_idx] = False
+            
+            # Apply RdYlGn colormap only to Active column
             sns.heatmap(active_data,
-                       annot=True,
-                       fmt='d',
-                       cmap='RdYlGn',  # Red-Yellow-Green colormap
-                       ax=ax2,
-                       cbar_kws={'label': 'Number of Active Units'})
-            ax2.set_title('Active Units by Property\n(Red=Lowest, Green=Highest)', 
-                         fontsize=14, fontweight='bold')
-            ax2.set_xlabel('Status', fontsize=12)
-            ax2.set_ylabel('Property', fontsize=12)
+                       annot=False,
+                       cmap='RdYlGn',
+                       ax=ax,
+                       mask=mask.iloc[:, active_col_idx:active_col_idx+1],
+                       cbar_kws={'label': 'Active Units', 'shrink': 0.8})
             
-            # Add percentage annotations
-            total_active = active_data['Active'].sum()
-            for i, property_name in enumerate(active_data.index):
-                active_count = active_data.loc[property_name, 'Active']
-                percentage = (active_count / total_active) * 100
-                ax2.text(0.5, i + 0.7, f'({percentage:.1f}%)', 
-                        ha='center', va='center', fontsize=9, fontweight='bold')
+            # Re-annotate the Active column with numbers
+            for i, prop in enumerate(active_data.index):
+                active_count = active_data.iloc[i, 0]
+                ax.text(active_col_idx + 0.5, i + 0.5, f'{active_count}', 
+                       ha='center', va='center', fontweight='bold', fontsize=10)
+        
+        ax.set_title('Property vs Status Distribution', fontsize=16, fontweight='bold', pad=20)
+        ax.set_xlabel('Status', fontsize=12)
+        ax.set_ylabel('Property', fontsize=12)
+        plt.setp(ax.get_xticklabels(), rotation=0, ha='center')
+        plt.setp(ax.get_yticklabels(), rotation=0)
         
         plt.tight_layout()
         plt.savefig('property_status_heatmap.png', dpi=300, bbox_inches='tight')
@@ -243,12 +260,6 @@ def create_property_status_heatmap(df):
             for i, (prop, count) in enumerate(active_by_property.head().items(), 1):
                 total_units = crosstab.loc[prop, 'TOTAL']
                 pct_active = (count / total_units) * 100
-                print(f"{i:2d}. {prop}: {count:,} active units ({pct_active:.1f}% of property)")
-            
-            print(f"\nBottom 5 Properties by Active Units:")
-            for i, (prop, count) in enumerate(active_by_property.tail().items(), 1):
-                total_units = crosstab.loc[prop, 'TOTAL'] 
-                pct_active = (count / total_units) * 100 if total_units > 0 else 0
                 print(f"{i:2d}. {prop}: {count:,} active units ({pct_active:.1f}% of property)")
         
         print(f"\n✓ Heatmap saved as 'property_status_heatmap.png'")
