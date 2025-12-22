@@ -185,75 +185,75 @@ def create_property_status_heatmap(df):
         
         # Format the table for better readability
         print("PROPERTY vs STATUS CROSS-TABULATION TABLE:")
-        print("=" * 100)
+        print("=" * 120)
         
-        # Get column widths for consistent formatting
-        col_width = 10
-        
-        # Print header
-        header = f"{'Property':<10}"
+        # Print the crosstab in a more readable format
+        print(f"{'Property':<8}", end="")
         for col in crosstab.columns:
-            header += f"{col:>{col_width}}"
-        print(header)
-        print("-" * len(header))
+            print(f"{col:>12}", end="")
+        print()
+        print("-" * 120)
         
         # Print data rows
         for prop in crosstab.index:
-            row = f"{prop:<10}"
+            print(f"{prop:<8}", end="")
             for col in crosstab.columns:
-                row += f"{crosstab.loc[prop, col]:>{col_width}}"
-            print(row)
+                print(f"{crosstab.loc[prop, col]:>12}", end="")
+            print()
         
-        # Create focused heatmap with only Property and Active colored
-        fig, ax = plt.subplots(1, 1, figsize=(16, 10))
+        # Create focused heatmap with proper column labels
+        fig, ax = plt.subplots(1, 1, figsize=(14, 10))
         
         # Remove totals for visualization
         crosstab_no_totals = crosstab.iloc[:-1, :-1]
         
-        # Create the base heatmap in grayscale
+        # Create heatmap with proper annotations and labels
         sns.heatmap(crosstab_no_totals, 
                    annot=True, 
                    fmt='d', 
                    cmap='Greys',
                    ax=ax,
-                   cbar=False)
+                   cbar=False,
+                   linewidths=0.5)
         
         # Overlay colors only on Active column if it exists
         if 'Active' in crosstab_no_totals.columns:
             active_col_idx = list(crosstab_no_totals.columns).index('Active')
             
-            # Create a mask array for all columns except Active
+            # Create a copy for coloring only Active column
+            active_only_data = np.zeros_like(crosstab_no_totals.values)
+            active_only_data[:, active_col_idx] = crosstab_no_totals.iloc[:, active_col_idx]
+            
+            # Create mask to show only Active column in color
             mask = np.ones_like(crosstab_no_totals.values, dtype=bool)
             mask[:, active_col_idx] = False
             
-            # Convert mask to DataFrame with same index/columns
-            mask_df = pd.DataFrame(mask, 
-                                 index=crosstab_no_totals.index, 
-                                 columns=crosstab_no_totals.columns)
+            # Apply color overlay
+            im = ax.imshow(active_only_data, cmap='RdYlGn', aspect='auto', alpha=0.7)
             
-            # Apply RdYlGn colormap only to Active column
-            sns.heatmap(crosstab_no_totals,
-                       annot=False,
-                       cmap='RdYlGn',
-                       ax=ax,
-                       mask=mask_df,
-                       cbar_kws={'label': 'Active Units', 'shrink': 0.8})
-            
-            # Re-annotate all cells with numbers
-            for i, prop in enumerate(crosstab_no_totals.index):
-                for j, status in enumerate(crosstab_no_totals.columns):
-                    value = crosstab_no_totals.iloc[i, j]
-                    ax.text(j + 0.5, i + 0.5, f'{value}', 
-                           ha='center', va='center', fontweight='bold', fontsize=10)
+            # Add colorbar for Active column only
+            from matplotlib.colors import Normalize
+            norm = Normalize(vmin=crosstab_no_totals.iloc[:, active_col_idx].min(), 
+                           vmax=crosstab_no_totals.iloc[:, active_col_idx].max())
+            sm = plt.cm.ScalarMappable(cmap='RdYlGn', norm=norm)
+            sm.set_array([])
+            cbar = plt.colorbar(sm, ax=ax, shrink=0.8)
+            cbar.set_label('Active Units', rotation=270, labelpad=15)
         
         ax.set_title('Property vs Status Distribution', fontsize=16, fontweight='bold', pad=20)
         ax.set_xlabel('Status', fontsize=12)
         ax.set_ylabel('Property', fontsize=12)
-        plt.setp(ax.get_xticklabels(), rotation=0, ha='center')
-        plt.setp(ax.get_yticklabels(), rotation=0)
+        
+        # Set proper tick labels
+        ax.set_xticklabels(crosstab_no_totals.columns, rotation=0, ha='center')
+        ax.set_yticklabels(crosstab_no_totals.index, rotation=0)
+        
+        # Ensure ticks are visible
+        ax.tick_params(axis='x', which='major', labelsize=10)
+        ax.tick_params(axis='y', which='major', labelsize=10)
         
         plt.tight_layout()
-        plt.savefig('property_status_heatmap.png', dpi=300, bbox_inches='tight')
+        # plt.savefig('property_status_heatmap.png', dpi=300, bbox_inches='tight')
         plt.show()
         
         # Summary statistics
@@ -267,7 +267,8 @@ def create_property_status_heatmap(df):
                 pct_active = (count / total_units) * 100
                 print(f"{i:2d}. {prop}: {count:,} active units ({pct_active:.1f}% of property)")
         
-        print(f"\n✓ Heatmap saved as 'property_status_heatmap.png'")
+        print(f"\n✓ Heatmap displayed successfully")
+        # Note: Use plt.savefig('filename.png') if you want to save the chart
         
     except Exception as e:
         print(f"✗ Error creating heatmap: {e}")
@@ -290,10 +291,10 @@ def main():
     df = analyze_updated_file(file_path)
     
     if df is not None:
-        # Save the processed data with Unit_ID for future use
-        output_file = 'modives_updated_with_unit_id.xlsx'
-        df.to_excel(output_file, index=False)
-        print(f"✓ Processed data saved to: {output_file}")
+        # Save the processed data with Unit_ID for future use (optional)
+        # output_file = 'modives_updated_with_unit_id.xlsx'
+        # df.to_excel(output_file, index=False)
+        # print(f"✓ Processed data saved to: {output_file}")
         
         return df
     else:
