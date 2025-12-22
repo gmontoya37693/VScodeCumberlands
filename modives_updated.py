@@ -17,6 +17,8 @@ File: modives_updated_analysis.py
 import pandas as pd
 import numpy as np
 from pathlib import Path
+import matplotlib.pyplot as plt
+import seaborn as sns
 
 def analyze_updated_file(file_path):
     """
@@ -71,6 +73,9 @@ def analyze_updated_file(file_path):
             if lowercase_active > 0:
                 df['Status'] = df['Status'].replace('active', 'Active')
                 print(f"✓ Data cleaning: Standardized {lowercase_active} lowercase 'active' to 'Active'")
+            
+            # Simplify status names for better readability
+            df['Status'] = df['Status'].replace('Pending Cancellation', 'Pending')
         
         # Display first few rows
         print(f"\nDATA PREVIEW (first 5 rows):")
@@ -149,6 +154,11 @@ def analyze_updated_file(file_path):
         else:
             print('✓ No missing Status observations found - all cleaned successfully!')
 
+        # Create property vs status heatmap table
+        print(f"\nPROPERTY vs STATUS HEATMAP TABLE:")
+        print("-" * 80)
+        create_property_status_heatmap(df)
+
         print("="*80)
         print("ANALYSIS COMPLETE")
         print("="*80)
@@ -162,7 +172,89 @@ def analyze_updated_file(file_path):
     except Exception as e:
         print(f"✗ Error loading file: {e}")
         return None
-
+def create_property_status_heatmap(df):
+    """
+    Create a heatmap table showing Property vs Status distribution
+    
+    Args:
+        df (pd.DataFrame): Dataset with Property and Status columns
+    """
+    try:
+        # Create crosstab with totals
+        crosstab = pd.crosstab(df['Property'], df['Status'], margins=True, margins_name='TOTAL')
+        
+        print("PROPERTY vs STATUS CROSS-TABULATION TABLE:")
+        print("=" * 120)
+        print(crosstab)
+        
+        # Create heatmap focusing on Active status for color coding
+        fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(20, 12))
+        
+        # Heatmap 1: Full crosstab (without totals row/column for better visualization)
+        crosstab_no_totals = crosstab.iloc[:-1, :-1]  # Remove totals
+        
+        # Create heatmap with all status values
+        sns.heatmap(crosstab_no_totals, 
+                   annot=True, 
+                   fmt='d', 
+                   cmap='Blues',
+                   ax=ax1,
+                   cbar_kws={'label': 'Number of Units'})
+        ax1.set_title('Property vs Status Distribution\n(All Status Categories)', 
+                     fontsize=14, fontweight='bold')
+        ax1.set_xlabel('Status', fontsize=12)
+        ax1.set_ylabel('Property', fontsize=12)
+        plt.setp(ax1.get_xticklabels(), rotation=45, ha='right')
+        
+        # Heatmap 2: Active status only with Red-Green color scheme
+        if 'Active' in crosstab_no_totals.columns:
+            active_data = crosstab_no_totals[['Active']].copy()
+            
+            # Create custom colormap from red (low) to green (high)
+            sns.heatmap(active_data,
+                       annot=True,
+                       fmt='d',
+                       cmap='RdYlGn',  # Red-Yellow-Green colormap
+                       ax=ax2,
+                       cbar_kws={'label': 'Number of Active Units'})
+            ax2.set_title('Active Units by Property\n(Red=Lowest, Green=Highest)', 
+                         fontsize=14, fontweight='bold')
+            ax2.set_xlabel('Status', fontsize=12)
+            ax2.set_ylabel('Property', fontsize=12)
+            
+            # Add percentage annotations
+            total_active = active_data['Active'].sum()
+            for i, property_name in enumerate(active_data.index):
+                active_count = active_data.loc[property_name, 'Active']
+                percentage = (active_count / total_active) * 100
+                ax2.text(0.5, i + 0.7, f'({percentage:.1f}%)', 
+                        ha='center', va='center', fontsize=9, fontweight='bold')
+        
+        plt.tight_layout()
+        plt.savefig('property_status_heatmap.png', dpi=300, bbox_inches='tight')
+        plt.show()
+        
+        # Summary statistics
+        print(f"\nSUMMARY STATISTICS:")
+        print("-" * 50)
+        if 'Active' in crosstab.columns:
+            active_by_property = crosstab['Active'].iloc[:-1].sort_values(ascending=False)
+            print("Top 5 Properties by Active Units:")
+            for i, (prop, count) in enumerate(active_by_property.head().items(), 1):
+                total_units = crosstab.loc[prop, 'TOTAL']
+                pct_active = (count / total_units) * 100
+                print(f"{i:2d}. {prop}: {count:,} active units ({pct_active:.1f}% of property)")
+            
+            print(f"\nBottom 5 Properties by Active Units:")
+            for i, (prop, count) in enumerate(active_by_property.tail().items(), 1):
+                total_units = crosstab.loc[prop, 'TOTAL'] 
+                pct_active = (count / total_units) * 100 if total_units > 0 else 0
+                print(f"{i:2d}. {prop}: {count:,} active units ({pct_active:.1f}% of property)")
+        
+        print(f"\n✓ Heatmap saved as 'property_status_heatmap.png'")
+        
+    except Exception as e:
+        print(f"✗ Error creating heatmap: {e}")
 def main():
     """Main function to analyze the updated MODIVES data"""
     
