@@ -201,55 +201,35 @@ def create_property_status_heatmap(df):
                 print(f"{crosstab.loc[prop, col]:>12}", end="")
             print()
         
-        # Create focused heatmap with proper column labels
+        # Create colorful heatmap with column names at top
         fig, ax = plt.subplots(1, 1, figsize=(14, 10))
         
         # Remove totals for visualization
         crosstab_no_totals = crosstab.iloc[:-1, :-1]
         
-        # Create heatmap with proper annotations and labels
+        # Create heatmap with colors for all columns
         sns.heatmap(crosstab_no_totals, 
                    annot=True, 
                    fmt='d', 
-                   cmap='Greys',
+                   cmap='viridis',  # Use colorful scheme for all data
                    ax=ax,
-                   cbar=False,
+                   cbar_kws={'label': 'Number of Units'},
                    linewidths=0.5)
-        
-        # Overlay colors only on Active column if it exists
-        if 'Active' in crosstab_no_totals.columns:
-            active_col_idx = list(crosstab_no_totals.columns).index('Active')
-            
-            # Create a copy for coloring only Active column
-            active_only_data = np.zeros_like(crosstab_no_totals.values)
-            active_only_data[:, active_col_idx] = crosstab_no_totals.iloc[:, active_col_idx]
-            
-            # Create mask to show only Active column in color
-            mask = np.ones_like(crosstab_no_totals.values, dtype=bool)
-            mask[:, active_col_idx] = False
-            
-            # Apply color overlay
-            im = ax.imshow(active_only_data, cmap='RdYlGn', aspect='auto', alpha=0.7)
-            
-            # Add colorbar for Active column only
-            from matplotlib.colors import Normalize
-            norm = Normalize(vmin=crosstab_no_totals.iloc[:, active_col_idx].min(), 
-                           vmax=crosstab_no_totals.iloc[:, active_col_idx].max())
-            sm = plt.cm.ScalarMappable(cmap='RdYlGn', norm=norm)
-            sm.set_array([])
-            cbar = plt.colorbar(sm, ax=ax, shrink=0.8)
-            cbar.set_label('Active Units', rotation=270, labelpad=15)
         
         ax.set_title('Property vs Status Distribution', fontsize=16, fontweight='bold', pad=20)
         ax.set_xlabel('Status', fontsize=12)
         ax.set_ylabel('Property', fontsize=12)
         
+        # Set column names at the top
+        ax.xaxis.tick_top()
+        ax.xaxis.set_label_position('top')
+        
         # Set proper tick labels
-        ax.set_xticklabels(crosstab_no_totals.columns, rotation=0, ha='center')
+        ax.set_xticklabels(crosstab_no_totals.columns, rotation=45, ha='left')
         ax.set_yticklabels(crosstab_no_totals.index, rotation=0)
         
-        # Ensure ticks are visible
-        ax.tick_params(axis='x', which='major', labelsize=10)
+        # Ensure ticks are visible and well formatted
+        ax.tick_params(axis='x', which='major', labelsize=10, pad=5)
         ax.tick_params(axis='y', which='major', labelsize=10)
         
         plt.tight_layout()
