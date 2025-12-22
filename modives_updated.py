@@ -201,20 +201,52 @@ def create_property_status_heatmap(df):
                 print(f"{crosstab.loc[prop, col]:>12}", end="")
             print()
         
-        # Create colorful heatmap with column names at top
+        # Create colorful heatmap with selective coloring
         fig, ax = plt.subplots(1, 1, figsize=(14, 10))
         
         # Remove totals for visualization
         crosstab_no_totals = crosstab.iloc[:-1, :-1]
         
-        # Create heatmap with colors for all columns
+        # Create base heatmap in neutral colors
         sns.heatmap(crosstab_no_totals, 
                    annot=True, 
                    fmt='d', 
-                   cmap='viridis',  # Use colorful scheme for all data
+                   cmap='Greys',  # Base neutral color
                    ax=ax,
-                   cbar_kws={'label': 'Number of Units'},
+                   cbar=False,
                    linewidths=0.5)
+        
+        # Apply red-to-green coloring only to Active column
+        if 'Active' in crosstab_no_totals.columns:
+            active_col_idx = list(crosstab_no_totals.columns).index('Active')
+            
+            # Get Active column data
+            active_values = crosstab_no_totals.iloc[:, active_col_idx]
+            
+            # Create colormap for Active column (red=low, green=high)
+            from matplotlib.colors import LinearSegmentedColormap
+            colors = ['red', 'yellow', 'green']
+            n_bins = 100
+            cmap = LinearSegmentedColormap.from_list('rg', colors, N=n_bins)
+            
+            # Normalize Active values for color mapping
+            norm = plt.Normalize(vmin=active_values.min(), vmax=active_values.max())
+            
+            # Color only the Active column cells
+            for i, prop in enumerate(crosstab_no_totals.index):
+                active_count = active_values.iloc[i]
+                color = cmap(norm(active_count))
+                
+                # Create a rectangle for just this cell
+                rect = plt.Rectangle((active_col_idx, i), 1, 1, 
+                                   facecolor=color, alpha=0.8, zorder=10)
+                ax.add_patch(rect)
+            
+            # Add colorbar for Active column only
+            sm = plt.cm.ScalarMappable(cmap=cmap, norm=norm)
+            sm.set_array([])
+            cbar = plt.colorbar(sm, ax=ax, shrink=0.8)
+            cbar.set_label('Active Units (Red=Low, Green=High)', rotation=270, labelpad=20)
         
         ax.set_title('Property vs Status Distribution', fontsize=16, fontweight='bold', pad=20)
         ax.set_xlabel('Status', fontsize=12)
