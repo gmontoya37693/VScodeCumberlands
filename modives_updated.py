@@ -221,25 +221,30 @@ def create_property_status_heatmap(df):
         # Overlay colors only on Active column if it exists
         if 'Active' in crosstab_no_totals.columns:
             active_col_idx = list(crosstab_no_totals.columns).index('Active')
-            active_data = crosstab_no_totals.iloc[:, active_col_idx:active_col_idx+1]
             
-            # Create a mask for only the Active column
-            mask = np.ones_like(crosstab_no_totals, dtype=bool)
+            # Create a mask array for all columns except Active
+            mask = np.ones_like(crosstab_no_totals.values, dtype=bool)
             mask[:, active_col_idx] = False
             
+            # Convert mask to DataFrame with same index/columns
+            mask_df = pd.DataFrame(mask, 
+                                 index=crosstab_no_totals.index, 
+                                 columns=crosstab_no_totals.columns)
+            
             # Apply RdYlGn colormap only to Active column
-            sns.heatmap(active_data,
+            sns.heatmap(crosstab_no_totals,
                        annot=False,
                        cmap='RdYlGn',
                        ax=ax,
-                       mask=mask.iloc[:, active_col_idx:active_col_idx+1],
+                       mask=mask_df,
                        cbar_kws={'label': 'Active Units', 'shrink': 0.8})
             
-            # Re-annotate the Active column with numbers
-            for i, prop in enumerate(active_data.index):
-                active_count = active_data.iloc[i, 0]
-                ax.text(active_col_idx + 0.5, i + 0.5, f'{active_count}', 
-                       ha='center', va='center', fontweight='bold', fontsize=10)
+            # Re-annotate all cells with numbers
+            for i, prop in enumerate(crosstab_no_totals.index):
+                for j, status in enumerate(crosstab_no_totals.columns):
+                    value = crosstab_no_totals.iloc[i, j]
+                    ax.text(j + 0.5, i + 0.5, f'{value}', 
+                           ha='center', va='center', fontweight='bold', fontsize=10)
         
         ax.set_title('Property vs Status Distribution', fontsize=16, fontweight='bold', pad=20)
         ax.set_xlabel('Status', fontsize=12)
