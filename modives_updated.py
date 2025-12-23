@@ -202,7 +202,7 @@ def create_property_status_heatmap(df):
             print()
         
         # Create colorful heatmap with selective coloring
-        fig, ax = plt.subplots(1, 1, figsize=(14, 10))
+        fig, ax = plt.subplots(1, 1, figsize=(14, 12))  # Increased height for title space
         
         # Keep totals for visualization
         crosstab_with_totals = crosstab
@@ -265,7 +265,7 @@ def create_property_status_heatmap(df):
         ax.tick_params(axis='y', which='major', labelsize=10)
         
         # Make sure title appears above the top labels
-        plt.subplots_adjust(top=0.9)
+        plt.subplots_adjust(top=0.85, bottom=0.1, left=0.1, right=0.9)
         
         plt.tight_layout()
         # plt.savefig('property_status_heatmap.png', dpi=300, bbox_inches='tight')
