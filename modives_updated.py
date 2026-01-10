@@ -174,7 +174,7 @@ def analyze_updated_file(file_path):
         return None
 def create_property_status_heatmap(df):
     """
-    Create a heatmap table showing Property vs Status distribution
+    Create a learheatmap table showing Property vs Status distribution
     
     Args:
         df (pd.DataFrame): Dataset with Property and Status columns
