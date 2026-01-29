@@ -289,7 +289,6 @@ def create_visualization():
 if __name__ == "__main__":
     # Run the actual calculation example with visualization
     create_visualization()
-"""
 
 # LINE FITTING VISUALIZATION STRATEGY
 """
