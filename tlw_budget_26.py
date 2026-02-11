@@ -179,8 +179,31 @@ def analyze_property_status_distribution(df):
         
         # Show unique status values
         print(f"Status values found: {list(status_counts.index)}")
-        print(f"\nNote: Original data had 7 unique status values, now showing {total_statuses}")
-        print(f"      'None' values were converted to 'Cancelled' for analysis consistency")
+        print(f"\nNote: Status values of None were replaced with Canceled")
+    
+    # Carrier analysis
+    if 'Carrier' in df.columns:
+        carrier_counts = df['Carrier'].value_counts(dropna=False)
+        total_carriers = len(carrier_counts)
+        
+        print(f"\nCARRIER ANALYSIS:")
+        print(f"Total different carriers: {total_carriers}")
+        
+        # Validation: Check Active status records have carriers
+        print(f"\nCARRIER VALIDATION FOR ACTIVE STATUS:")
+        print("-" * 50)
+        if 'Status' in df.columns:
+            active_records = df[df['Status'] == 'Active']
+            if len(active_records) > 0:
+                missing_carriers = active_records['Carrier'].isnull().sum() + (active_records['Carrier'] == '').sum()
+                if missing_carriers > 0:
+                    print(f"✗ Found {missing_carriers} Active records with missing/blank Carrier")
+                    print(f"  This represents {(missing_carriers/len(active_records)*100):.1f}% of Active records")
+                else:
+                    print(f"✓ All {len(active_records):,} Active records have Carrier information")
+            else:
+                print("No Active status records found")
+        print()
 
 def main():
     """Main analysis function"""
