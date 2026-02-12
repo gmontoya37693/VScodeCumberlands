@@ -1081,12 +1081,21 @@ def generate_excel_reports(df, tlw_portfolio, timeline_data):
     print(f"\nPHASE 5: EXCEL REPORTS GENERATION")
     print("="*80)
     
+    # Debug: Check available columns
+    print(f"Available columns in dataset: {list(df.columns)}")
+    
     # 1. Generate Acento Apartments report (all 30 properties)
     print(f"Generating Acento Apartments report...")
     
-    # Select required columns for all properties
-    acento_columns = ['Unit_ID', 'Key', 'Property', 'Units']
-    acento_report = df[acento_columns].copy()
+    # Select required columns for all properties - adjust based on available columns
+    base_columns = ['Unit_ID', 'Key', 'Property']
+    available_columns = [col for col in base_columns if col in df.columns]
+    
+    if 'Units' in df.columns:
+        available_columns.append('Units')
+    
+    print(f"Using columns: {available_columns}")
+    acento_report = df[available_columns].copy()
     
     # Sort by Property and then by Unit_ID 
     acento_report = acento_report.sort_values(['Property', 'Unit_ID'])
@@ -1106,6 +1115,12 @@ def generate_excel_reports(df, tlw_portfolio, timeline_data):
     # Filter for TLW properties only
     tlw_properties = tlw_portfolio['Property'].tolist()
     tlw_data = df[df['Property'].isin(tlw_properties)].copy()
+    
+    # Add Units column from tlw_portfolio if not already present
+    if 'Units' not in tlw_data.columns:
+        property_units_map = tlw_portfolio.set_index('Property')['Units'].to_dict()
+        tlw_data['Units'] = tlw_data['Property'].map(property_units_map)
+        print(f"Added Units column from portfolio data")
     
     # Calculate week rollout for each unit based on property schedule
     property_schedule = timeline_data['property_schedule']
@@ -1147,11 +1162,14 @@ def generate_excel_reports(df, tlw_portfolio, timeline_data):
                 week_idx = idx % len(rollout_weeks) if len(rollout_weeks) > 0 else 0
                 assigned_week = rollout_weeks[week_idx]
                 
+                # Get units count properly
+                units_count = unit_row.get('Units', schedule['units'])
+                
                 week_assignments.append({
                     'Unit_ID': unit_row['Unit_ID'],
                     'Key': unit_row['Key'],
                     'Property': unit_row['Property'],
-                    'Units': unit_row['Units'],
+                    'Units': units_count,
                     'Week': assigned_week
                 })
             
