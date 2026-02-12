@@ -972,8 +972,8 @@ def create_property_gantt_chart(timeline_data):
     
     print("-" * 95)
     
-    # Create Gantt chart
-    fig, ax = plt.subplots(figsize=(16, max(8, len(properties) * 0.4)))
+    # Create Gantt chart with larger figure size
+    fig, ax = plt.subplots(figsize=(18, max(10, len(properties) * 0.5)))
     
     # Create horizontal bars
     y_positions = range(len(properties))
@@ -999,10 +999,10 @@ def create_property_gantt_chart(timeline_data):
     # Customize chart
     ax.set_yticks(y_positions)
     ax.set_yticklabels(properties)
-    ax.set_xlabel('Timeline - April to December 2026 (Week Numbers)', fontweight='bold', fontsize=11)
+    ax.set_xlabel('Timeline - April to December 2026 (Week Numbers)', fontweight='bold', fontsize=12)
     ax.set_ylabel('Properties', fontweight='bold')
     ax.set_title('TLW Property Enrollment Schedule - Gantt Chart\nProperty-by-Property Timeline', 
-                fontsize=14, fontweight='bold', pad=20)
+                fontsize=16, fontweight='bold', pad=30)
     
     # Add vertical lines for month boundaries
     month_boundaries = []
@@ -1040,8 +1040,8 @@ def create_property_gantt_chart(timeline_data):
     
     ax.legend(handles=legend_elements, loc='upper left', bbox_to_anchor=(0, 1))
     
-    # Adjust layout with extra bottom margin for readable x-axis label
-    plt.subplots_adjust(bottom=0.15)
+    # Adjust layout with more space for title and x-axis label
+    plt.subplots_adjust(bottom=0.12, top=0.88)
     plt.tight_layout()
     plt.show()
     
