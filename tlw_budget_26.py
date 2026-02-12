@@ -1088,7 +1088,7 @@ def generate_excel_reports(df, tlw_portfolio, timeline_data):
     print(f"Generating Acento Apartments report...")
     
     # Select required columns for all properties - adjust based on available columns
-    base_columns = ['Unit_ID', 'Key', 'Property']
+    base_columns = ['Unit_ID', 'Key', 'Property', 'Unit']
     available_columns = [col for col in base_columns if col in df.columns]
     
     if 'Units' in df.columns:
@@ -1162,14 +1162,11 @@ def generate_excel_reports(df, tlw_portfolio, timeline_data):
                 week_idx = idx % len(rollout_weeks) if len(rollout_weeks) > 0 else 0
                 assigned_week = rollout_weeks[week_idx]
                 
-                # Get units count properly
-                units_count = unit_row.get('Units', schedule['units'])
-                
                 week_assignments.append({
                     'Unit_ID': unit_row['Unit_ID'],
                     'Key': unit_row['Key'],
                     'Property': unit_row['Property'],
-                    'Units': units_count,
+                    'Unit': unit_row.get('Unit', unit_row['Key']),  # Use Unit or fall back to Key
                     'Week': assigned_week
                 })
             
@@ -1191,7 +1188,7 @@ def generate_excel_reports(df, tlw_portfolio, timeline_data):
     print(f"  - TLW properties: {tlw_rollout_df['Property'].nunique()}")
     print(f"  - Total units: {len(tlw_rollout_df):,}")
     print(f"  - Week range: {tlw_rollout_df['Week'].min()} to {tlw_rollout_df['Week'].max()}")
-    print(f"  - Columns: Unit_ID, Key, Property, Units, Week")
+    print(f"  - Columns: Unit_ID, Key, Property, Unit, Week")
     
     # Display rollout statistics
     print(f"\nTLW ROLLOUT STATISTICS:")
