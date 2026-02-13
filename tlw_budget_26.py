@@ -799,8 +799,8 @@ def create_weekly_cumulative_enrollment_graph(timeline_data):
         running_total += weekly_units
         cumulative_enrollments.append(int(running_total))
     
-    # Create the visualization
-    plt.figure(figsize=(15, 8))
+    # Create the visualization with larger figure
+    fig = plt.figure(figsize=(16, 9))
     
     # Plot cumulative enrollment line using correct week numbers
     plt.plot(week_numbers, cumulative_enrollments, 
@@ -811,9 +811,9 @@ def create_weekly_cumulative_enrollment_graph(timeline_data):
     plt.fill_between(week_numbers, cumulative_enrollments, 
                      alpha=0.3, color='#A23B72', label='Enrollment Progress')
     
-    # Formatting
+    # Formatting with better title spacing
     plt.title(f'TLW Enrollment: Weekly Cumulative Distribution\n{target_total:,} Apartment Units Timeline (April-December)', 
-              fontsize=16, fontweight='bold', pad=20)
+              fontsize=16, fontweight='bold', pad=30)
     plt.xlabel(f'Timeline - April to December 2026 (Week {week_numbers[0]} to {week_numbers[-1]})', fontsize=12, fontweight='bold')
     plt.ylabel('Cumulative Apartments Enrolled', fontsize=12, fontweight='bold')
     
@@ -868,7 +868,8 @@ def create_weekly_cumulative_enrollment_graph(timeline_data):
     # Legend
     plt.legend(loc='center right', bbox_to_anchor=(1.15, 0.5))
     
-    # Tight layout
+    # Adjust layout for better title and label visibility
+    plt.subplots_adjust(top=0.9, bottom=0.12)
     plt.tight_layout()
     
     # Display statistics
