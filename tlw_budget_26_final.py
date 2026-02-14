@@ -71,13 +71,14 @@ pd.set_option('display.width', None)
 
 def load_and_examine_files():
     """
+    PART 1: UPLOAD AND EXPLORATION
     Load and examine the two primary Excel files for TLW budget analysis.
     
     Returns:
     --------
     tuple: (acento_df, base_rent_df) - loaded DataFrames
     """
-    print("📂 LOADING TLW BUDGET DATA FILES")
+    print("📂 PART 1: UPLOAD AND EXPLORATION")
     print("="*40)
     
     # Load acento apartments fixed data
@@ -189,6 +190,75 @@ def examine_data_quality(acento_df, base_rent_df):
     
     print("\n✅ Data examination complete.")
 
+def create_working_dataframe(acento_df, base_rent_df):
+    """
+    PART 2: CREATE WORKING DATAFRAME
+    Start with 5 columns from acento apartments, add 6th column "Rent" calculated 
+    by multiplying each unit's SQFT × property-specific slope.
+    
+    Parameters:
+    -----------
+    acento_df : DataFrame
+        Acento apartments fixed data (5 columns)
+    base_rent_df : DataFrame
+        Property base rent data with slopes (stays untouched)
+    
+    Returns:
+    --------
+    DataFrame: Working dataframe with exactly 6 columns including calculated Rent
+    """
+    print("\n\n💼 PART 2: CREATE WORKING DATAFRAME")
+    print("="*45)
+    
+    # Start with acento apartments 5 columns
+    print("1️⃣ STARTING WITH ACENTO APARTMENTS (5 COLUMNS):")
+    working_df = acento_df.copy()
+    print(f"   ✅ Base dataframe: {len(working_df):,} units")
+    print(f"   📋 Columns: {list(working_df.columns)}")
+    
+    # Create property slope lookup dictionary
+    print("\n2️⃣ CREATING PROPERTY SLOPE LOOKUP:")
+    slope_lookup = dict(zip(base_rent_df['Property'], base_rent_df['Slope']))
+    print(f"   ✅ Loaded slope data for {len(slope_lookup)} properties")
+    print(f"   📋 Sample slopes: {dict(list(slope_lookup.items())[:3])}")
+    
+    # Calculate rent for each unit: Unit_SQFT × Property_Slope
+    print("\n3️⃣ CALCULATING RENT COLUMN:")
+    print("   📐 Formula: Rent = Unit_SQFT × Property_Slope")
+    
+    def calculate_unit_rent(row):
+        if pd.isna(row['SQFT']):
+            return np.nan
+        
+        property_slope = slope_lookup.get(row['Property'])
+        if property_slope is None:
+            return np.nan
+            
+        return row['SQFT'] * property_slope
+    
+    working_df['Rent'] = working_df.apply(calculate_unit_rent, axis=1)
+    
+    # Round to nearest dollar
+    working_df['Rent'] = working_df['Rent'].round(0)
+    
+    # Analysis results
+    valid_rent_count = working_df['Rent'].notna().sum()
+    print(f"   ✅ Calculated rent for {valid_rent_count:,}/{len(working_df):,} units")
+    
+    if valid_rent_count > 0:
+        rent_stats = working_df['Rent'].describe()
+        print(f"   💰 Rent Range: ${rent_stats['min']:.0f} - ${rent_stats['max']:.0f}")
+        print(f"   💰 Average Rent: ${rent_stats['mean']:.0f}")
+    
+    print(f"\n   📋 Sample Working DataFrame (6 columns):")
+    print(working_df.head(3).to_string(index=False))
+    
+    print(f"\n✅ Working dataframe completed:")
+    print(f"   📊 Total columns: {len(working_df.columns)} (as expected: 6)")
+    print(f"   📋 Final columns: {list(working_df.columns)}")
+    
+    return working_df
+
 def main():
     """
     Main function to execute TLW budget analysis.
@@ -208,7 +278,10 @@ def main():
     # Step 2: Examine data quality
     examine_data_quality(acento_df, base_rent_df)
     
-    return acento_df, base_rent_df
+    # Step 3: Create working dataframe with estimated rent
+    working_df = create_working_dataframe(acento_df, base_rent_df)
+    
+    return acento_df, base_rent_df, working_df
 
 if __name__ == "__main__":
-    acento_df, base_rent_df = main()
+    acento_df, base_rent_df, working_df = main()
