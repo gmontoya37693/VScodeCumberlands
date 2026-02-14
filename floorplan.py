@@ -127,7 +127,8 @@ def step1_extract_rentroll_data():
             
             for col in df_tab.columns:
                 col_str = str(col).lower()
-                if 'bldg' in col_str and 'unit' in col_str:
+                # Look for Bldg/Unit column (primary) or Unit column (fallback for LHC)
+                if ('bldg' in col_str and 'unit' in col_str) or col_str == 'unit':
                     bldg_unit_col = col
                 elif 'sqft' in col_str:
                     sqft_col = col
