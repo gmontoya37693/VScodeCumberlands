@@ -334,7 +334,7 @@ def prepare_tlw_portfolio(working_df):
                      .reset_index())
         
         print(f"   ✅ TLW Eligible Properties: {len(tlw_summary)}")
-        print(f"\n   TLW ELIGIBLE PROPERTIES TABLE (All Properties):")
+        print(f"\n   TLW ELIGIBLE PROPERTIES TABLE:")
         print("   " + "="*60)
         print(f"   {'#':<3} {'Property':<25} {'Units':<8} {'Rent Roll/Month':<15}")
         print("   " + "-"*60)
@@ -408,7 +408,7 @@ def calculate_tlw_rollout_timeline(tlw_eligible_df, portfolio_summary):
     """
     PART 4: TLW ROLLOUT TIMELINE CALCULATION
     Calculate week-by-week rollout schedule for TLW deployment across eligible properties.
-    Create sequential deployment with minimal parallel properties to achieve steady slope.
+    Simple distribution across available weeks 15-52 (April-December 2026).
     
     Parameters:
     -----------
@@ -424,371 +424,370 @@ def calculate_tlw_rollout_timeline(tlw_eligible_df, portfolio_summary):
     print("\n\nPART 4: TLW ROLLOUT TIMELINE CALCULATION")
     print("="*50)
     
-    # Timeline parameters
+    # Timeline parameters - CORRECTED for realistic 2026 rollout
     timeline_params = {
-        'current_week': 7,           # Today is Feb 14, Week 7
+        'current_week': 7,           # Today is Feb 15, Week 7
         'rollout_start_week': 15,    # Start in April (Week 15)
         'rollout_end_week': 52,      # Finish by end of year (Week 52)
-        'max_parallel_properties': 2, # Minimal parallel deployment
-        'installation_weeks_per_100_units': 2,  # Installation time
-        'ramp_up_weeks': 2,          # Service ramp-up after installation
-        'buffer_weeks': 1            # Buffer between properties
+        'available_weeks': 37,       # 52 - 15 = 37 weeks available
+        'total_units': portfolio_summary['tlw_units'],
+        'target_units_per_week': portfolio_summary['tlw_units'] // 37  # Simple division
     }
     
     print("1. TIMELINE PARAMETERS:")
-    print(f"   Current Week: {timeline_params['current_week']} (Feb 14, 2026)")
+    print(f"   Current Week: {timeline_params['current_week']} (Feb 15, 2026)")
     print(f"   Rollout Period: Week {timeline_params['rollout_start_week']} to {timeline_params['rollout_end_week']} (April-December)")
-    print(f"   Available Weeks: {timeline_params['rollout_end_week'] - timeline_params['rollout_start_week']} weeks")
-    print(f"   Max Parallel Properties: {timeline_params['max_parallel_properties']}")
+    print(f"   Available Weeks: {timeline_params['available_weeks']} weeks")
+    print(f"   Total Units: {timeline_params['total_units']:,} units")
+    print(f"   Target Rate: ~{timeline_params['target_units_per_week']} units/week")
     
-    # Step 1: Create property-level rollout schedule
-    print("\n2. CREATING PROPERTY ROLLOUT SCHEDULE:")
+    # Step 1: Get properties sorted by size (largest first)
+    print("\n2. PROPERTY ROLLOUT SCHEDULING:")
     
-    # Get property summary for scheduling
-    property_schedule = (tlw_eligible_df.groupby('Property')
-                        .agg({
-                            'Unit': 'count',
-                            'Rent': 'mean'  # Average rent per unit (for prioritization)
-                        })
-                        .rename(columns={'Unit': 'Total_Units', 'Rent': 'Avg_Rent'})
-                        .reset_index())
+    property_summary = (tlw_eligible_df.groupby('Property')
+                       .agg({'Unit': 'count'})
+                       .rename(columns={'Unit': 'Units'})
+                       .sort_values('Units', ascending=False)
+                       .reset_index())
     
-    # Strategic priority scoring (larger properties first, but consider complexity)
-    property_schedule['Priority_Score'] = (
-        property_schedule['Total_Units'].rank(ascending=False) * 0.6 +  # Size priority
-        property_schedule['Avg_Rent'].rank(ascending=False) * 0.4       # Revenue priority
-    )
+    print(f"   Properties to schedule: {len(property_summary)}")
     
-    # Sort by priority
-    property_schedule = property_schedule.sort_values('Priority_Score', ascending=False).reset_index(drop=True)
-    
-    # Calculate deployment timeline for each property
-    current_week = timeline_params['rollout_start_week']
+    # Step 2: Distribute properties across weeks 15-52
     rollout_schedule = []
+    current_week = timeline_params['rollout_start_week']
+    cumulative_units = 0
     
-    print(f"   Properties to schedule: {len(property_schedule)}")
-    print(f"\n   PROPERTY ROLLOUT SEQUENCE:")
-    print("   " + "="*80)
-    print(f"   {'#':<3} {'Property':<12} {'Units':<6} {'Install Weeks':<6} {'Roll-In':<12} {'Roll-Out':<12}")
-    print("   " + "-"*80)
+    print(f"\n   WEEKLY ROLLOUT DISTRIBUTION:")
+    print("   " + "="*60)
+    print(f"   {'Week':<6} {'Property':<12} {'Units':<8} {'Cumulative':<12}")
+    print("   " + "-"*60)
     
-    for i, (_, prop) in enumerate(property_schedule.iterrows(), 1):
-        units = prop['Total_Units']
+    for i, (_, prop) in enumerate(property_summary.iterrows()):
+        property_name = prop['Property']
+        units = prop['Units']
         
-        # Calculate installation duration based on property size
-        install_weeks = max(2, int(np.ceil(units / 50)))  # ~50 units per week installation
-        
-        # Installation period
-        install_start_week = current_week
-        install_end_week = install_start_week + install_weeks - 1
-        
-        # Service roll-out period (after installation + ramp-up)
-        service_start_week = install_end_week + timeline_params['ramp_up_weeks']
-        service_end_week = service_start_week + 1  # Service goes live quickly after installation
+        # Assign to current week
+        rollout_week = current_week
+        cumulative_units += units
         
         rollout_schedule.append({
-            'Property': prop['Property'],
-            'Total_Units': units,
-            'Priority_Sequence': i,
-            'Install_Start_Week': install_start_week,
-            'Install_End_Week': install_end_week,
-            'Install_Duration_Weeks': install_weeks,
-            'Service_Start_Week': service_start_week,
-            'Service_End_Week': service_end_week,
-            'Cumulative_Units': sum([p['Total_Units'] for p in rollout_schedule]) + units
+            'Property': property_name,
+            'Units': units,
+            'Week': rollout_week,
+            'Cumulative_Units': cumulative_units,
+            'Sequence': i + 1
         })
         
-        # Print schedule
-        install_period = f"W{install_start_week}-{install_end_week}"
-        service_period = f"W{service_start_week}-{service_end_week}"
-        print(f"   {i:<3} {prop['Property']:<12} {units:<6} {install_weeks:<6} {install_period:<12} {service_period:<12}")
+        print(f"   {rollout_week:<6} {property_name:<12} {units:<8,} {cumulative_units:<12,}")
         
-        # Move to next property with buffer
-        current_week = install_end_week + timeline_params['buffer_weeks']
-        
-        # Check if we're within timeline constraints
-        if current_week > timeline_params['rollout_end_week'] - 5:  # Leave some buffer
-            print(f"   ⚠️ Approaching timeline limit at Week {current_week}")
+        # Advance week - distribute roughly evenly
+        # For 26 properties across 37 weeks, some weeks will have multiple properties
+        if i < len(property_summary) - 1:  # Not the last property
+            weeks_per_property = timeline_params['available_weeks'] / len(property_summary)
+            current_week = min(
+                timeline_params['rollout_start_week'] + int((i + 1) * weeks_per_property),
+                timeline_params['rollout_end_week']
+            )
     
-    # Create rollout DataFrame
-    rollout_df = pd.DataFrame(rollout_schedule)
+    print("   " + "="*60)
+    print(f"   Final Week: {max([p['Week'] for p in rollout_schedule])}")
+    print(f"   Total Units: {cumulative_units:,}")
+    print(f"   Verification: {'✅ Match' if cumulative_units == timeline_params['total_units'] else '❌ Mismatch'}")
     
-    print("   " + "="*80)
-    print(f"   Total Properties Scheduled: {len(rollout_df)}")
-    print(f"   Final Week: {rollout_df['Service_End_Week'].max()}")
-    print(f"   ✅ Timeline Status: {'Within Bounds' if rollout_df['Service_End_Week'].max() <= timeline_params['rollout_end_week'] else '⚠️ Exceeds Timeline'}")
+    # Step 3: Create cumulative weekly data for visualization
+    print("\n3. WEEKLY CUMULATIVE ANALYSIS:")
     
-    # Step 2: Add rollout columns to apartment-level dataframe
-    print("\n3. ADDING ROLLOUT COLUMNS TO APARTMENT DATAFRAME:")
-    
-    # Create lookup dictionary for property rollout data
-    property_lookup = rollout_df.set_index('Property').to_dict('index')
-    
-    # Add rollout columns to each apartment unit
-    rollout_columns = [
-        'Week_Roll_In_Start',      # Installation start week
-        'Week_Roll_In_End',        # Installation end week  
-        'Week_Roll_Out_Start',     # Service start week
-        'Week_Roll_Out_End',       # Service end week
-        'Install_Duration_Weeks',   # Installation duration
-        'Priority_Sequence',       # Property priority sequence
-        'Cumulative_Units_At_Rollout'  # Cumulative units when this property goes live
-    ]
-    
-    # Initialize new columns
-    enhanced_df = tlw_eligible_df.copy()
-    for col in rollout_columns:
-        enhanced_df[col] = None
-    
-    # Populate rollout data for each apartment
-    for prop, prop_data in property_lookup.items():
-        mask = enhanced_df['Property'] == prop
-        enhanced_df.loc[mask, 'Week_Roll_In_Start'] = prop_data['Install_Start_Week']
-        enhanced_df.loc[mask, 'Week_Roll_In_End'] = prop_data['Install_End_Week']
-        enhanced_df.loc[mask, 'Week_Roll_Out_Start'] = prop_data['Service_Start_Week']
-        enhanced_df.loc[mask, 'Week_Roll_Out_End'] = prop_data['Service_End_Week']
-        enhanced_df.loc[mask, 'Install_Duration_Weeks'] = prop_data['Install_Duration_Weeks']
-        enhanced_df.loc[mask, 'Priority_Sequence'] = prop_data['Priority_Sequence']
-        enhanced_df.loc[mask, 'Cumulative_Units_At_Rollout'] = prop_data['Cumulative_Units']
-    
-    print(f"   Added {len(rollout_columns)} rollout columns to apartment dataframe")
-    print(f"   Enhanced dataframe shape: {enhanced_df.shape}")
-    
-    # Show sample of enhanced dataframe
-    print(f"\n   SAMPLE ENHANCED DATAFRAME:")
-    sample_cols = ['Property', 'Unit', 'Week_Roll_In_Start', 'Week_Roll_Out_Start', 'Priority_Sequence']
-    print("   " + enhanced_df[sample_cols].head(3).to_string(index=False))
-    
-    # Step 3: Create cumulative enrollment tracking
-    print("\n4. CUMULATIVE ENROLLMENT ANALYSIS:")
-    
-    # Calculate weekly cumulative enrollment
-    weekly_cumulative = []
+    # Generate week-by-week cumulative data
+    weekly_data = []
     for week in range(timeline_params['rollout_start_week'], timeline_params['rollout_end_week'] + 1):
-        # Units that have service active by this week
-        active_units = enhanced_df[enhanced_df['Week_Roll_Out_Start'] <= week]['Unit'].count()
-        weekly_cumulative.append({
+        # Sum all units that roll out by this week
+        units_by_week = sum([p['Units'] for p in rollout_schedule if p['Week'] <= week])
+        percentage = (units_by_week / timeline_params['total_units']) * 100
+        
+        weekly_data.append({
             'Week': week,
-            'Cumulative_Units': active_units,
-            'Percentage_Complete': (active_units / portfolio_summary['tlw_units']) * 100
+            'Cumulative_Units': units_by_week,
+            'Percentage_Complete': percentage
         })
     
-    cumulative_df = pd.DataFrame(weekly_cumulative)
+    cumulative_df = pd.DataFrame(weekly_data)
     
     # Show key milestones
     print("   KEY MILESTONES:")
-    print("   " + "="*40)
+    print("   " + "-"*40)
     milestones = [25, 50, 75, 100]
     for milestone in milestones:
-        milestone_week = cumulative_df[cumulative_df['Percentage_Complete'] >= milestone]['Week'].min()
-        milestone_units = cumulative_df[cumulative_df['Week'] == milestone_week]['Cumulative_Units'].iloc[0] if pd.notna(milestone_week) else 0
-        status = f"Week {milestone_week}: {milestone_units:,} units" if pd.notna(milestone_week) else "Not achieved"
-        print(f"   {milestone:3d}% Complete: {status}")
+        milestone_data = cumulative_df[cumulative_df['Percentage_Complete'] >= milestone]
+        if not milestone_data.empty:
+            week = milestone_data['Week'].iloc[0]
+            units = milestone_data['Cumulative_Units'].iloc[0]
+            month = "April" if week <= 18 else "May" if week <= 22 else "June" if week <= 26 else \
+                   "July" if week <= 31 else "August" if week <= 35 else "September" if week <= 39 else \
+                   "October" if week <= 44 else "November" if week <= 48 else "December"
+            print(f"   {milestone:3d}%: Week {week} ({month}) - {units:,} units")
     
-    print(f"\n   FINAL ROLLOUT SUMMARY:")
-    print(f"   - Start: Week {timeline_params['rollout_start_week']} (April 2026)")
-    print(f"   - End: Week {rollout_df['Service_End_Week'].max()} (2026)")
-    print(f"   - Duration: {rollout_df['Service_End_Week'].max() - timeline_params['rollout_start_week']} weeks")
-    print(f"   - Total Units: {portfolio_summary['tlw_units']:,}")
-    print(f"   - Properties: {len(rollout_df)}")
+    # Convert rollout schedule to DataFrame
+    rollout_df = pd.DataFrame(rollout_schedule)
     
-    return enhanced_df, rollout_df, cumulative_df, timeline_params
+    print(f"\n4. TIMELINE SUMMARY:")
+    print("   " + "-"*40)
+    print(f"   Duration: Week {timeline_params['rollout_start_week']} to {rollout_df['Week'].max()}")
+    print(f"   Properties: {len(rollout_df)}")
+    print(f"   Total Units: {timeline_params['total_units']:,}")
+    print(f"   Average per week: {timeline_params['total_units'] // timeline_params['available_weeks']}")
+    print("   ✅ Timeline calculation complete")
+    
+    return rollout_df, cumulative_df, timeline_params
 
 def visualize_tlw_rollout_timeline(rollout_df, cumulative_df, timeline_params, portfolio_summary):
     """
-    Create comprehensive visualizations for TLW rollout timeline.
-    Generate Gantt chart and cumulative enrollment graphics.
-    
-    Parameters:
-    -----------
-    rollout_df : DataFrame
-        Property-level rollout schedule
-    cumulative_df : DataFrame
-        Weekly cumulative enrollment data
-    timeline_params : dict
-        Timeline parameters and constraints
-    portfolio_summary : dict
-        Portfolio summary statistics
+    Create TLW rollout visualizations using working code structure from tlw_budget_26.py
     """
-    print("\n\nPART 5: TLW ROLLOUT VISUALIZATIONS")
-    print("="*45)
+    print("\n\nPHASE 3: WEEKLY CUMULATIVE ENROLLMENT VISUALIZATION")
+    print("="*80)
     
-    # Set up the plotting style
-    plt.style.use('default')
-    sns.set_palette("husl")
-    
-    # Create figure with two subplots
-    fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(16, 12))
-    fig.suptitle('TLW Property Enrollment Schedule - 2026 Rollout Timeline', fontsize=16, fontweight='bold', y=0.98)
-    
-    # ==========================================
-    # CHART 1: GANTT CHART (Property-by-Property Timeline)
-    # ==========================================
-    
-    print("1. Creating Gantt Chart - Property-by-Property Timeline:")
-    
-    # Prepare data for Gantt chart
-    gantt_data = rollout_df.copy()
-    
-    # Create property categories by size
-    gantt_data['Size_Category'] = pd.cut(gantt_data['Total_Units'], 
-                                        bins=[0, 100, 200, 400, float('inf')],
-                                        labels=['Micro (<100 units)', 'Small (100-199 units)', 
-                                               'Medium (200-399 units)', 'Large (400+ units)'])
-    
-    # Color mapping for different categories
-    color_map = {
-        'Micro (<100 units)': '#87CEEB',      # Light blue
-        'Small (100-199 units)': '#40E0D0',   # Turquoise  
-        'Medium (200-399 units)': '#FF6B6B',  # Light red
-        'Large (400+ units)': '#FF4444'       # Red
-    }
-    
-    # Create y-axis positions (reverse order for top-down display)
-    y_positions = range(len(gantt_data))
-    gantt_data = gantt_data.reset_index(drop=True)
-    
-    # Plot installation periods
-    for i, (_, row) in enumerate(gantt_data.iterrows()):
-        # Installation bar
-        install_duration = row['Install_End_Week'] - row['Install_Start_Week'] + 1
-        color = color_map[row['Size_Category']]
-        
-        ax1.barh(len(gantt_data) - 1 - i, install_duration, 
-                left=row['Install_Start_Week'], height=0.6, 
-                color=color, alpha=0.8, edgecolor='white', linewidth=0.5)
-        
-        # Add property label and unit count
-        label_x = row['Install_Start_Week'] + install_duration/2
-        label_text = f"{row['Property']} ({row['Total_Units']} units)"
-        ax1.text(label_x, len(gantt_data) - 1 - i, label_text, 
-                ha='center', va='center', fontsize=9, fontweight='bold', color='white')
-        
-        # Add service start marker
-        ax1.plot(row['Service_Start_Week'], len(gantt_data) - 1 - i, 
-                marker='|', markersize=15, color='green', markeredgewidth=3)
-    
-    # Customize Gantt chart
-    ax1.set_yticks(range(len(gantt_data)))
-    ax1.set_yticklabels([f"{row['Property']}" for _, row in gantt_data[::-1].iterrows()], fontsize=8)
-    ax1.set_xlabel('Timeline - April to December 2026 (Week Numbers)', fontsize=12)
-    ax1.set_ylabel('Properties', fontsize=12)
-    ax1.set_title('Property-by-Property Timeline', fontsize=14, fontweight='bold', pad=20)
-    ax1.grid(True, axis='x', alpha=0.3)
-    ax1.set_xlim(timeline_params['rollout_start_week'] - 2, timeline_params['rollout_end_week'] + 2)
-    
-    # Add month labels on top
-    month_weeks = {15: 'Apr', 19: 'May', 23: 'Jun', 27: 'Jul', 31: 'Aug', 
-                   35: 'Sep', 40: 'Oct', 44: 'Nov', 48: 'Dec', 52: 'Year End'}
-    ax1_top = ax1.twiny()
-    ax1_top.set_xlim(ax1.get_xlim())
-    ax1_top.set_xticks(list(month_weeks.keys()))
-    ax1_top.set_xticklabels(list(month_weeks.values()), fontsize=10)
-    
-    # Add current week marker
-    ax1.axvline(x=timeline_params['current_week'], color='red', linestyle='--', linewidth=2, 
-               label=f"Today: Week {timeline_params['current_week']} (Feb 14)")
-    
-    # Create legend for size categories
-    legend_elements = [plt.Rectangle((0, 0), 1, 1, color=color, alpha=0.8, label=category)
-                      for category, color in color_map.items()]
-    legend_elements.append(plt.Line2D([0], [0], color='green', marker='|', markersize=10, 
-                                     label='Service Goes Live', linestyle='None', markeredgewidth=2))
-    legend_elements.append(plt.Line2D([0], [0], color='red', linestyle='--', label='Today (Week 7)'))
-    
-    ax1.legend(handles=legend_elements, loc='upper right', fontsize=9)
-    
-    print(f"   ✅ Gantt chart created with {len(gantt_data)} properties")
-    
-    # ==========================================
-    # CHART 2: CUMULATIVE UNITS TIMELINE
-    # ==========================================
-    
-    print("2. Creating Cumulative Units Timeline:")
+    # Create cumulative enrollment chart matching original format
+    fig2, ax2 = plt.subplots(figsize=(14, 8))
     
     # Plot cumulative enrollment
     ax2.plot(cumulative_df['Week'], cumulative_df['Cumulative_Units'], 
-             linewidth=4, color='#2E86AB', marker='o', markersize=6, markevery=5)
+             linewidth=4, color='#2E86AB', marker='o', markersize=4)
     
     # Fill area under curve
     ax2.fill_between(cumulative_df['Week'], cumulative_df['Cumulative_Units'], 
-                     alpha=0.3, color='#2E86AB', label='Enrollment Progress')
+                     alpha=0.3, color='lightblue', label='Enrollment Progress')
     
-    # Add milestone markers
-    milestones = [
-        (25, 1589, 'Week 25\n1,589 units'),
-        (50, 3179, 'Week 35\n3,179 units'), 
-        (75, 4769, 'Week 47\n4,769 units'),
-        (100, 6359, 'End: Week 52\n6,359 units')
-    ]
-    
-    for pct, target_units, label in milestones:
-        # Find closest week
-        target_week_data = cumulative_df[cumulative_df['Cumulative_Units'] >= target_units]
-        if not target_week_data.empty:
-            week = target_week_data['Week'].iloc[0]
-            units = target_week_data['Cumulative_Units'].iloc[0]
+    # Add milestone annotations
+    for pct in [25, 50, 75]:
+        target_units = int(portfolio_summary['tlw_units'] * pct / 100)
+        milestone_row = cumulative_df[cumulative_df['Cumulative_Units'] >= target_units]
+        if not milestone_row.empty:
+            week = milestone_row['Week'].iloc[0]
+            units = milestone_row['Cumulative_Units'].iloc[0]
             
             # Add milestone marker
             ax2.plot(week, units, marker='s', markersize=10, color='orange', markeredgecolor='black')
             
-            # Add label box
-            bbox_props = dict(boxstyle="round,pad=0.3", facecolor='yellow', alpha=0.7)
-            ax2.annotate(label, (week, units), xytext=(10, 10), textcoords='offset points',
-                        fontsize=10, fontweight='bold', bbox=bbox_props)
+            # Add label
+            ax2.annotate(f'Week {week}\n{units:,} units', (week, units), 
+                        xytext=(10, 10), textcoords='offset points',
+                        fontsize=10, fontweight='bold', 
+                        bbox=dict(boxstyle="round,pad=0.3", facecolor='yellow', alpha=0.8))
     
-    # Add percentage reference lines
-    total_units = portfolio_summary['tlw_units']
-    percentage_lines = [0.25, 0.50, 0.75, 1.0]
-    colors = ['orange', 'gold', 'lightgreen', 'green']
+    # Add final point
+    final_week = cumulative_df['Week'].max()
+    final_units = cumulative_df['Cumulative_Units'].max()
+    ax2.annotate(f'End: Week {final_week}\n{final_units:,} units', 
+                (final_week, final_units), 
+                xytext=(-50, 10), textcoords='offset points',
+                fontsize=10, fontweight='bold',
+                bbox=dict(boxstyle="round,pad=0.3", facecolor='lightgreen', alpha=0.8))
     
-    for i, pct in enumerate(percentage_lines):
-        target_units = total_units * pct
-        ax2.axhline(y=target_units, color=colors[i], linestyle=':', alpha=0.7, linewidth=2)
-        ax2.text(timeline_params['rollout_end_week'] + 0.5, target_units, 
-                f'{int(pct*100)}% ({int(target_units):,} units)', 
-                va='center', fontsize=10, color=colors[i], fontweight='bold')
+    # Add milestone reference lines with colors
+    milestone_colors = ['#FF6B6B', '#4ECDC4', '#45B7D1']  # Red, Teal, Blue
+    milestone_labels = []
+    for i, pct in enumerate([25, 50, 75]):
+        target_units = portfolio_summary['tlw_units'] * pct / 100
+        color = milestone_colors[i]
+        ax2.axhline(y=target_units, color=color, linestyle='--', alpha=0.8, linewidth=2)
+        milestone_labels.append(f'{pct}% Milestone ({int(target_units):,} units)')
     
-    # Customize cumulative chart
+    # Customize chart
     ax2.set_xlabel('Timeline - April to December 2026 (Week 15 to 52)', fontsize=12)
     ax2.set_ylabel('Cumulative Apartments Enrolled', fontsize=12)
-    ax2.set_title(f'{total_units:,} Apartment Units Timeline (April-December)', fontsize=14, fontweight='bold')
+    ax2.set_title(f'{portfolio_summary["tlw_units"]:,} Apartment Units Timeline (April-December)', 
+                  fontsize=14, fontweight='bold')
     ax2.grid(True, alpha=0.3)
-    ax2.set_xlim(timeline_params['rollout_start_week'] - 1, timeline_params['rollout_end_week'] + 2)
-    ax2.set_ylim(0, total_units * 1.1)
+    ax2.set_xlim(timeline_params['rollout_start_week'] - 1, 52 + 2)
+    ax2.set_ylim(0, portfolio_summary['tlw_units'] * 1.05)
     
     # Add current week marker
-    ax2.axvline(x=timeline_params['current_week'], color='red', linestyle='--', linewidth=2)
-    ax2.text(timeline_params['current_week'], total_units * 0.1, 'Start: Week 15\n70 units', 
-             ha='center', bbox=dict(boxstyle="round,pad=0.3", facecolor='lightblue', alpha=0.7),
-             fontsize=10, fontweight='bold')
+    ax2.axvline(x=timeline_params['current_week'], color='red', linestyle='-', linewidth=2, 
+               label='Today: Week 7 (Feb 15)')
     
-    # Add legend for cumulative chart
-    legend_elements2 = [
-        plt.Line2D([0], [0], color='#2E86AB', linewidth=4, label='Cumulative Apartments Enrolled'),
-        plt.Line2D([0], [0], color='orange', marker='s', markersize=8, label='Milestone Markers', linestyle='None'),
-        plt.Line2D([0], [0], color='red', linestyle='--', label='Today (Week 7)')
-    ]
-    ax2.legend(handles=legend_elements2, loc='upper left', fontsize=10)
+    # Create legend with milestone colors
+    legend_elements = [plt.Line2D([0], [0], color='#2E86AB', linewidth=4, label='Enrollment Progress')]
+    legend_elements.append(plt.Line2D([0], [0], color='red', linewidth=2, label='Today: Week 7 (Feb 15)'))
+    for i, (pct, color) in enumerate(zip([25, 50, 75], milestone_colors)):
+        target_units = int(portfolio_summary['tlw_units'] * pct / 100)
+        legend_elements.append(plt.Line2D([0], [0], color=color, linestyle='--', linewidth=2, 
+                                        label=f'{pct}% Target ({target_units:,} units)'))
     
-    print(f"   ✅ Cumulative timeline created showing progression to {total_units:,} units")
+    ax2.legend(handles=legend_elements, loc='upper left', fontsize=10)
     
-    # Adjust layout and display
     plt.tight_layout()
-    plt.subplots_adjust(top=0.93)
+    plt.show()
+    
+    print(f"✅ Weekly cumulative enrollment graph generated successfully!")
+    
+    print("\n\nPHASE 4: PROPERTY ENROLLMENT GANTT CHART")
+    print("="*80)
+    
+    # Display property schedule table first
+    print("PROPERTY ENROLLMENT SCHEDULE:")
+    print("-" * 95)
+    print(f"{'Property':<12} {'Units':<8} {'Start':<12} {'End':<12} {'Duration':<10} {'Weeks':<10}")
+    print("-" * 95)
+    
+    # Prepare data for Gantt chart
+    properties = []
+    start_weeks = []
+    durations_weeks = []
+    units = []
+    colors = []
+    
+    # Color palette for different property sizes
+    color_map = {
+        'Large (400+ units)': '#FF6B6B',     # Red
+        'Medium (200-399 units)': '#4ECDC4',  # Teal  
+        'Small (100-199 units)': '#45B7D1',   # Blue
+        'Micro (<100 units)': '#96CEB4'       # Green
+    }
+    
+    for _, row in rollout_df.iterrows():
+        prop_name = row['Property']
+        prop_units = row['Units']
+        week_start = row['Week']
+        
+        # Calculate duration based on property size (1-3 weeks)
+        if prop_units >= 400:
+            duration_weeks = 3
+            category = 'Large (400+ units)'
+        elif prop_units >= 200:
+            duration_weeks = 2
+            category = 'Medium (200-399 units)'  
+        elif prop_units >= 100:
+            duration_weeks = 2
+            category = 'Small (100-199 units)'
+        else:
+            duration_weeks = 1
+            category = 'Micro (<100 units)'
+        
+        # Convert week to month name
+        start_month = "April" if week_start <= 18 else \
+                     "May" if week_start <= 22 else \
+                     "June" if week_start <= 26 else \
+                     "July" if week_start <= 31 else \
+                     "August" if week_start <= 35 else \
+                     "September" if week_start <= 39 else \
+                     "October" if week_start <= 44 else \
+                     "November" if week_start <= 48 else "December"
+        
+        end_week = week_start + duration_weeks - 1
+        end_month = "April" if end_week <= 18 else \
+                   "May" if end_week <= 22 else \
+                   "June" if end_week <= 26 else \
+                   "July" if end_week <= 31 else \
+                   "August" if end_week <= 35 else \
+                   "September" if end_week <= 39 else \
+                   "October" if end_week <= 44 else \
+                   "November" if end_week <= 48 else "December"
+        
+        properties.append(prop_name)
+        start_weeks.append(week_start)
+        durations_weeks.append(duration_weeks)
+        units.append(prop_units)
+        colors.append(color_map[category])
+        
+        print(f"{prop_name:<12} {prop_units:<8} {start_month:<12} {end_month:<12} {duration_weeks:<10} {duration_weeks:<10}")
+    
+    print("-" * 95)
+    
+    # Create Gantt chart with larger figure size
+    fig, ax = plt.subplots(figsize=(19, max(12, len(properties) * 0.5)))
+    
+    # Create horizontal bars
+    y_positions = range(len(properties))
+    bars = ax.barh(y_positions, durations_weeks, left=start_weeks, 
+                   color=colors, alpha=0.8, height=0.6)
+    
+    # Add unit count labels on bars
+    for i, (bar, unit_count) in enumerate(zip(bars, units)):
+        width = bar.get_width()
+        x_pos = bar.get_x() + width / 2
+        y_pos = bar.get_y() + bar.get_height() / 2
+        
+        # Add unit count in the middle of the bar
+        ax.text(x_pos, y_pos, f'{unit_count} units', 
+                ha='center', va='center', fontweight='bold', fontsize=9,
+                color='white' if width > 3 else 'black')
+        
+        # Add week range at the end of the bar
+        end_week = start_weeks[i] + durations_weeks[i] - 1
+        ax.text(end_week + 2, y_pos, f'W{start_weeks[i]}-{end_week}', 
+                ha='left', va='center', fontsize=8, fontweight='bold')
+    
+    # Customize chart
+    ax.set_yticks(y_positions)
+    ax.set_yticklabels(properties)
+    ax.set_xlabel('Timeline - April to December 2026 (Week Numbers)', fontweight='bold', fontsize=12)
+    ax.set_ylabel('Properties', fontweight='bold')
+    fig.suptitle('TLW Property Enrollment Schedule - Gantt Chart\nProperty-by-Property Timeline', 
+                fontsize=16, fontweight='bold', y=0.95)
+    
+    # Add month boundaries
+    months = ['April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
+    month_start_weeks = [15, 19, 23, 27, 31, 35, 39, 44, 48]
+    
+    for i, (month, week) in enumerate(zip(months, month_start_weeks)):
+        ax.axvline(x=week, color='gray', linestyle='--', alpha=0.5)
+        ax.text(week + 1, len(properties), month, 
+               rotation=45, ha='left', va='bottom', fontsize=9, fontweight='bold')
+    
+    # Add Today's week marker
+    today_week = 7  # Feb 15, 2026
+    ax.axvline(x=today_week, color='red', linestyle='-', linewidth=2, alpha=0.8, 
+              label=f'Today (Week {today_week})')
+    
+    # Format x-axis
+    ax.set_xlim(5, 57)
+    
+    # Add grid
+    ax.grid(True, alpha=0.3, axis='both')
+    ax.set_axisbelow(True)
+    
+    # Create legend for property sizes
+    legend_elements = []
+    for category, color in color_map.items():
+        count = sum(1 for c in colors if c == color)
+        legend_elements.append(plt.Rectangle((0,0),1,1, facecolor=color, alpha=0.8, 
+                                           label=f'{category} ({count} properties)'))
+    
+    # Add today marker to legend
+    legend_elements.append(plt.Line2D([0], [0], color='red', linewidth=2, 
+                                    label=f'Today: Week {today_week} (Feb 15)'))
+    
+    ax.legend(handles=legend_elements, loc='upper left', bbox_to_anchor=(0, 1))
+    
+    plt.subplots_adjust(bottom=0.18, top=0.85, left=0.08, right=0.95)
     plt.show()
     
     # Summary statistics
-    print(f"\n3. VISUALIZATION SUMMARY:")
-    print("   " + "="*40)
-    print(f"   Timeline: Week {timeline_params['rollout_start_week']} to {rollout_df['Service_End_Week'].max()}")
-    print(f"   Properties: {len(rollout_df)}")
-    print(f"   Total Units: {portfolio_summary['tlw_units']:,}")
-    print(f"   Peak Week: Week {cumulative_df.loc[cumulative_df['Cumulative_Units'].idxmax(), 'Week']}")
-    print(f"   Completion: Week {rollout_df['Service_End_Week'].max()}")
-    print("   ✅ Both visualizations generated successfully!")
+    total_properties = len(properties)
+    total_units_gantt = sum(units)
+    earliest_start = min(start_weeks)
+    latest_end = max([start + duration for start, duration in zip(start_weeks, durations_weeks)])
     
-    return fig
+    print(f"\nGANTT CHART SUMMARY:")
+    print("-" * 50)
+    print(f"Total properties: {total_properties}")
+    print(f"Total units: {total_units_gantt:,}")
+    print(f"Timeline span: Week {earliest_start} to Week {latest_end-1}")
+    print(f"Total duration: {latest_end - earliest_start} weeks")
+    print(f"Average units per property: {total_units_gantt/total_properties:,.0f}")
+    
+    # Show property size distribution
+    print(f"\nPROPERTY SIZE DISTRIBUTION:")
+    print("-" * 50)
+    for category, color in color_map.items():
+        count = sum(1 for c in colors if c == color)
+        category_units = sum(u for u, c in zip(units, colors) if c == color)
+        if count > 0:
+            print(f"{category}: {count} properties, {category_units:,} units")
+    
+    print(f"\n✅ Property Gantt chart generated successfully!")
+    
+    return fig2, fig
 
 def main():
     """
@@ -827,7 +826,7 @@ if __name__ == "__main__":
         excluded_df, tlw_eligible_df, portfolio_summary = prepare_tlw_portfolio(working_df)
         
         # Calculate TLW rollout timeline
-        enhanced_df, rollout_df, cumulative_df, timeline_params = calculate_tlw_rollout_timeline(tlw_eligible_df, portfolio_summary)
+        rollout_df, cumulative_df, timeline_params = calculate_tlw_rollout_timeline(tlw_eligible_df, portfolio_summary)
         
         # Create rollout visualizations
         rollout_fig = visualize_tlw_rollout_timeline(rollout_df, cumulative_df, timeline_params, portfolio_summary)
