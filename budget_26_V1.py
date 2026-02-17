@@ -325,25 +325,21 @@ try:
         ax.barh(i, data['duration'], left=data['start'], 
                color=data['color'], alpha=0.7, edgecolor='black', linewidth=0.5)
         
-        # Add property name and unit count inside the bar
-        ax.text(data['start'] + data['duration']/2, i, 
-               f"{data['property']}\n{data['units']} units", 
-               ha='center', va='center', fontsize=9, weight='bold')
-        
-        # Add week range to the right side of the bar
+        # Add property name, unit count, and week range as annotation
         if data['duration'] > 1:
             week_range = f"W{data['start']}-{data['end']}"
         else:
             week_range = f"W{data['end']}"
             
-        ax.text(data['end'] + 0.5, i, week_range, 
-               ha='left', va='center', fontsize=8, weight='bold', color='darkblue')
+        ax.text(data['start'] + data['duration']/2, i, 
+               f"{data['property']}\n{data['units']} units\n{week_range}", 
+               ha='center', va='center', fontsize=8, weight='bold')
     
     # Customize Gantt chart
-    ax.set_xlabel('Timeline - April to December 2026 (Week Numbers)', fontsize=12, pad=15)
+    ax.set_xlabel('Timeline - April to December 2026 (Week Numbers)', fontsize=12)
     ax.set_ylabel('Properties', fontsize=12)
-    ax.set_title('TLW PROPERTY ENROLLMENT SCHEDULE - GANTT CHART\nProperty-by-Property Timeline (6,359 Units from 26 Properties)', 
-                fontsize=14, weight='bold', pad=15)
+    ax.set_title('TLW Property Enrollment Schedule - Gantt Chart\nProperty-by-Property Timeline', 
+                fontsize=16, weight='bold', pad=20)
     
     # Set y-axis labels
     property_labels = [data['property'] for data in gantt_data]
@@ -353,16 +349,16 @@ try:
     # Add grid and formatting
     ax.grid(True, alpha=0.3, axis='x')
     ax.grid(True, alpha=0.2, axis='y')  # Add horizontal grid lines
-    ax.set_xlim(14, 54)  # Extended to accommodate week range labels
+    ax.set_xlim(14, 52)
     
-    # Add legend for property sizes (moved to upper left)
+    # Add legend for property sizes
     legend_elements = [
         plt.Rectangle((0,0),1,1, facecolor='lightcoral', alpha=0.7, label='Large (400+ units)'),
         plt.Rectangle((0,0),1,1, facecolor='lightblue', alpha=0.7, label='Medium (200-399 units)'),
         plt.Rectangle((0,0),1,1, facecolor='lightgreen', alpha=0.7, label='Small (100-199 units)'),
         plt.Rectangle((0,0),1,1, facecolor='lightyellow', alpha=0.7, label='Micro (<100 units)')
     ]
-    ax.legend(handles=legend_elements, loc='upper left', bbox_to_anchor=(0.02, 0.98), fontsize=10)
+    ax.legend(handles=legend_elements, loc='upper right')
     
     # Add current week indicator
     current_week = 7  # February 16, 2026
