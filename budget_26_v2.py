@@ -100,6 +100,56 @@ try:
     total_properties = len(property_summary_all)
     total_apartments = property_summary_all['Apartment_Count'].sum()
     print(f"{'TOTAL':<6} {total_properties} Properties{'':<6} {total_apartments:,}")
+
+    # PART 1: EST_RENT SUMMARY BY PROPERTY (TABLE + PARETO)
+    print(f"\n✅ PART 1 SUMMARY - TOTAL EST_RENT BY PROPERTY:")
+    est_rent_summary = main_df.groupby('Property', as_index=False)['est_rent'].sum()
+    est_rent_summary = est_rent_summary.sort_values('est_rent', ascending=False).reset_index(drop=True)
+    est_rent_total = est_rent_summary['est_rent'].sum()
+    est_rent_summary['Pct_Total'] = (est_rent_summary['est_rent'] / est_rent_total) * 100
+    est_rent_summary['Cum_Pct'] = est_rent_summary['Pct_Total'].cumsum()
+
+    print("-" * 90)
+    print(f"{'Count':<6} {'Property':<12} {'Total_Est_Rent':<18} {'Pct_Total':<12} {'Cum_Pct':<10}")
+    print("-" * 90)
+    for i, row in est_rent_summary.iterrows():
+        print(
+            f"{i + 1:<6} "
+            f"{row['Property']:<12} "
+            f"${row['est_rent']:>15,.2f} "
+            f"{row['Pct_Total']:>10.2f}% "
+            f"{row['Cum_Pct']:>9.2f}%"
+        )
+    print("-" * 90)
+    print(f"{'TOTAL':<6} {'':<12} ${est_rent_total:>15,.2f} {100:>10.2f}% {100:>9.2f}%")
+
+    # Pareto chart for total est_rent by property
+    import matplotlib.pyplot as plt
+
+    fig1, ax1 = plt.subplots(figsize=(14, 8))
+    bars = ax1.bar(est_rent_summary['Property'], est_rent_summary['est_rent'], color='steelblue', alpha=0.8)
+    ax1.set_ylabel('Total Est Rent (USD)', fontsize=12)
+    ax1.set_xlabel('Property', fontsize=12)
+    ax1.set_title('Total Est Rent by Property (Pareto)', fontsize=14, weight='bold')
+    ax1.tick_params(axis='x', rotation=45)
+    ax1.grid(True, axis='y', alpha=0.3)
+
+    # Format y-axis as USD
+    from matplotlib.ticker import FuncFormatter
+    ax1.yaxis.set_major_formatter(FuncFormatter(lambda x, _: f'${x:,.0f}'))
+
+    # Add value labels on top of each bar
+    ax1.bar_label(bars, labels=[f"${v:,.0f}" for v in est_rent_summary['est_rent']],
+                  padding=3, fontsize=8, rotation=90)
+
+    ax2 = ax1.twinx()
+    ax2.plot(est_rent_summary['Property'], est_rent_summary['Cum_Pct'], color='darkred', marker='o')
+    ax2.set_ylabel('Cumulative % of Total Est Rent', fontsize=12)
+    ax2.set_ylim(0, 110)
+    ax2.axhline(80, color='gray', linestyle='--', alpha=0.6)
+
+    plt.tight_layout()
+    plt.show()
     
     # PART 2: ROLLOUT TIMELINE AND GANTT
     print(f"\n{'='*60}")
@@ -385,6 +435,163 @@ try:
     
     plt.tight_layout()
     plt.show()
+
+    # PRELIMINARY: Calculate tlw_flat and tlw_adj for all rollout units to use in revenue timeline
+    temp_tlw_flat = np.zeros(len(main_df))
+    temp_tlw_flat[main_df['rollout'] == True] = 15.0
+
+    temp_tlw_adj = np.zeros(len(main_df))
+    for prop in main_df['Property'].unique():
+        prop_mask = (main_df['Property'] == prop) & (main_df['rollout'] == True)
+        if prop_mask.sum() > 0:
+            avg_sqft = main_df.loc[prop_mask, 'SQFT'].mean()
+            temp_tlw_adj[prop_mask] = (main_df.loc[prop_mask, 'SQFT'] * 15.0 / avg_sqft)
+
+    # TLW REVENUE TIMELINE (MONTHLY BASED ON ROLLOUT COMPLETIONS)
+    print(f"\n✅ TLW MONTHLY REVENUE TIMELINE (FLAT vs ADJUSTED):")
+    
+    # Map weeks to months (April = 4, May = 5, ..., December = 12)
+    weeks_to_month = {
+        14: 4, 15: 4, 16: 4, 17: 4, 18: 5, 19: 5, 20: 5, 21: 5, 22: 6,
+        23: 6, 24: 6, 25: 6, 26: 7, 27: 7, 28: 7, 29: 7, 30: 8,
+        31: 8, 32: 8, 33: 8, 34: 9, 35: 9, 36: 9, 37: 9, 38: 10,
+        39: 10, 40: 10, 41: 10, 42: 11, 43: 11, 44: 11, 45: 11, 46: 12,
+        47: 12, 48: 12, 49: 12, 50: 12, 51: 12, 52: 12
+    }
+
+    # Calculate monthly revenue
+    monthly_revenue_flat = {m: 0.0 for m in range(4, 13)}
+    monthly_revenue_adj = {m: 0.0 for m in range(4, 13)}
+
+    for prop, completion_week in property_completions.items():
+        if prop in property_unit_counts:
+            month = weeks_to_month.get(completion_week, 0)
+            prop_mask = (main_df['Property'] == prop) & (main_df['rollout'] == True)
+            monthly_revenue_flat[month] += temp_tlw_flat[prop_mask].sum()
+            monthly_revenue_adj[month] += temp_tlw_adj[prop_mask].sum()
+
+    months = list(range(4, 13))
+    month_names = ['April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
+    revenue_flat_monthly = [monthly_revenue_flat[m] for m in months]
+    revenue_adj_monthly = [monthly_revenue_adj[m] for m in months]
+
+    cumulative_flat = np.cumsum(revenue_flat_monthly)
+    cumulative_adj = np.cumsum(revenue_adj_monthly)
+
+    fig_rev, ax_rev = plt.subplots(figsize=(14, 7))
+    ax_rev.plot(month_names, cumulative_flat, marker='o', linewidth=2.5, color='steelblue', label='Cumulative TLW Flat ($15/unit)', markersize=8)
+    ax_rev.plot(month_names, cumulative_adj, marker='s', linewidth=2.5, color='darkgreen', label='Cumulative TLW Adjusted (SQFT-based)', markersize=8)
+    ax_rev.set_xlabel('Month (2026)', fontsize=12)
+    ax_rev.set_ylabel('Cumulative Revenue (USD)', fontsize=12)
+    ax_rev.grid(True, alpha=0.3)
+
+    from matplotlib.ticker import FuncFormatter
+    ax_rev.yaxis.set_major_formatter(FuncFormatter(lambda x, _: f'${x:,.0f}'))
+
+    ax_rev.set_title('Expected TLW Monthly Cumulative Revenue During 2026 Rollout', fontsize=14, weight='bold')
+
+    # Add value labels on each point
+    for i, month in enumerate(month_names):
+        ax_rev.text(i, cumulative_flat[i], f'${cumulative_flat[i]:,.0f}', fontsize=8, ha='center', va='bottom', color='steelblue')
+        ax_rev.text(i, cumulative_adj[i], f'${cumulative_adj[i]:,.0f}', fontsize=8, ha='center', va='top', color='darkgreen')
+
+    ax_rev.legend(loc='upper left', fontsize=10)
+
+    plt.tight_layout()
+    plt.show()
+    
+    # TLW_ADJ RANGE PLOT WITH MODE MARKER BY PROPERTY
+    print(f"\n✅ TLW_ADJ RANGE PLOT WITH MODE MARKER BY PROPERTY:")
+    
+    # First, we need to calculate tlw_adj for all rollout units
+    main_df['tlw_adj_temp'] = 0.0
+    for prop in main_df['Property'].unique():
+        prop_mask = (main_df['Property'] == prop) & (main_df['rollout'] == True)
+        if prop_mask.sum() > 0:
+            avg_sqft = main_df.loc[prop_mask, 'SQFT'].mean()
+            main_df.loc[prop_mask, 'tlw_adj_temp'] = (main_df.loc[prop_mask, 'SQFT'] * 15.0 / avg_sqft)
+    
+    # Prepare data for range plot
+    rollout_properties_list = sorted(main_df[main_df['rollout'] == True]['Property'].unique())
+    
+    # Calculate min, max, mode, median for each property
+    ranges_data = []
+    for prop in rollout_properties_list:
+        prop_data = main_df[(main_df['Property'] == prop) & (main_df['rollout'] == True)]['tlw_adj_temp'].values
+        prop_data = prop_data[prop_data > 0]
+        
+        if len(prop_data) > 0:
+            min_val = np.min(prop_data)
+            max_val = np.max(prop_data)
+            median_val = np.median(prop_data)
+            
+            from scipy import stats
+            try:
+                mode_val = stats.mode(prop_data, keepdims=True).mode[0]
+            except:
+                mode_val = median_val
+            
+            ranges_data.append({
+                'property': prop,
+                'min': min_val,
+                'max': max_val,
+                'mode': mode_val,
+                'median': median_val
+            })
+    
+    # Create range plot
+    fig_range, ax_range = plt.subplots(figsize=(14, 10))
+    
+    y_pos = np.arange(len(ranges_data))
+    
+    for i, data in enumerate(ranges_data):
+        # Draw horizontal line from min to max
+        ax_range.plot([data['min'], data['max']], [i, i], 'o-', linewidth=2, markersize=6, color='steelblue', alpha=0.7)
+        
+        # Add mode marker (diamond)
+        ax_range.plot(data['mode'], i, 'D', markersize=10, color='darkgreen', markeredgecolor='black', markeredgewidth=1.5)
+    
+    ax_range.set_yticks(y_pos)
+    ax_range.set_yticklabels([d['property'] for d in ranges_data])
+    ax_range.set_xlabel('TLW Adjusted Rate (USD)', fontsize=12)
+    ax_range.set_ylabel('Property', fontsize=12)
+    ax_range.set_title('TLW Adjusted Rate Range by Property (Min—Max with Mode)', fontsize=14, weight='bold')
+    ax_range.grid(True, axis='x', alpha=0.3)
+    
+    from matplotlib.ticker import FuncFormatter
+    ax_range.xaxis.set_major_formatter(FuncFormatter(lambda x, _: f'${x:.2f}'))
+    
+    # Create custom legend
+    from matplotlib.lines import Line2D
+    legend_elements = [
+        Line2D([0], [0], color='steelblue', linewidth=2, marker='o', markersize=6, label='Min—Max Range'),
+        Line2D([0], [0], marker='D', color='w', markerfacecolor='darkgreen', markersize=10, markeredgecolor='black', markeredgewidth=1.5, label='Mode')
+    ]
+    ax_range.legend(handles=legend_elements, loc='lower right', fontsize=10)
+    
+    plt.tight_layout()
+    plt.show()
+    
+    # Summary statistics table
+    print(f"\n{'='*95}")
+    print(f"{'Property':<12} {'Min':<12} {'Mode':<12} {'Max':<12} {'Range':<12} {'Count':<8}")
+    print(f"{'='*95}")
+    
+    for data in ranges_data:
+        count = len(main_df[(main_df['Property'] == data['property']) & (main_df['rollout'] == True)])
+        range_val = data['max'] - data['min']
+        print(
+            f"{data['property']:<12} "
+            f"${data['min']:<11.2f} "
+            f"${data['mode']:<11.2f} "
+            f"${data['max']:<11.2f} "
+            f"${range_val:<11.2f} "
+            f"{count:<8}"
+        )
+    print(f"{'='*95}")
+    
+    # Drop temporary column
+    main_df.drop('tlw_adj_temp', axis=1, inplace=True)
     
     # PART 3: TLW PRICING CALCULATION
     print(f"\n{'='*60}")
