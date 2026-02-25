@@ -439,7 +439,7 @@ print(f"✅ STEP 5 COMPLETE - Coverage transition chart created")
 print(f"{'='*60}\n")
 
 # ============================================================================
-# STEP 6: SIMPLIFIED COVERAGE CHART (TLW vs HO4 with Data Labels)
+# STEP 6: SIMPLIFIED COVERAGE CHART (TLW vs Insurance with Data Labels)
 # ============================================================================
 
 print(f"\nSTEP 6: SIMPLIFIED COVERAGE CHART WITH DATA LABELS")
@@ -481,7 +481,7 @@ for i in range(len(units_totals_df)):
             ha='center', va='center', fontweight='bold', fontsize=10, color='black')
 
 # Formatting
-ax.set_title('Tenant Coverage Transition 2026-2027\nTLW vs HO4', 
+ax.set_title('Tenant Coverage Transition 2026-2027\nTLW vs Insurance', 
              fontsize=16, fontweight='bold', pad=20)
 ax.set_xlabel('', fontsize=12, fontweight='bold')
 ax.set_ylabel('', fontsize=12, fontweight='bold')
@@ -493,7 +493,7 @@ ax.grid(False)
 
 plt.tight_layout()
 
-simplified_chart_filename = 'tenant_coverage_tlw_ho4_simplified.png'
+simplified_chart_filename = 'tenant_coverage_tlw_insurance_simplified.png'
 plt.savefig(simplified_chart_filename, dpi=300, bbox_inches='tight', facecolor='white')
 plt.show()
 
@@ -585,8 +585,7 @@ row_labels = [
     'Captive Operating Costs',
     'Premium Taxes',
     'Compliance/Regulatory Buffer',
-    'Profit',
-    'Profit Margin'
+    'Profit'
 ]
 
 column_keys = [
@@ -599,8 +598,7 @@ column_keys = [
     'capt_op_cost',
     'prem_tax',
     'comp_buff',
-    'profit',
-    'profit_mar'
+    'profit'
 ]
 
 # Build table data with percentage rates in first column
@@ -614,32 +612,127 @@ rate_values = [
     f'{coc_rate*100:.1f}%',
     f'{prem_tax_rate*100:.1f}%',
     f'{buffer_rate*100:.1f}%',
-    '',  # Profit doesn't have a fixed rate
-    ''   # Profit margin is calculated
+    f'{profit_alex:.2f}%'  # Profit margin from Alex scenario
 ]
 
 for idx, (label, key, rate) in enumerate(zip(row_labels, column_keys, rate_values)):
     row = [label, rate]
     for month_data in budget_df.itertuples():
         value = getattr(month_data, key)
-        # Format profit margin as percentage
-        if key == 'profit_mar':
-            row.append(f'{value*100:.2f}%')
-        else:
-            row.append(f'${value:,.0f}')
+        row.append(f'${value:,.0f}')
     table_data.append(row)
 
-# Create figure
-fig, ax = plt.subplots(figsize=(16, 6))
-ax.axis('off')
+# Add accumulated rows
+# Calculate cumulative sums
+cumulative_gwp = budget_df['gwp'].cumsum()
+cumulative_profit = budget_df['profit'].cumsum()
+
+# Add Accumulated GWP row
+accum_gwp_row = ['Accumulated GWP', '']
+for value in cumulative_gwp:
+    accum_gwp_row.append(f'${value:,.0f}')
+table_data.append(accum_gwp_row)
+
+# Add Accumulated Profit row
+accum_profit_row = ['Accumulated Profit', '']
+for value in cumulative_profit:
+    accum_profit_row.append(f'${value:,.0f}')
+table_data.append(accum_profit_row)
+
+# Prepare units split table data
+units_split_labels = [
+    'New Contracts on TLW',
+    'New Contracts on Insurance',
+    'Old Contracts with Active Insurance',
+    'Old Contracts on TLW',
+    'Drag',
+    'Total'
+]
+
+units_split_keys = [
+    'new_tlw',
+    'new_Ins',
+    'old_ins',
+    'old_tlw',
+    'drag',
+    None  # Total will be calculated
+]
+
+# Calculate drag rate (what remains from old after active and tlw)
+drag_rate = 1.0 - active_rate - old_tlw_rate
+
+units_split_rates = [
+    f'{tlw_default_rate*100:.0f}%',
+    f'{(1-tlw_default_rate)*100:.0f}%',
+    f'{active_rate*100:.2f}%',
+    f'{old_tlw_rate*100:.2f}%',
+    f'{drag_rate*100:.2f}%',
+    ''  # Total has no rate
+]
+
+units_split_data = []
+for label, key, rate in zip(units_split_labels, units_split_keys, units_split_rates):
+    row = [label, rate]
+    if key is None:  # Total row
+        for month_data in units_totals_df.itertuples():
+            total = month_data.new_tlw + month_data.new_Ins + month_data.old_tlw + month_data.old_ins + month_data.drag
+            row.append(f'{total:,.0f}')
+    else:
+        for month_data in units_totals_df.itertuples():
+            value = getattr(month_data, key)
+            row.append(f'{value:,.0f}')
+    units_split_data.append(row)
+
+# Create figure with two subplots
+fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(16, 10))
+
+# ===== TOP TABLE: UNITS SPLIT =====
+ax1.axis('off')
+
+units_col_labels = ['Unit Split', '%'] + list(units_totals_df['Month'])
+
+units_table = ax1.table(cellText=units_split_data, colLabels=units_col_labels,
+                        cellLoc='right', loc='center',
+                        colWidths=[0.15, 0.04] + [0.065]*12)
+
+units_table.auto_set_font_size(False)
+units_table.set_fontsize(9)
+units_table.scale(1, 2)
+
+# Style the header row
+for i in range(len(units_col_labels)):
+    cell = units_table[(0, i)]
+    cell.set_facecolor('#4472C4')
+    cell.set_text_props(weight='bold', color='white')
+
+# Style the data rows
+for i in range(len(units_split_data)):
+    cell = units_table[(i+1, 0)]
+    cell.set_facecolor('#D9E2F3')
+    cell.set_text_props(weight='bold', ha='left')
+    
+    cell = units_table[(i+1, 1)]
+    cell.set_facecolor('#D9E2F3')
+    cell.set_text_props(weight='bold')
+    
+    # Color Total row differently
+    if i == len(units_split_data) - 1:  # Total row
+        for j in range(len(units_col_labels)):
+            cell = units_table[(i+1, j)]
+            if j >= 2:  # Data columns only
+                cell.set_facecolor('#A9D08E')
+                cell.set_text_props(weight='bold')
+
+# ===== BOTTOM TABLE: BUDGET P&L =====
+ax2.axis('off')
 
 # Column headers
-col_labels = ['Monthly', ''] + list(budget_df['Month'])
+col_labels = ['Monthly P&L', '%'] + list(budget_df['Month'])
 
 # Create table
-table = ax.table(cellText=table_data, colLabels=col_labels,
-                cellLoc='right', loc='center',
-                colWidths=[0.15, 0.04] + [0.065]*12)
+table = ax2.table(cellText=table_data, colLabels=col_labels,
+                  cellLoc='right', loc='center',
+                  colWidths=[0.15, 0.04] + [0.065]*12)
 
 table.auto_set_font_size(False)
 table.set_fontsize(9)
@@ -663,12 +756,20 @@ for i in range(len(table_data)):
     cell.set_facecolor('#D9E2F3')
     cell.set_text_props(weight='bold')
     
-    # Color profit rows differently
-    if i >= len(table_data) - 2:  # Profit and Profit Margin rows
+    # Color profit row differently
+    if i == len(row_labels) - 1:  # Profit row only
         for j in range(len(col_labels)):
             cell = table[(i+1, j)]
             if j >= 2:  # Data columns only
                 cell.set_facecolor('#F4B084')
+                cell.set_text_props(weight='bold')
+    
+    # Color accumulated rows differently
+    if i >= len(row_labels):  # Accumulated GWP and Accumulated Profit rows
+        for j in range(len(col_labels)):
+            cell = table[(i+1, j)]
+            if j >= 2:  # Data columns only
+                cell.set_facecolor('#A9D08E')
                 cell.set_text_props(weight='bold')
 
 plt.tight_layout()
@@ -684,206 +785,80 @@ print(f"✅ STEP 8 COMPLETE - Budget summary table graphic created")
 print(f"{'='*60}\n")
 
 # ============================================================================
-# STEP 9: ACCUMULATED BUDGET SUMMARY TABLE GRAPHIC
+# STEP 9: GWP & PROFIT CHART WITH DUAL AXES
 # ============================================================================
 
-print(f"\nSTEP 9: CREATING ACCUMULATED BUDGET SUMMARY TABLE")
+print(f"\nSTEP 9: CREATING GWP & PROFIT CHART")
 print(f"{'='*60}\n")
 
-# Create cumulative dataframes
-units_accum_df = units_totals_df.copy()
-budget_accum_df = budget_df.copy()
+# Calculate accumulated values
+cumulative_gwp = budget_df['gwp'].cumsum()
+cumulative_profit = budget_df['profit'].cumsum()
 
-# Calculate cumulative sums for relevant columns
-for col in ['new', 'old', 'new_tlw', 'new_Ins', 'old_ins', 'old_tlw', 'drag', 'tlw_total', 'total_ins']:
-    units_accum_df[col] = units_accum_df[col].cumsum()
+# Create figure with dual y-axes
+fig, ax1 = plt.subplots(figsize=(14, 8))
 
-for col in ['gwp', 'vac_drag', 'net_ear_p', 'exp_loss', 'ibnr', 'claim_admin', 
-            'capt_op_cost', 'prem_tax', 'comp_buff', 'profit']:
-    budget_accum_df[col] = budget_accum_df[col].cumsum()
+x_pos = np.arange(len(months))
 
-# Recalculate profit margin for cumulative
-budget_accum_df['profit_mar'] = budget_accum_df['profit'] / budget_accum_df['gwp']
+# Primary y-axis: Monthly GWP bar chart
+ax1.bar(x_pos, budget_df['gwp'], color='#4472C4', alpha=0.8, label='Gross Written Premium')
+ax1.set_xlabel('Month', fontsize=12, fontweight='bold')
+ax1.set_ylabel('Monthly GWP ($)', fontsize=12, fontweight='bold', color='#4472C4')
+ax1.tick_params(axis='y', labelcolor='#4472C4')
+ax1.set_xticks(x_pos)
+ax1.set_xticklabels(months, rotation=45, ha='right')
 
-# Calculate ratios for units table
-units_accum_df['tlw_ratio'] = (units_accum_df['tlw_total'] / 
-                                (units_accum_df['tlw_total'] + units_accum_df['total_ins'] + units_accum_df['drag']))
+# Add data labels on bars
+for i, (value, month) in enumerate(zip(budget_df['gwp'], months)):
+    ax1.text(i, value/2, f'${value:,.0f}', ha='center', va='center', 
+             fontweight='bold', fontsize=9, color='white')
+    ax1.text(i, value + 2000, month, ha='center', va='bottom', 
+             fontweight='bold', fontsize=8, color='black')
 
-# Create figure with more height for two tables
-fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(16, 10))
+# Secondary y-axis: Accumulated GWP and Profit lines
+ax2 = ax1.twinx()
 
-# ===== TABLE 1: ACCUMULATED PROPERTY SPLIT =====
-ax1.axis('off')
+# Plot accumulated GWP line
+ax2.plot(x_pos, cumulative_gwp, color='#C5504B', linewidth=3, 
+         marker='o', markersize=8, label='Gross Written Premium Acum.')
 
-# Prepare property split data
-prop_split_labels = [
-    'Unit Count Total Properties',
-    'New Contracts',
-    'Old Contracts'
-]
+# Plot accumulated Profit line  
+ax2.plot(x_pos, cumulative_profit, color='#A9D08E', linewidth=3, 
+         marker='o', markersize=8, label='Profit Acum.')
 
-prop_split_data = []
+ax2.set_ylabel('Accumulated ($)', fontsize=12, fontweight='bold', color='black')
+ax2.tick_params(axis='y', labelcolor='black')
 
-# Row 1: Total Units
-row = ['Unit Count Total Properties', '']
-for month_data in units_accum_df.itertuples():
-    total = month_data.tlw_total + month_data.total_ins + month_data.drag
-    row.append(f'{total:,.0f}')
-prop_split_data.append(row)
+# Add data labels for accumulated GWP (above line)
+for i, value in enumerate(cumulative_gwp):
+    ax2.text(i, value + 10000, f'${value:,.0f}', ha='center', va='bottom', 
+             fontweight='bold', fontsize=9, color='#C5504B')
 
-# Row 2: New Contracts
-row = ['New Contracts', '']
-for month_data in units_accum_df.itertuples():
-    row.append(f'{month_data.new:,.0f}')
-prop_split_data.append(row)
+# Add data labels for accumulated Profit (below line)
+for i, value in enumerate(cumulative_profit):
+    ax2.text(i, value - 10000, f'${value:,.0f}', ha='center', va='top', 
+             fontweight='bold', fontsize=9, color='#70A040')
 
-# Row 3: Old Contracts  
-row = ['Old Contracts', '']
-for month_data in units_accum_df.itertuples():
-    row.append(f'{month_data.old:,.0f}')
-prop_split_data.append(row)
+# Title
+plt.title('Gross Written Premium & Profit from TLW by Lease Contract Roll-over', 
+          fontsize=14, fontweight='bold', pad=20)
 
-# Add blank row
-prop_split_data.append(['', ''] + ['']*12)
+# Add legends
+lines1, labels1 = ax1.get_legend_handles_labels()
+lines2, labels2 = ax2.get_legend_handles_labels()
+ax1.legend(lines1 + lines2, labels1 + labels2, loc='upper left', fontsize=10)
 
-# Detailed breakdown rows
-row = ['New Contracts on TLW', '70%']
-for month_data in units_accum_df.itertuples():
-    row.append(f'{month_data.new_tlw:,.0f}')
-prop_split_data.append(row)
-
-row = ['New Contracts on HO4', '30%']
-for month_data in units_accum_df.itertuples():
-    row.append(f'{month_data.new_Ins:,.0f}')
-prop_split_data.append(row)
-
-# Add blank row
-prop_split_data.append(['', ''] + ['']*12)
-
-row = ['Old Contracts with Active HO4', f'{active_rate*100:.2f}%']
-for month_data in units_accum_df.itertuples():
-    row.append(f'{month_data.old_ins:,.0f}')
-prop_split_data.append(row)
-
-row = ['Old Contracts on TLW', f'{old_tlw_rate*100:.2f}%']
-for month_data in units_accum_df.itertuples():
-    row.append(f'{month_data.old_tlw:,.0f}')
-prop_split_data.append(row)
-
-row = ['Drag', '']
-for month_data in units_accum_df.itertuples():
-    row.append(f'{month_data.drag:,.0f}')
-prop_split_data.append(row)
-
-# Add blank rows
-prop_split_data.append(['', ''] + ['']*12)
-prop_split_data.append(['', ''] + ['']*12)
-
-# Summary rows
-row = ['TLW Total', '']
-for month_data in units_accum_df.itertuples():
-    row.append(f'{month_data.tlw_total:,.0f}')
-prop_split_data.append(row)
-
-row = ['HO4 Total', '']
-for month_data in units_accum_df.itertuples():
-    row.append(f'{month_data.total_ins:,.0f}')
-prop_split_data.append(row)
-
-row = ['Drag', '']
-for month_data in units_accum_df.itertuples():
-    row.append(f'{month_data.drag:,.0f}')
-prop_split_data.append(row)
-
-# Add blank row
-prop_split_data.append(['', ''] + ['']*12)
-
-# TLW total ratio
-row = ['TLW-total Ratio', '']
-for month_data in units_accum_df.itertuples():
-    row.append(f'{month_data.tlw_ratio*100:.2f}%')
-prop_split_data.append(row)
-
-col_labels1 = ['Acum. Property Split', ''] + list(budget_accum_df['Month'])
-
-table1 = ax1.table(cellText=prop_split_data, colLabels=col_labels1,
-                   cellLoc='right', loc='center',
-                   colWidths=[0.15, 0.04] + [0.065]*12)
-
-table1.auto_set_font_size(False)
-table1.set_fontsize(8)
-table1.scale(1, 1.5)
-
-# Style header
-for i in range(len(col_labels1)):
-    cell = table1[(0, i)]
-    cell.set_facecolor('#4472C4')
-    cell.set_text_props(weight='bold', color='white')
-
-# Style data rows
-for i in range(len(prop_split_data)):
-    cell = table1[(i+1, 0)]
-    cell.set_facecolor('#D9E2F3')
-    cell.set_text_props(weight='bold', ha='left')
-    cell = table1[(i+1, 1)]
-    cell.set_facecolor('#D9E2F3')
-    cell.set_text_props(weight='bold')
-
-# ===== TABLE 2: ACCUMULATED P&L =====
-ax2.axis('off')
-
-pnl_data = []
-for idx, (label, key, rate) in enumerate(zip(row_labels, column_keys, rate_values)):
-    row = [label, rate]
-    for month_data in budget_accum_df.itertuples():
-        value = getattr(month_data, key)
-        if key == 'profit_mar':
-            row.append(f'{value*100:.2f}%')
-        else:
-            row.append(f'${value:,.0f}')
-    pnl_data.append(row)
-
-col_labels2 = ['Acum P&L', ''] + list(budget_accum_df['Month'])
-
-table2 = ax2.table(cellText=pnl_data, colLabels=col_labels2,
-                   cellLoc='right', loc='center',
-                   colWidths=[0.15, 0.04] + [0.065]*12)
-
-table2.auto_set_font_size(False)
-table2.set_fontsize(8)
-table2.scale(1, 1.5)
-
-# Style header
-for i in range(len(col_labels2)):
-    cell = table2[(0, i)]
-    cell.set_facecolor('#4472C4')
-    cell.set_text_props(weight='bold', color='white')
-
-# Style data rows
-for i in range(len(pnl_data)):
-    cell = table2[(i+1, 0)]
-    cell.set_facecolor('#D9E2F3')
-    cell.set_text_props(weight='bold', ha='left')
-    cell = table2[(i+1, 1)]
-    cell.set_facecolor('#D9E2F3')
-    cell.set_text_props(weight='bold')
-    
-    # Highlight profit rows
-    if i >= len(pnl_data) - 2:
-        for j in range(len(col_labels2)):
-            cell = table2[(i+1, j)]
-            if j >= 2:
-                cell.set_facecolor('#F4B084')
-                cell.set_text_props(weight='bold')
+# Grid
+ax1.grid(True, alpha=0.3, axis='y')
 
 plt.tight_layout()
 
-accum_table_filename = 'budget_accumulated_summary.png'
-plt.savefig(accum_table_filename, dpi=300, bbox_inches='tight', facecolor='white')
+gwp_profit_chart_filename = 'gwp_profit_rollover_chart.png'
+plt.savefig(gwp_profit_chart_filename, dpi=300, bbox_inches='tight', facecolor='white')
 plt.show()
 
-print(f"✅ Accumulated budget summary created and saved as: {accum_table_filename}")
+print(f"✅ GWP & Profit chart created and saved as: {gwp_profit_chart_filename}")
 
 print(f"\n{'='*60}")
-print(f"✅ STEP 9 COMPLETE - Accumulated budget summary table created")
+print(f"✅ STEP 9 COMPLETE - GWP & Profit chart created")
 print(f"{'='*60}\n")
