@@ -111,7 +111,7 @@ compliance_alex = params_df.loc[12, 'Alex']
 profit_suggested = net_expected_premium_suggested + adjusted_loss_ratio_suggested + tpa_suggested + cac_suggested + coc_suggested + premium_taxes_suggested + capital_cost_suggested + compliance_suggested
 profit_alex = net_expected_premium_alex + adjusted_loss_ratio_alex + tpa_alex + cac_alex + coc_alex + premium_taxes_alex + capital_cost_alex + compliance_alex
 
-print(f"📋 PARAMETER SET: SUGGESTED vs ALEX SCENARIO")
+print(f"✅ PARAMETER SET: SUGGESTED vs ALEX SCENARIO")
 print(f"   (Waterfall % of GWP = 100%)")
 print(f"{'-'*70}")
 print(params_df.to_string(index=False))
@@ -122,7 +122,7 @@ print(f"\n{'PROFIT %':<35} {profit_suggested:>12.2f}%  {profit_alex:>12.2f}%")
 print(f"{'-'*70}")
 
 # Validation
-print(f"\n📊 PARAMETER VALIDATION:")
+print(f"\n✅ PARAMETER VALIDATION:")
 print(f"   ✅ Suggested scenario profit: {profit_suggested:.2f}%")
 print(f"   ✅ Alex scenario profit: {profit_alex:.2f}%")
 print(f"   ✅ Using ALEX scenario for model")
@@ -137,7 +137,7 @@ coc_rate = coc_alex / 100.0
 prem_tax_rate = premium_taxes_alex / 100.0
 buffer_rate = compliance_alex / 100.0
 
-print(f"\n📊 BUDGET RATES (Alex Scenario):")
+print(f"\n✅ BUDGET RATES (Alex Scenario):")
 print(f"   Vacancy Drag Rate: {vac_drag_rate:.4f}")
 print(f"   Expected Loss Rate: {exp_loss_rate:.4f}")
 print(f"   IBNR Rate: {ibnr_rate:.4f}")
@@ -200,7 +200,7 @@ print(f"   Total Properties: {len(properties_df)}")
 print(f"   Total Units: {properties_df['exp_count'].sum():,}")
 
 print(f"\n✅ STEP 1 Complete: Property dataframe created")
-print(f"\n📊 Properties DataFrame:")
+print(f"\n✅ Properties DataFrame:")
 print(properties_df.to_string(index=False))
 
 # Add totals row
@@ -212,7 +212,7 @@ print("="*50)
 total_properties = len(properties_df)
 total_units = properties_df['exp_count'].sum()
 
-print(f"\n📋 STEP 1 VALIDATION:")
+print(f"\n✅ STEP 1 VALIDATION:")
 print(f"   ✅ Properties loaded: {total_properties}")
 print(f"   ✅ Total units: {total_units:,}")
 print(f"   ✅ Dataframe created successfully")
@@ -242,7 +242,7 @@ for month_num, month in enumerate(months, start=1):
 
 print(f"✅ Created 24 columns (12 months × 2: new/old)")
 print(f"   Months: {months}")
-print(f"\n📊 Sample rows (first 3 properties, showing Apr-26 and Dec-26):")
+print(f"\n✅ Sample rows (first 3 properties, showing Apr-26 and Dec-26):")
 
 # Show sample data
 sample_cols = ['Property_Name', 'exp_count', 'Apr-26_new', 'Apr-26_old', 'Dec-26_new', 'Dec-26_old']
@@ -314,7 +314,7 @@ plt.show()
 print(f"✅ Chart generated and saved as: {chart_filename}")
 
 # Print summary table
-print(f"\n📊 ROLLOVER SUMMARY:")
+print(f"\n✅ ROLLOVER SUMMARY:")
 print(f"{'Month':<10} {'New Cumul':<12} {'Old Remains':<12} {'Total':<8}")
 print(f"{'-'*45}")
 for month, new, old in zip(months, cumulative_new, cumulative_old):
@@ -367,7 +367,7 @@ for i, month in enumerate(months):
 
 units_totals_df = pd.DataFrame(units_totals_data)
 
-print(f"📊 UNITS TOTALS DATAFRAME:")
+print(f"✅ UNITS TOTALS DATAFRAME:")
 print(units_totals_df.to_string(index=False))
 
 print(f"\n✅ STEP 4 VALIDATION:")
@@ -551,7 +551,7 @@ for i, row in units_totals_df.iterrows():
 
 budget_df = pd.DataFrame(budget_data)
 
-print(f"📊 MONTHLY BUDGET DATAFRAME:")
+print(f"✅ MONTHLY BUDGET DATAFRAME:")
 print(budget_df.to_string(index=False))
 
 print(f"\n✅ STEP 7 VALIDATION:")
@@ -584,7 +584,7 @@ row_labels = [
     'Claims Administration',
     'Captive Operating Costs',
     'Premium Taxes',
-    'Compliance/Regulatory Buffer',
+    'Compliance/Regulatory Buff',
     'Profit'
 ]
 
@@ -619,7 +619,7 @@ for idx, (label, key, rate) in enumerate(zip(row_labels, column_keys, rate_value
     row = [label, rate]
     for month_data in budget_df.itertuples():
         value = getattr(month_data, key)
-        row.append(f'${value:,.0f}')
+        row.append(f'${value:,.2f}')
     table_data.append(row)
 
 # Add accumulated rows
@@ -630,21 +630,21 @@ cumulative_profit = budget_df['profit'].cumsum()
 # Add Accumulated GWP row
 accum_gwp_row = ['Accumulated GWP', '']
 for value in cumulative_gwp:
-    accum_gwp_row.append(f'${value:,.0f}')
+    accum_gwp_row.append(f'${value:,.2f}')
 table_data.append(accum_gwp_row)
 
 # Add Accumulated Profit row
 accum_profit_row = ['Accumulated Profit', '']
 for value in cumulative_profit:
-    accum_profit_row.append(f'${value:,.0f}')
+    accum_profit_row.append(f'${value:,.2f}')
 table_data.append(accum_profit_row)
 
 # Prepare units split table data
 units_split_labels = [
-    'New Contracts on TLW',
-    'New Contracts on Insurance',
-    'Old Contracts with Active Insurance',
-    'Old Contracts on TLW',
+    'New on TLW',
+    'New on Insurance',
+    'Old Active Insurance',
+    'Old on TLW',
     'Drag',
     'Total'
 ]
@@ -692,8 +692,9 @@ ax1.axis('off')
 units_col_labels = ['Unit Split', '%'] + list(units_totals_df['Month'])
 
 units_table = ax1.table(cellText=units_split_data, colLabels=units_col_labels,
-                        cellLoc='right', loc='center',
-                        colWidths=[0.15, 0.04] + [0.065]*12)
+                        cellLoc='center', loc='center',
+                        colWidths=[0.18, 0.04] + [0.0615]*12,
+                        bbox=[0, 0, 1, 1])
 
 units_table.auto_set_font_size(False)
 units_table.set_fontsize(9)
@@ -731,8 +732,9 @@ col_labels = ['Monthly P&L', '%'] + list(budget_df['Month'])
 
 # Create table
 table = ax2.table(cellText=table_data, colLabels=col_labels,
-                  cellLoc='right', loc='center',
-                  colWidths=[0.15, 0.04] + [0.065]*12)
+                  cellLoc='center', loc='center',
+                  colWidths=[0.18, 0.04] + [0.0615]*12,
+                  bbox=[0, 0, 1, 1])
 
 table.auto_set_font_size(False)
 table.set_fontsize(9)
@@ -808,36 +810,47 @@ ax1.tick_params(axis='y', labelcolor='#4472C4')
 ax1.set_xticks(x_pos)
 ax1.set_xticklabels(months, rotation=45, ha='right')
 
+# Format primary y-axis with thousand separators
+ax1.yaxis.set_major_formatter(plt.FuncFormatter(lambda x, p: f'${x:,.2f}'))
+
 # Add data labels on bars
 for i, (value, month) in enumerate(zip(budget_df['gwp'], months)):
-    ax1.text(i, value/2, f'${value:,.0f}', ha='center', va='center', 
-             fontweight='bold', fontsize=9, color='white')
-    ax1.text(i, value + 2000, month, ha='center', va='bottom', 
-             fontweight='bold', fontsize=8, color='black')
+    ax1.text(i, value/2, f'${value:,.2f}', ha='center', va='center', 
+             fontweight='bold', fontsize=8, color='white')
+    # Month label on top of bar - closer to bar end
+    ax1.text(i, value + 500, month, ha='center', va='bottom', 
+             fontweight='bold', fontsize=7, color='black')
 
 # Secondary y-axis: Accumulated GWP and Profit lines
 ax2 = ax1.twinx()
 
 # Plot accumulated GWP line
 ax2.plot(x_pos, cumulative_gwp, color='#C5504B', linewidth=3, 
-         marker='o', markersize=8, label='Gross Written Premium Acum.')
+         marker='o', markersize=7, label='Gross Written Premium Acum.')
 
 # Plot accumulated Profit line  
 ax2.plot(x_pos, cumulative_profit, color='#A9D08E', linewidth=3, 
-         marker='o', markersize=8, label='Profit Acum.')
+         marker='o', markersize=7, label='Profit Acum.')
 
 ax2.set_ylabel('Accumulated ($)', fontsize=12, fontweight='bold', color='black')
 ax2.tick_params(axis='y', labelcolor='black')
 
-# Add data labels for accumulated GWP (above line)
-for i, value in enumerate(cumulative_gwp):
-    ax2.text(i, value + 10000, f'${value:,.0f}', ha='center', va='bottom', 
-             fontweight='bold', fontsize=9, color='#C5504B')
+# Format secondary y-axis with thousand separators
+ax2.yaxis.set_major_formatter(plt.FuncFormatter(lambda x, p: f'${x:,.2f}'))
 
-# Add data labels for accumulated Profit (below line)
+# Add data labels for accumulated GWP - positioned to avoid overlap
+for i, value in enumerate(cumulative_gwp):
+    # Alternate positioning slightly to reduce overlap
+    offset = 15000 if i % 2 == 0 else 18000
+    ax2.text(i, value + offset, f'${value:,.2f}', ha='center', va='bottom', 
+             fontweight='bold', fontsize=7, color='#C5504B')
+
+# Add data labels for accumulated Profit - positioned to avoid overlap
 for i, value in enumerate(cumulative_profit):
-    ax2.text(i, value - 10000, f'${value:,.0f}', ha='center', va='top', 
-             fontweight='bold', fontsize=9, color='#70A040')
+    # Position below the line with some offset
+    offset = 8000 if i % 2 == 0 else 5000
+    ax2.text(i, value - offset, f'${value:,.2f}', ha='center', va='top', 
+             fontweight='bold', fontsize=7, color='white')
 
 # Title
 plt.title('Gross Written Premium & Profit from TLW by Lease Contract Roll-over', 
@@ -851,6 +864,7 @@ ax1.legend(lines1 + lines2, labels1 + labels2, loc='upper left', fontsize=10)
 # Grid
 ax1.grid(True, alpha=0.3, axis='y')
 
+# Adjust layout to prevent label cutoff
 plt.tight_layout()
 
 gwp_profit_chart_filename = 'gwp_profit_rollover_chart.png'
