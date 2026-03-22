@@ -1,0 +1,47 @@
+{
+  "timestamp": "2026-03-22T17:03:01.089502",
+  "best_model": "Tuned DNN",
+  "all_models": [
+    {
+      "Model": "Tuned DNN",
+      "R\u00b2": 0.7737409000660735,
+      "RMSE ($)": 54451.0749170411,
+      "MAE ($)": 36957.476896537366,
+      "R\u00b2 Rank": 1.0,
+      "RMSE Rank": 1.0,
+      "MAE Rank": 1.0,
+      "Composite Rank": 1.0
+    },
+    {
+      "Model": "Baseline DNN",
+      "R\u00b2": 0.6411875512789493,
+      "RMSE ($)": 68570.47865580839,
+      "MAE ($)": 48530.6945251938,
+      "R\u00b2 Rank": 2.0,
+      "RMSE Rank": 2.0,
+      "MAE Rank": 2.0,
+      "Composite Rank": 2.0
+    },
+    {
+      "Model": "Multi Linear",
+      "R\u00b2": 0.6302508322913283,
+      "RMSE ($)": 69607.65971231497,
+      "MAE ($)": 50398.45423987788,
+      "R\u00b2 Rank": 3.0,
+      "RMSE Rank": 3.0,
+      "MAE Rank": 3.0,
+      "Composite Rank": 3.0
+    },
+    {
+      "Model": "Single Linear",
+      "R\u00b2": 0.45885918903846656,
+      "RMSE ($)": 84209.01241414454,
+      "MAE ($)": 62990.86530093759,
+      "R\u00b2 Rank": 4.0,
+      "RMSE Rank": 4.0,
+      "MAE Rank": 4.0,
+      "Composite Rank": 4.0
+    }
+  ],
+  "equation": "Deep Neural Network (Nonlinear transformation of 15 features)"
+}

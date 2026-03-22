@@ -915,13 +915,75 @@ if all_r2:
 	print(f"✓ Saved predicted vs actual scatter plots: {comparison_scatter_path.name}")
 
 	# ============================================================
-	# STEP 11: Generate Final Report
+	# STEP 11: Comprehensive Model Ranking (All Metrics)
 	# ============================================================
-	print("\n--- STEP 11: GENERATING FINAL REPORT ---")
-
-	# Determine best model
-	best_model = max(all_r2.keys(), key=lambda k: all_r2[k])
+	print("\n--- STEP 11: COMPREHENSIVE MODEL RANKING ---")
+	
+	# Create ranking dataframe
+	ranking_df = pd.DataFrame({
+		"Model": list(all_r2.keys()),
+		"R²": [all_r2[m] for m in all_r2.keys()],
+		"RMSE ($)": [all_rmse[m] for m in all_r2.keys()],
+		"MAE ($)": [all_mae[m] for m in all_r2.keys()],
+	})
+	
+	# Rank by each metric
+	ranking_df["R² Rank"] = ranking_df["R²"].rank(ascending=False)
+	ranking_df["RMSE Rank"] = ranking_df["RMSE ($)"].rank(ascending=True)  # Lower is better
+	ranking_df["MAE Rank"] = ranking_df["MAE ($)"].rank(ascending=True)    # Lower is better
+	
+	# Composite score (average rank across all metrics)
+	ranking_df["Composite Rank"] = (ranking_df["R² Rank"] + ranking_df["RMSE Rank"] + ranking_df["MAE Rank"]) / 3
+	ranking_df = ranking_df.sort_values("Composite Rank")
+	
+	print("\n=== MODEL RANKING BY ALL METRICS ===")
+	print(ranking_df.to_string(index=False))
+	
+	# Best model by composite score
+	best_model = ranking_df.iloc[0]["Model"]
 	best_r2 = all_r2[best_model]
+	best_rmse = all_rmse[best_model]
+	best_mae = all_mae[best_model]
+	
+	print(f"\n🏆 BEST MODEL (by Composite Score): {best_model}")
+	print(f"   R² = {best_r2:.6f}")
+	print(f"   RMSE = ${best_rmse:,.0f}")
+	print(f"   MAE = ${best_mae:,.0f}")
+	
+	# Extract equation for linear models
+	model_equation = ""
+	if best_model == "Single Linear" and sklearn_available:
+		model_equation = f"median_house_value = {lr_single.intercept_:,.2f} + {lr_single.coef_[median_income_idx]:.6f} × median_income"
+	elif best_model == "Multi Linear" and sklearn_available:
+		feature_names = X.columns.tolist()
+		equation_parts = [f"{lr_multi.intercept_:,.2f}"]
+		for feat, coef in zip(feature_names, lr_multi.coef_):
+			sign = "+" if coef >= 0 else "-"
+			equation_parts.append(f"{sign} {abs(coef):.6f} × {feat}")
+		model_equation = "median_house_value = " + " ".join(equation_parts)
+	elif "DNN" in best_model:
+		model_equation = f"Deep Neural Network (Nonlinear transformation of {X_test_scaled_cmp.shape[1]} features)"
+	
+	if model_equation:
+		print(f"\n📋 EQUATION/ARCHITECTURE:")
+		print(f"   {model_equation}")
+	
+	# Save ranking to JSON
+	ranking_json = {
+		"timestamp": datetime.now().isoformat(),
+		"best_model": best_model,
+		"all_models": ranking_df.to_dict(orient="records"),
+		"equation": model_equation,
+	}
+	ranking_json_path = BASE_DIR / "model_ranking.json"
+	with open(ranking_json_path, "w") as f:
+		json.dump(ranking_json, f, indent=2)
+	print(f"\n✓ Saved ranking details: {ranking_json_path.name}")
+
+	# ============================================================
+	# STEP 12: Generate Final Report
+	# ============================================================
+	print("\n--- STEP 12: GENERATING FINAL REPORT ---")
 
 	# Create markdown report
 	final_report = f"""# MSDS-534 Project 3 - Group 2 (Housing) - Final Analysis Report
@@ -946,6 +1008,36 @@ Complete pipeline analysis: Data Engineering → Baseline Linear Models → Deep
 
 	for model_name in all_r2.keys():
 		final_report += f"| {model_name} | {all_r2[model_name]:.6f} | {all_rmse[model_name]:,.0f} | {all_mae[model_name]:,.0f} |\n"
+
+	final_report += f"""
+---
+
+## Comprehensive Ranking (All Metrics Considered)
+
+**Best Model Overall:** {best_model}
+- **R² Score:** {best_r2:.6f}
+- **RMSE:** ${best_rmse:,.0f}
+- **MAE:** ${best_mae:,.0f}
+
+*Ranking determined by composite score across R², RMSE, and MAE metrics.*
+
+### Rank by Metric:
+
+**By R² (Accuracy):**
+"""
+	r2_sorted = ranking_df.sort_values("R²", ascending=False)
+	for i, row in r2_sorted.iterrows():
+		final_report += f"  {int(row['R² Rank'])}. {row['Model']}: {row['R²']:.6f}\n"
+	
+	final_report += "\n**By RMSE (Lower Errors):**\n"
+	rmse_sorted = ranking_df.sort_values("RMSE ($)", ascending=True)
+	for i, row in rmse_sorted.iterrows():
+		final_report += f"  {int(row['RMSE Rank'])}. {row['Model']}: ${row['RMSE ($)']:,.0f}\n"
+	
+	final_report += "\n**By MAE (Average Error):**\n"
+	mae_sorted = ranking_df.sort_values("MAE ($)", ascending=True)
+	for i, row in mae_sorted.iterrows():
+		final_report += f"  {int(row['MAE Rank'])}. {row['Model']}: ${row['MAE ($)']:,.0f}\n"
 
 	final_report += f"""
 ---
@@ -1090,37 +1182,13 @@ The complete pipeline demonstrates the progression from raw data through cleanin
 		f.write(final_report)
 
 	print(f"✓ Saved final report: {final_report_path.name}")
-
-	# Save comparison results to JSON
-	comparison_json = {
-		"timestamp": datetime.now().isoformat(),
-		"test_set_size": len(X_test_cmp),
-		"train_set_size": len(X_train_cmp) if X_train_cmp is not None else None,
-		"models": {
-			model_name: {
-				"r2": float(all_r2[model_name]),
-				"rmse": float(all_rmse[model_name]),
-				"mae": float(all_mae[model_name]),
-			}
-			for model_name in all_r2.keys()
-		},
-		"best_model": {
-			"name": best_model,
-			"r2": float(best_r2),
-		}
-	}
-
-	json_path = BASE_DIR / "assignment_comparison_results.json"
-	with open(json_path, "w") as f:
-		json.dump(comparison_json, f, indent=2)
-
-	print(f"✓ Saved comparison results: {json_path.name}")
+	print(f"✓ Saved ranking details: model_ranking.json")
 
 else:
 	print("\n⚠ No models available for comparison. Skipping visualization and report generation.")
 
 print("\n" + "="*70)
-print("STEP 12: ASSIGNMENT COMPLETE")
+print("STEP 13: ASSIGNMENT COMPLETE")
 print("="*70)
 print(f"\nFinal Outputs:")
 print(f"  - de_cleaning_handoff.md")
@@ -1130,7 +1198,7 @@ print(f"  - de_eda_boxplot.png")
 print(f"  - de_eda_target_distribution.png")
 if all_r2:
 	print(f"  - assignment_final_report.md")
-	print(f"  - assignment_comparison_results.json")
+	print(f"  - model_ranking.json")
 	print(f"  - comparison_metrics_bars.png")
 	print(f"  - comparison_predicted_vs_actual.png")
 print(f"\nReady for submission!")
