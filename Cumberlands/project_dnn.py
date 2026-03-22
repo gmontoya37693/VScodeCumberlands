@@ -1,5 +1,5 @@
 # ============================================================
-# Part 1 (Markdown Equivalent): DE Context and Objectives
+# STEP 1: DE Context and Objectives
 # 2026 Spring - Deep Learning (MSDS-534-M40)
 # Residency Day 2 - Project 3: Basic Regression and DNNs
 #
@@ -26,7 +26,7 @@
 # BMI-related preprocessing does not apply to this dataset.
 # ============================================================
 
-# Part 2 (Code Equivalent): Imports and Raw Data Inspection
+# STEP 2: Imports and Raw Data Inspection
 from datetime import datetime
 from pathlib import Path
 
@@ -222,7 +222,7 @@ missing_table = inspect_raw_data(raw_df)
 
 
 # ============================================================
-# Part 3 (Markdown Equivalent): Imputation Strategy Justification
+# STEP 3: Imputation Strategy Justification
 # We use median imputation for total_bedrooms because:
 # 1) The column is numeric and has missing values.
 # 2) Median is robust to outliers compared with mean.
@@ -289,7 +289,7 @@ print(cleaning_log_df)
 
 
 # ============================================================
-# Part 4 (Markdown Equivalent): Feature Engineering + Encoding Rationale
+# STEP 4: Feature Engineering + Encoding Rationale
 # Required Group 2 engineered features:
 # 1) Rooms_per_Household = total_rooms / households
 # 2) Bedrooms_per_Room = total_bedrooms / total_rooms
@@ -379,7 +379,7 @@ print("\nUpdated cleaning log:")
 print(cleaning_log_df)
 
 
-# Part 5 (Code Equivalent): Persist Handoff Report for Team Integration
+# STEP 5: Persist Handoff Report for Team Integration
 handoff_markdown = build_handoff_markdown(
 	raw_df=raw_df,
 	clean_df=clean_df,
@@ -398,7 +398,7 @@ HANDOFF_MD_PATH.write_text(handoff_markdown, encoding="utf-8")
 print(f"\nSaved markdown handoff report: {HANDOFF_MD_PATH}")
 
 
-# Part 6 (Code Equivalent): Lightweight Schema Validation for Handoff
+# STEP 6: Lightweight Schema Validation for Handoff
 def validate_handoff_schema(df: pd.DataFrame) -> bool:
 	issues = []
 
@@ -449,7 +449,7 @@ def validate_handoff_schema(df: pd.DataFrame) -> bool:
 schema_ok = validate_handoff_schema(clean_df)
 
 
-# Part 7 (Code Equivalent): DE Task 4 - EDA Summary Table (Mean and Std)
+# STEP 7: EDA Summary Table (Mean and Std)
 key_features_for_eda = [
 	"total_rooms",
 	"total_bedrooms",
@@ -472,7 +472,7 @@ print(eda_summary_df)
 
 
 # ============================================================
-# Part 7b (Code Equivalent): EDA Visualizations
+# STEP 8: EDA Visualizations
 # ============================================================
 
 # Configure matplotlib style
@@ -601,11 +601,11 @@ print(f"\nAppended EDA and BM-ready summary to: {HANDOFF_MD_PATH}")
 
 
 # ============================================================
-# Part 8 (Code Equivalent): Baseline Linear vs Tuned DNN Comparison
+# STEP 9: Baseline Linear vs Tuned DNN Comparison
 # ============================================================
 
 print("\n" + "="*70)
-print("BASELINE LINEAR MODELS vs DNN COMPARISON")
+print("STEP 9A: BASELINE LINEAR MODELS vs DNN COMPARISON")
 print("="*70)
 
 # Reload clean data for comparison
@@ -628,7 +628,7 @@ X_test_scaled_cmp = None
 # Train Linear Regression Models (if sklearn available)
 # ============================================================
 if sklearn_available:
-	print("\n--- LINEAR REGRESSION MODELS ---")
+	print("\n--- STEP 9B: LINEAR REGRESSION MODELS ---")
 	
 	# Train/test split (80/20, deterministic seed)
 	X_train_cmp, X_test_cmp, y_train_cmp, y_test_cmp = train_test_split(
@@ -681,7 +681,7 @@ if sklearn_available:
 	all_mae["Multi Linear"] = mae_multi
 
 else:
-	print("\n⚠ sklearn not available - using dummy test set for DNN evaluation")
+	print("\n⚠ STEP 9B: sklearn not available - using dummy test set for DNN evaluation")
 	# Create dummy train/test split using numpy only
 	n_samples = len(X)
 	n_test = int(0.2 * n_samples)
@@ -696,9 +696,9 @@ else:
 	print(f"Test set: {X_test_cmp.shape}")
 
 # ============================================================
-# Train/Evaluate DNN Models
+# STEP 9C: Train/Evaluate DNN Models
 # ============================================================
-print("\n--- DNN MODELS ---")
+print("\n--- STEP 9C: DNN MODELS ---")
 
 baseline_dnn_path = BASE_DIR / "baseline_linear_model.keras"
 tuned_dnn_path = BASE_DIR / "tuned_dnn_model.keras"
@@ -815,10 +815,10 @@ else:
 	print("[DNN Models] Keras/TensorFlow or test set not available.")
 
 # ============================================================
-# Generate Comparison Visualizations (if models available)
+# STEP 10: Generate Comparison Visualizations (if models available)
 # ============================================================
 if all_r2:
-	print("\n--- GENERATING VISUALIZATIONS ---")
+	print("\n--- STEP 10: GENERATING VISUALIZATIONS ---")
 
 	# 1. Bar chart: R², RMSE, MAE comparison
 	fig_bars, axes = plt.subplots(1, 3, figsize=(15, 5))
@@ -827,7 +827,10 @@ if all_r2:
 	x_pos = np.arange(len(model_names))
 
 	# R² scores
-	axes[0].bar(x_pos, [all_r2[m] for m in model_names], color="steelblue", alpha=0.7, edgecolor="black")
+	r2_values = [all_r2[m] for m in model_names]
+	axes[0].bar(x_pos, r2_values, color="steelblue", alpha=0.7, edgecolor="black")
+	for i, v in enumerate(r2_values):
+		axes[0].text(i, v + 0.01, f"{v:.4f}", ha="center", va="bottom", fontsize=9, fontweight="bold")
 	axes[0].set_title("R² Score (Higher is Better)", fontsize=12, fontweight="bold")
 	axes[0].set_ylabel("R²", fontsize=11)
 	axes[0].set_xticks(x_pos)
@@ -835,7 +838,11 @@ if all_r2:
 	axes[0].grid(True, alpha=0.3, axis="y")
 
 	# RMSE
-	axes[1].bar(x_pos, [all_rmse[m] for m in model_names], color="coral", alpha=0.7, edgecolor="black")
+	rmse_values = [all_rmse[m] for m in model_names]
+	axes[1].bar(x_pos, rmse_values, color="coral", alpha=0.7, edgecolor="black")
+	for i, v in enumerate(rmse_values):
+		axes[1].text(i, v + 1000, f"${v:,.0f}", ha="center", va="bottom", fontsize=9, fontweight="bold")
+	axes[1].text(0.98, 0.98, "Root Mean Squared Error", transform=axes[1].transAxes, fontsize=10, fontweight="bold", va="top", ha="right", bbox=dict(boxstyle="round", facecolor="wheat", alpha=0.5))
 	axes[1].set_title("RMSE (Lower is Better)", fontsize=12, fontweight="bold")
 	axes[1].set_ylabel("RMSE ($)", fontsize=11)
 	axes[1].set_xticks(x_pos)
@@ -843,7 +850,11 @@ if all_r2:
 	axes[1].grid(True, alpha=0.3, axis="y")
 
 	# MAE
-	axes[2].bar(x_pos, [all_mae[m] for m in model_names], color="lightgreen", alpha=0.7, edgecolor="black")
+	mae_values = [all_mae[m] for m in model_names]
+	axes[2].bar(x_pos, mae_values, color="lightgreen", alpha=0.7, edgecolor="black")
+	for i, v in enumerate(mae_values):
+		axes[2].text(i, v + 1000, f"${v:,.0f}", ha="center", va="bottom", fontsize=9, fontweight="bold")
+	axes[2].text(0.98, 0.98, "Mean Absolute Error", transform=axes[2].transAxes, fontsize=10, fontweight="bold", va="top", ha="right", bbox=dict(boxstyle="round", facecolor="lightcyan", alpha=0.5))
 	axes[2].set_title("MAE (Lower is Better)", fontsize=12, fontweight="bold")
 	axes[2].set_ylabel("MAE ($)", fontsize=11)
 	axes[2].set_xticks(x_pos)
@@ -880,6 +891,12 @@ if all_r2:
 		y_min, y_max = y_test_cmp.min(), y_test_cmp.max()
 		ax.plot([y_min, y_max], [y_min, y_max], "r--", linewidth=2, label="Perfect Fit")
 		
+		# Calculate and plot regression equation (actual vs predicted)
+		z = np.polyfit(y_test_cmp, y_pred, 1)  # Linear fit
+		p = np.poly1d(z)
+		y_line = p(y_test_cmp)
+		ax.plot(y_test_cmp, y_line, "b-", linewidth=2, label=f"Fit: y={z[0]:.3f}x+${z[1]:,.0f}")
+		
 		ax.set_xlabel("Actual Price ($)", fontsize=10)
 		ax.set_ylabel("Predicted Price ($)", fontsize=10)
 		ax.set_title(f"{model_name}\nR² = {all_r2[model_name]:.4f}", fontsize=11, fontweight="bold")
@@ -898,9 +915,9 @@ if all_r2:
 	print(f"✓ Saved predicted vs actual scatter plots: {comparison_scatter_path.name}")
 
 	# ============================================================
-	# Generate Final Report
+	# STEP 11: Generate Final Report
 	# ============================================================
-	print("\n--- GENERATING FINAL REPORT ---")
+	print("\n--- STEP 11: GENERATING FINAL REPORT ---")
 
 	# Determine best model
 	best_model = max(all_r2.keys(), key=lambda k: all_r2[k])
@@ -1103,7 +1120,7 @@ else:
 	print("\n⚠ No models available for comparison. Skipping visualization and report generation.")
 
 print("\n" + "="*70)
-print("ASSIGNMENT COMPLETE")
+print("STEP 12: ASSIGNMENT COMPLETE")
 print("="*70)
 print(f"\nFinal Outputs:")
 print(f"  - de_cleaning_handoff.md")

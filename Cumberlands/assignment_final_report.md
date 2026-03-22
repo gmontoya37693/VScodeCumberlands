@@ -1,6 +1,6 @@
 # MSDS-534 Project 3 - Group 2 (Housing) - Final Analysis Report
 
-**Generated:** 2026-03-21 20:47:02
+**Generated:** 2026-03-22 00:02:05
 
 ---
 
@@ -8,7 +8,7 @@
 
 Complete pipeline analysis: Data Engineering → Baseline Linear Models → Deep Neural Networks
 
-**Best Performing Model:** **Tuned DNN** (R² = 0.716490)
+**Best Performing Model:** **Tuned DNN** (R² = 0.768656)
 
 ---
 
@@ -18,8 +18,8 @@ Complete pipeline analysis: Data Engineering → Baseline Linear Models → Deep
 |-------|----------|----------|---------|
 | Single Linear | 0.458859 | 84,209 | 62,991 |
 | Multi Linear | 0.630251 | 69,608 | 50,398 |
-| Baseline DNN | 0.636160 | 69,049 | 48,881 |
-| Tuned DNN | 0.716490 | 60,952 | 41,580 |
+| Baseline DNN | 0.635422 | 69,119 | 48,931 |
+| Tuned DNN | 0.768656 | 55,060 | 37,602 |
 
 ---
 
@@ -59,14 +59,14 @@ Complete pipeline analysis: Data Engineering → Baseline Linear Models → Deep
 ## Phase 3: Deep Neural Networks
 
 **Baseline DNN**
-- R²: 0.636160
-- RMSE: $69,049
+- R²: 0.635422
+- RMSE: $69,119
 - Purpose: First DNN attempt, foundational network
 
 **Tuned DNN**
-- R²: 0.716490
-- RMSE: $60,952
-- Improvement over Baseline DNN: +0.080330
+- R²: 0.768656
+- RMSE: $55,060
+- Improvement over Baseline DNN: +0.133234
 - Purpose: Optimized architecture for better generalization
 
 ---
@@ -79,11 +79,11 @@ Complete pipeline analysis: Data Engineering → Baseline Linear Models → Deep
 
 2. **Best Performer Analysis**
    - Model: Tuned DNN
-   - R² Score: 0.716490 (explains 71.65% of variance)
+   - R² Score: 0.768656 (explains 76.87% of variance)
    - Recommendation: Use for housing price predictions
 
 3. **Remaining Error**
-   - Even best model leaves ~28.4% of variance unexplained
+   - Even best model leaves ~23.1% of variance unexplained
    - Suggests: Feature engineering opportunities, domain factors, market noise
 
 ---
