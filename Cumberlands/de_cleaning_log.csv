@@ -1,0 +1,7 @@
+step,column,action,before,after,note
+duplicates,all,drop_duplicates,20640,20640,Removed 0 duplicate rows.
+imputation,total_bedrooms,median_fillna,1214,0,Median used: 435.00
+feature_engineering,Rooms_per_Household,create_ratio,not_present,present,Created total_rooms / households.
+feature_engineering,Bedrooms_per_Room,create_ratio,not_present,present,Created total_bedrooms / total_rooms.
+feature_engineering,Rooms_per_Household|Bedrooms_per_Room,fillna_zero,0,0,Filled ratio NaN values caused by zero denominators with 0.0.
+encoding,ocean_proximity,one_hot_encode_drop_original,12,16,Applied one-hot encoding and dropped original categorical column.
