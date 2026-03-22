@@ -1,0 +1,118 @@
+GEL Generated Text Samples
+======================================================================
+
+--- Temperature 0.5 ---
+Alice could not and the little good face again, and every to be a seem to know white she cound replied.
+
+  `Well, I shall I never fan a tree with a large pitsed.'
+
+  `It was moment she could remember them it had finder the end of the playes.
+
+  `It must be a little good mad promes and make out her foot her seemed to herself, `and I'm not the sebould all the other said, and the proper of the court to her some of the room, and she daid it his she could not to the
+book, and she had a let mank it beginning very soon and the bittle
+good not to find a stear finutes the looked and soon made or two the mames of a great hand and the puppress was quite surting to it in a hear the eng of the same with an the treen the reppoor, and the stood way the roof of the other such a hurry with her head ore of the thing about again.
+
+  `It must be a little gordon was, and then they letsen she head down and the other say, and the she heard it anything to be in a little mares and she spoke, and the
+table to be a he
+
+--- Temperature 1.0 ---
+Alice very contert said more him bestures gote now?  The voice outing to be a really all the could over crossed.
+
+  `Why is a Course!' swould anseed in she reply sharphing!' And she the had ad in an of she read as enough, and only
+animple, she could not like a curioush, `you inur now!'  And she eap of largigsing.  `Deere
+poiren, as the trelarclest, and wild into a March brighted to crave the look to dras lergo, endore the ligtlencrha--Hengigun ruppoise!'
+
+  `Well, I pan a little mush get inte ching,' she growing or arough, and moures an im-
+   (Alice was some
+nowormont to yem about it, eyen the tail.
+
+  Ald,' said Alving, on a pime comelith, and the Mock Turtle dif, ruthing  quinking to hase,
+their was sumple a comfingo nerpening of the
+hearth; and all the pleased it then, (und the minute of the smalle?'
+
+  `But it's very draping of at the
+rese.  Theres all such a high picking, and she condined the rool
+iffortly: `you snow.  It SOVE be a little Caterpillar gaverembly asked in any musternared
+
+--- Temperature 1.5 ---
+Alice donn; solp loxuoned an; it is therembora,' Alice aid the heaght id a firmod wat, mofvone.'
+
+  Alice allait'l onereaXeg on bary:  suls,
+Yered of
+be doun slodby bif toied eefDing my sleen
+turlies,
+
+  `Exaces tired-'t ASqeeytled stwancermbay -OO min in they hades,
+seriling toor in e
+she
+rourn in hid of. I of uguon in hos hand?"EFbyis soce
+hurry?  just of Nig;
+emplyEd-bron'w sais each in violily-atsed.
+
+
+
+
+    Whal to seeced it ven in the grembstef.
+
+  There Hare
+too bit child, as well.
+
+  `I beforo:,
+while I've greed a Glytons onesentr."  s inddiedlected to
+arnobbea:  very-dying wrove
+
+
+
+    Lousa uig toid agoud
+to.'  and she retelled Just smeesing AlD vecided Alice..
+
+  Ald vere croad a great moir; it just
+(muse, for the
+half-would
+bemberas
+plyselt,' s kaid ranish therevin's!' (she hembstur
+so slateny, and thay a)
+Beap; it woods upen.
+
+A drop
+a ningraboe, nowriaruVE ,'  Alice, be kwricpletstionly fow Insilly wald rook, butiess araif."
+
+    How, ; `I'm
+ormessep of  ILtmocleypHage, add
+you
+
+======================================================================
+Qualitative Analysis
+======================================================================
+
+[GEL Task 4] ===== QUALITATIVE ANALYSIS =====
+
+[GEL Task 4] Temperature 0.5 — LOW (Conservative / Repetitive)
+[GEL Task 4]   The model picks the most probable next character at each step.
+[GEL Task 4]   Output tends to be grammatically structured and recognizable
+[GEL Task 4]   as Alice-in-Wonderland-style prose, but may loop on common
+[GEL Task 4]   phrases ('said Alice', 'the Queen', '') repeatedly.
+[GEL Task 4]   Use when: you want coherent, readable output.
+
+[GEL Task 4] Temperature 1.0 — BASELINE (Balanced)
+[GEL Task 4]   Uses the unmodified learned distribution.
+[GEL Task 4]   Output mixes recognizable words with occasional novel combinations.
+[GEL Task 4]   Best general-purpose temperature for character-level RNNs.
+[GEL Task 4]   Use when: you want the model's 'natural' voice.
+
+[GEL Task 4] Temperature 1.5 — HIGH (Creative / Chaotic)
+[GEL Task 4]   Flattens the distribution → low-probability characters get
+[GEL Task 4]   a much larger chance of being sampled.
+[GEL Task 4]   Output contains invented words, broken syntax, and random
+[GEL Task 4]   punctuation, but can surface surprising new combinations.
+[GEL Task 4]   Use when: you want diversity and are willing to accept noise.
+
+[GEL Task 4] Mathematical explanation of temperature:
+[GEL Task 4]   p_i = exp(z_i / T) / sum_j( exp(z_j / T) )
+[GEL Task 4]   T < 1 → sharpens peaks (winner-takes-all)
+[GEL Task 4]   T = 1 → standard softmax
+[GEL Task 4]   T > 1 → flattens distribution (uniform at T→∞)
+
+[GEL Task 4] temp=0.5: 1006 chars | 213 words | 108 unique words
+[GEL Task 4] temp=1.0: 1006 chars | 180 words | 122 unique words
+[GEL Task 4] temp=1.5: 1006 chars | 162 words | 130 unique words

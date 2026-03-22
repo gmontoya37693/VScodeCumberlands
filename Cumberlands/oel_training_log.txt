@@ -1,0 +1,20 @@
+OEL Training Log
+Epochs: 5
+Architecture: GRU | RNN_UNITS=1024 | EMBEDDING_DIM=256 | vocab_size=72
+
+Adam losses per epoch:
+  Epoch  1: 2.8767
+  Epoch  2: 2.3970
+  Epoch  3: 2.1696
+  Epoch  4: 2.0113
+  Epoch  5: 1.8856
+
+RMSprop losses per epoch:
+  Epoch  1: 3.0547
+  Epoch  2: 2.6667
+  Epoch  3: 2.5133
+  Epoch  4: 2.4128
+  Epoch  5: 2.3327
+
+Better optimizer for first 5 epochs: Adam
+Plots: oel_adam_loss.png, oel_optimizer_comparison.png
