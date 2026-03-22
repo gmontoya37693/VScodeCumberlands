@@ -1,6 +1,6 @@
 # MSDS-534 Project 3 - Group 2 (Housing) - Final Analysis Report
 
-**Generated:** 2026-03-21 19:41:59
+**Generated:** 2026-03-21 20:47:02
 
 ---
 
@@ -8,7 +8,7 @@
 
 Complete pipeline analysis: Data Engineering → Baseline Linear Models → Deep Neural Networks
 
-**Best Performing Model:** **Baseline DNN** (R² = -3.191081)
+**Best Performing Model:** **Tuned DNN** (R² = 0.716490)
 
 ---
 
@@ -16,8 +16,10 @@ Complete pipeline analysis: Data Engineering → Baseline Linear Models → Deep
 
 | Model | R² Score | RMSE ($) | MAE ($) |
 |-------|----------|----------|---------|
-| Baseline DNN | -3.191081 | 234,351 | 204,438 |
-| Tuned DNN | -484.833754 | 2,523,174 | 1,994,448 |
+| Single Linear | 0.458859 | 84,209 | 62,991 |
+| Multi Linear | 0.630251 | 69,608 | 50,398 |
+| Baseline DNN | 0.636160 | 69,049 | 48,881 |
+| Tuned DNN | 0.716490 | 60,952 | 41,580 |
 
 ---
 
@@ -38,7 +40,17 @@ Complete pipeline analysis: Data Engineering → Baseline Linear Models → Deep
 
 ## Phase 2: Baseline Linear Models
 
-*Note: Linear regression models were not available due to sklearn import issues. Proceeding with DNN comparison only.*
+**Single-Variable Linear Regression**
+- Features: median_income only
+- R²: 0.458859
+- RMSE: $84,209
+- Purpose: Simplest baseline
+
+**Multi-Variable Linear Regression**
+- Features: All 15 engineered/encoded features
+- R²: 0.630251
+- RMSE: $69,608
+- Purpose: Linear standard model for comparison
 
 
 
@@ -47,14 +59,14 @@ Complete pipeline analysis: Data Engineering → Baseline Linear Models → Deep
 ## Phase 3: Deep Neural Networks
 
 **Baseline DNN**
-- R²: -3.191081
-- RMSE: $234,351
+- R²: 0.636160
+- RMSE: $69,049
 - Purpose: First DNN attempt, foundational network
 
 **Tuned DNN**
-- R²: -484.833754
-- RMSE: $2,523,174
-- Improvement over Baseline DNN: -481.642672
+- R²: 0.716490
+- RMSE: $60,952
+- Improvement over Baseline DNN: +0.080330
 - Purpose: Optimized architecture for better generalization
 
 ---
@@ -66,12 +78,12 @@ Complete pipeline analysis: Data Engineering → Baseline Linear Models → Deep
    - DNNs: Slower, black-box, potential for better accuracy
 
 2. **Best Performer Analysis**
-   - Model: Baseline DNN
-   - R² Score: -3.191081 (explains -319.11% of variance)
+   - Model: Tuned DNN
+   - R² Score: 0.716490 (explains 71.65% of variance)
    - Recommendation: Use for housing price predictions
 
 3. **Remaining Error**
-   - Even best model leaves ~419.1% of variance unexplained
+   - Even best model leaves ~28.4% of variance unexplained
    - Suggests: Feature engineering opportunities, domain factors, market noise
 
 ---
@@ -97,6 +109,7 @@ If further optimization is needed:
 
 ## Dataset Information
 
+- **Train set:** 16,512 samples
 - **Test set:** 4,128 samples
 - **Features:** 15
 - **Target:** median_house_value (range: $14,999 - $500,001)
@@ -107,7 +120,7 @@ If further optimization is needed:
 
 The complete pipeline demonstrates the progression from raw data through cleaning, baseline modeling, and deep learning. 
 
-**Recommendation:** Deploy Baseline DNN in production with monitoring for performance drift. Consider fine-tuning strategies if accuracy targets are not met.
+**Recommendation:** Deploy Tuned DNN in production with monitoring for performance drift. Consider fine-tuning strategies if accuracy targets are not met.
 
 ---
 

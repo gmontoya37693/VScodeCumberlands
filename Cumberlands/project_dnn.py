@@ -62,12 +62,21 @@ except ImportError as e:
 		ss_tot = np.sum((y_true - np.mean(y_true)) ** 2)
 		return 1 - (ss_res / ss_tot)
 
-# Try to import Keras/TensorFlow for model loading
+# Try to import Keras/TensorFlow for DNN training/loading
+keras_available = False
 try:
-	from tensorflow.keras.models import load_model
+	from tensorflow.keras.models import load_model, Sequential
+	from tensorflow.keras.layers import Dense, Dropout, BatchNormalization, Input
+	from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint
+	from tensorflow.keras.optimizers import Adam
+	keras_available = True
 except ImportError:
 	try:
-		from keras.models import load_model
+		from keras.models import load_model, Sequential
+		from keras.layers import Dense, Dropout, BatchNormalization, Input
+		from keras.callbacks import EarlyStopping, ModelCheckpoint
+		from keras.optimizers import Adam
+		keras_available = True
 	except ImportError:
 		load_model = None
 
@@ -608,8 +617,11 @@ all_predictions = {}
 all_r2 = {}
 all_rmse = {}
 all_mae = {}
+X_train_cmp = None
+X_train_scaled_cmp = None
 X_test_cmp = None
 y_test_cmp = None
+y_train_cmp = None
 X_test_scaled_cmp = None
 
 # ============================================================
@@ -684,43 +696,121 @@ else:
 	print(f"Test set: {X_test_cmp.shape}")
 
 # ============================================================
-# Load DNN Models
+# Train/Evaluate DNN Models
 # ============================================================
 print("\n--- DNN MODELS ---")
 
-baseline_dnn_path = BASE_DIR / "baseline_linear_model.h5"
-tuned_dnn_path = BASE_DIR / "tuned_dnn_model.h5"
+baseline_dnn_path = BASE_DIR / "baseline_linear_model.keras"
+tuned_dnn_path = BASE_DIR / "tuned_dnn_model.keras"
 
-if load_model is not None and X_test_scaled_cmp is not None:
-	if baseline_dnn_path.exists():
-		baseline_dnn = load_model(baseline_dnn_path)
+if keras_available and X_test_scaled_cmp is not None:
+	baseline_dnn = None
+	tuned_dnn = None
+
+	if sklearn_available and X_train_scaled_cmp is not None and y_train_cmp is not None:
+		print("Training DNNs with same split/scaler as linear models...")
+		n_features = X_train_scaled_cmp.shape[1]
+
+		# Baseline DNN: simple architecture for first-pass neural benchmark.
+		baseline_dnn = Sequential(
+			[
+				Input(shape=(n_features,)),
+				Dense(64, activation="relu"),
+				Dropout(0.20),
+				Dense(32, activation="relu"),
+				Dense(1),
+			]
+		)
+		baseline_dnn.compile(optimizer=Adam(learning_rate=1e-3), loss="mse", metrics=["mae"])
+
+		baseline_callbacks = [
+			EarlyStopping(monitor="val_loss", patience=10, restore_best_weights=True),
+			ModelCheckpoint(filepath=baseline_dnn_path, monitor="val_loss", save_best_only=True, verbose=0),
+		]
+		history_base = baseline_dnn.fit(
+			X_train_scaled_cmp,
+			y_train_cmp,
+			epochs=80,
+			batch_size=64,
+			validation_split=0.2,
+			callbacks=baseline_callbacks,
+			verbose=0,
+		)
+		print(f"[Baseline DNN] Trained for {len(history_base.history['loss'])} epochs")
+
+		# Tuned DNN: deeper network with normalization/dropout and lower LR.
+		tuned_dnn = Sequential(
+			[
+				Input(shape=(n_features,)),
+				Dense(256, activation="relu"),
+				BatchNormalization(),
+				Dropout(0.30),
+				Dense(128, activation="relu"),
+				BatchNormalization(),
+				Dropout(0.20),
+				Dense(64, activation="relu"),
+				Dense(1),
+			]
+		)
+		tuned_dnn.compile(optimizer=Adam(learning_rate=5e-4), loss="mse", metrics=["mae"])
+
+		tuned_callbacks = [
+			EarlyStopping(monitor="val_loss", patience=12, restore_best_weights=True),
+			ModelCheckpoint(filepath=tuned_dnn_path, monitor="val_loss", save_best_only=True, verbose=0),
+		]
+		history_tuned = tuned_dnn.fit(
+			X_train_scaled_cmp,
+			y_train_cmp,
+			epochs=120,
+			batch_size=64,
+			validation_split=0.2,
+			callbacks=tuned_callbacks,
+			verbose=0,
+		)
+		print(f"[Tuned DNN] Trained for {len(history_tuned.history['loss'])} epochs")
+
+		if baseline_dnn_path.exists():
+			baseline_dnn = load_model(baseline_dnn_path, compile=False)
+		if tuned_dnn_path.exists():
+			tuned_dnn = load_model(tuned_dnn_path, compile=False)
+	else:
+		print("Training skipped (requires sklearn split/scaler). Attempting to use saved DNN files...")
+		if baseline_dnn_path.exists():
+			baseline_dnn = load_model(baseline_dnn_path, compile=False)
+		if tuned_dnn_path.exists():
+			tuned_dnn = load_model(tuned_dnn_path, compile=False)
+
+	if baseline_dnn is not None:
 		y_pred_baseline_dnn = baseline_dnn.predict(X_test_scaled_cmp, verbose=0).flatten()
 		r2_base_dnn = r2_score(y_test_cmp, y_pred_baseline_dnn)
 		rmse_base_dnn = np.sqrt(mean_squared_error(y_test_cmp, y_pred_baseline_dnn))
 		mae_base_dnn = mean_absolute_error(y_test_cmp, y_pred_baseline_dnn)
-		
+
 		print(f"[Baseline DNN]")
 		print(f"  R²: {r2_base_dnn:.6f} | RMSE: ${rmse_base_dnn:,.0f} | MAE: ${mae_base_dnn:,.0f}")
-		
+
 		all_predictions["Baseline DNN"] = y_pred_baseline_dnn
 		all_r2["Baseline DNN"] = r2_base_dnn
 		all_rmse["Baseline DNN"] = rmse_base_dnn
 		all_mae["Baseline DNN"] = mae_base_dnn
-	
-	if tuned_dnn_path.exists():
-		tuned_dnn = load_model(tuned_dnn_path)
+	else:
+		print(f"[Baseline DNN] Model file missing: {baseline_dnn_path.name}")
+
+	if tuned_dnn is not None:
 		y_pred_tuned_dnn = tuned_dnn.predict(X_test_scaled_cmp, verbose=0).flatten()
 		r2_tuned_dnn = r2_score(y_test_cmp, y_pred_tuned_dnn)
 		rmse_tuned_dnn = np.sqrt(mean_squared_error(y_test_cmp, y_pred_tuned_dnn))
 		mae_tuned_dnn = mean_absolute_error(y_test_cmp, y_pred_tuned_dnn)
-		
+
 		print(f"[Tuned DNN]")
 		print(f"  R²: {r2_tuned_dnn:.6f} | RMSE: ${rmse_tuned_dnn:,.0f} | MAE: ${mae_tuned_dnn:,.0f}")
-		
+
 		all_predictions["Tuned DNN"] = y_pred_tuned_dnn
 		all_r2["Tuned DNN"] = r2_tuned_dnn
 		all_rmse["Tuned DNN"] = rmse_tuned_dnn
 		all_mae["Tuned DNN"] = mae_tuned_dnn
+	else:
+		print(f"[Tuned DNN] Model file missing: {tuned_dnn_path.name}")
 else:
 	print("[DNN Models] Keras/TensorFlow or test set not available.")
 
@@ -988,7 +1078,7 @@ The complete pipeline demonstrates the progression from raw data through cleanin
 	comparison_json = {
 		"timestamp": datetime.now().isoformat(),
 		"test_set_size": len(X_test_cmp),
-		"train_set_size": len(X_train_cmp),
+		"train_set_size": len(X_train_cmp) if X_train_cmp is not None else None,
 		"models": {
 			model_name: {
 				"r2": float(all_r2[model_name]),
