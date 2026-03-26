@@ -1,0 +1,5007 @@
+[
+    {
+        "patient_id": "PID_1000",
+        "resting_bp": 132,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1001",
+        "resting_bp": 125,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1002",
+        "resting_bp": 113,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1003",
+        "resting_bp": 125,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1004",
+        "resting_bp": 105,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1005",
+        "resting_bp": 121,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1006",
+        "resting_bp": 121,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1007",
+        "resting_bp": 114,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1008",
+        "resting_bp": 107,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1009",
+        "resting_bp": 121,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1010",
+        "resting_bp": 119,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1011",
+        "resting_bp": 113,
+        "readmitted": 1
+    },
+    {
+        "patient_id": "PID_1012",
+        "resting_bp": 104,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1013",
+        "resting_bp": 120,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1014",
+        "resting_bp": 113,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1015",
+        "resting_bp": 104,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1016",
+        "resting_bp": 120,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1017",
+        "resting_bp": 144,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1018",
+        "resting_bp": 114,
+        "readmitted": 1
+    },
+    {
+        "patient_id": "PID_1019",
+        "resting_bp": 142,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1020",
+        "resting_bp": 151,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1021",
+        "resting_bp": 105,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1022",
+        "resting_bp": 120,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1023",
+        "resting_bp": 151,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1024",
+        "resting_bp": 118,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1025",
+        "resting_bp": 120,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1026",
+        "resting_bp": 94,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1027",
+        "resting_bp": 112,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1028",
+        "resting_bp": 128,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1029",
+        "resting_bp": 156,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1030",
+        "resting_bp": 117,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1031",
+        "resting_bp": 95,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1032",
+        "resting_bp": 98,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1033",
+        "resting_bp": 119,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1034",
+        "resting_bp": 137,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1035",
+        "resting_bp": 129,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1036",
+        "resting_bp": 126,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1037",
+        "resting_bp": 139,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1038",
+        "resting_bp": 109,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1039",
+        "resting_bp": 120,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1040",
+        "resting_bp": 112,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1041",
+        "resting_bp": 115,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1042",
+        "resting_bp": 104,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1043",
+        "resting_bp": 114,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1044",
+        "resting_bp": 119,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1045",
+        "resting_bp": 114,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1046",
+        "resting_bp": 117,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1047",
+        "resting_bp": 126,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1048",
+        "resting_bp": 138,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1049",
+        "resting_bp": 139,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1050",
+        "resting_bp": 131,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1051",
+        "resting_bp": 101,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1052",
+        "resting_bp": 114,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1053",
+        "resting_bp": 115,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1054",
+        "resting_bp": 110,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1055",
+        "resting_bp": 125,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1056",
+        "resting_bp": 96,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1057",
+        "resting_bp": 145,
+        "readmitted": 1
+    },
+    {
+        "patient_id": "PID_1058",
+        "resting_bp": 137,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1059",
+        "resting_bp": 127,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1060",
+        "resting_bp": 119,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1061",
+        "resting_bp": 138,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1062",
+        "resting_bp": 130,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1063",
+        "resting_bp": 136,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1064",
+        "resting_bp": 119,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1065",
+        "resting_bp": 146,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1066",
+        "resting_bp": 137,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1067",
+        "resting_bp": 127,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1068",
+        "resting_bp": 138,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1069",
+        "resting_bp": 113,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1070",
+        "resting_bp": 102,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1071",
+        "resting_bp": 124,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1072",
+        "resting_bp": 119,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1073",
+        "resting_bp": 117,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1074",
+        "resting_bp": 138,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1075",
+        "resting_bp": 122,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1076",
+        "resting_bp": 123,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1077",
+        "resting_bp": 115,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1078",
+        "resting_bp": 133,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1079",
+        "resting_bp": 130,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1080",
+        "resting_bp": 133,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1081",
+        "resting_bp": 112,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1082",
+        "resting_bp": 139,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1083",
+        "resting_bp": 147,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1084",
+        "resting_bp": 132,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1085",
+        "resting_bp": 107,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1086",
+        "resting_bp": 107,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1087",
+        "resting_bp": 114,
+        "readmitted": 1
+    },
+    {
+        "patient_id": "PID_1088",
+        "resting_bp": 111,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1089",
+        "resting_bp": 118,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1090",
+        "resting_bp": 129,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1091",
+        "resting_bp": 124,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1092",
+        "resting_bp": 123,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1093",
+        "resting_bp": 116,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1094",
+        "resting_bp": 118,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1095",
+        "resting_bp": 131,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1096",
+        "resting_bp": 89,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1097",
+        "resting_bp": 119,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1098",
+        "resting_bp": 124,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1099",
+        "resting_bp": 131,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1100",
+        "resting_bp": 104,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1101",
+        "resting_bp": 104,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1102",
+        "resting_bp": 128,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1103",
+        "resting_bp": 91,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1104",
+        "resting_bp": 139,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1105",
+        "resting_bp": 123,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1106",
+        "resting_bp": 143,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1107",
+        "resting_bp": 103,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1108",
+        "resting_bp": 113,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1109",
+        "resting_bp": 83,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1110",
+        "resting_bp": 108,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1111",
+        "resting_bp": 117,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1112",
+        "resting_bp": 90,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1113",
+        "resting_bp": 114,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1114",
+        "resting_bp": 90,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1115",
+        "resting_bp": 116,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1116",
+        "resting_bp": 137,
+        "readmitted": 1
+    },
+    {
+        "patient_id": "PID_1117",
+        "resting_bp": 119,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1118",
+        "resting_bp": 144,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1119",
+        "resting_bp": 131,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1120",
+        "resting_bp": -120,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1121",
+        "resting_bp": 108,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1122",
+        "resting_bp": 108,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1123",
+        "resting_bp": 125,
+        "readmitted": 1
+    },
+    {
+        "patient_id": "PID_1124",
+        "resting_bp": 96,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1125",
+        "resting_bp": 127,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1126",
+        "resting_bp": 115,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1127",
+        "resting_bp": 139,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1128",
+        "resting_bp": 130,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1129",
+        "resting_bp": 136,
+        "readmitted": 1
+    },
+    {
+        "patient_id": "PID_1130",
+        "resting_bp": 108,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1131",
+        "resting_bp": 135,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1132",
+        "resting_bp": 141,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1133",
+        "resting_bp": 119,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1134",
+        "resting_bp": 108,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1135",
+        "resting_bp": 109,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1136",
+        "resting_bp": 138,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1137",
+        "resting_bp": 160,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1138",
+        "resting_bp": 105,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1139",
+        "resting_bp": 104,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1140",
+        "resting_bp": 133,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1141",
+        "resting_bp": 108,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1142",
+        "resting_bp": 135,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1143",
+        "resting_bp": 126,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1144",
+        "resting_bp": 119,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1145",
+        "resting_bp": 126,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1146",
+        "resting_bp": 125,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1147",
+        "resting_bp": 117,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1148",
+        "resting_bp": 93,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1149",
+        "resting_bp": 122,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1150",
+        "resting_bp": 143,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1151",
+        "resting_bp": 95,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1152",
+        "resting_bp": 105,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1153",
+        "resting_bp": 126,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1154",
+        "resting_bp": 120,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1155",
+        "resting_bp": 126,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1156",
+        "resting_bp": 109,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1157",
+        "resting_bp": 137,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1158",
+        "resting_bp": 120,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1159",
+        "resting_bp": 130,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1160",
+        "resting_bp": 124,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1161",
+        "resting_bp": 122,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1162",
+        "resting_bp": 129,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1163",
+        "resting_bp": 122,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1164",
+        "resting_bp": 102,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1165",
+        "resting_bp": 136,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1166",
+        "resting_bp": 132,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1167",
+        "resting_bp": 88,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1168",
+        "resting_bp": 110,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1169",
+        "resting_bp": 135,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1170",
+        "resting_bp": 92,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1171",
+        "resting_bp": 134,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1172",
+        "resting_bp": 117,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1173",
+        "resting_bp": 140,
+        "readmitted": 1
+    },
+    {
+        "patient_id": "PID_1174",
+        "resting_bp": -120,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1175",
+        "resting_bp": 109,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1176",
+        "resting_bp": 124,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1177",
+        "resting_bp": 119,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1178",
+        "resting_bp": 107,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1179",
+        "resting_bp": 153,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1180",
+        "resting_bp": 105,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1181",
+        "resting_bp": 86,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1182",
+        "resting_bp": 143,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1183",
+        "resting_bp": 111,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1184",
+        "resting_bp": 115,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1185",
+        "resting_bp": 114,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1186",
+        "resting_bp": 111,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1187",
+        "resting_bp": 108,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1188",
+        "resting_bp": 105,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1189",
+        "resting_bp": 120,
+        "readmitted": 1
+    },
+    {
+        "patient_id": "PID_1190",
+        "resting_bp": 113,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1191",
+        "resting_bp": 130,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1192",
+        "resting_bp": 127,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1193",
+        "resting_bp": 106,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1194",
+        "resting_bp": 121,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1195",
+        "resting_bp": 113,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1196",
+        "resting_bp": 105,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1197",
+        "resting_bp": 130,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1198",
+        "resting_bp": 118,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1199",
+        "resting_bp": 113,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1200",
+        "resting_bp": 107,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1201",
+        "resting_bp": 104,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1202",
+        "resting_bp": 149,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1203",
+        "resting_bp": 125,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1204",
+        "resting_bp": 103,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1205",
+        "resting_bp": 124,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1206",
+        "resting_bp": 135,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1207",
+        "resting_bp": 122,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1208",
+        "resting_bp": 140,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1209",
+        "resting_bp": 96,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1210",
+        "resting_bp": 90,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1211",
+        "resting_bp": 123,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1212",
+        "resting_bp": 124,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1213",
+        "resting_bp": 69,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1214",
+        "resting_bp": 110,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1215",
+        "resting_bp": 104,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1216",
+        "resting_bp": 99,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1217",
+        "resting_bp": 104,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1218",
+        "resting_bp": 128,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1219",
+        "resting_bp": 104,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1220",
+        "resting_bp": 105,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1221",
+        "resting_bp": 95,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1222",
+        "resting_bp": 139,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1223",
+        "resting_bp": 126,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1224",
+        "resting_bp": 82,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1225",
+        "resting_bp": 105,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1226",
+        "resting_bp": 127,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1227",
+        "resting_bp": 139,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1228",
+        "resting_bp": 132,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1229",
+        "resting_bp": 114,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1230",
+        "resting_bp": 91,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1231",
+        "resting_bp": 133,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1232",
+        "resting_bp": 115,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1233",
+        "resting_bp": 121,
+        "readmitted": 1
+    },
+    {
+        "patient_id": "PID_1234",
+        "resting_bp": 117,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1235",
+        "resting_bp": 99,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1236",
+        "resting_bp": 125,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1237",
+        "resting_bp": 123,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1238",
+        "resting_bp": 113,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1239",
+        "resting_bp": 127,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1240",
+        "resting_bp": 99,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1241",
+        "resting_bp": 115,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1242",
+        "resting_bp": 120,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1243",
+        "resting_bp": 93,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1244",
+        "resting_bp": 119,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1245",
+        "resting_bp": 131,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1246",
+        "resting_bp": 115,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1247",
+        "resting_bp": 119,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1248",
+        "resting_bp": 128,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1249",
+        "resting_bp": 114,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1250",
+        "resting_bp": 115,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1251",
+        "resting_bp": 102,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1252",
+        "resting_bp": 119,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1253",
+        "resting_bp": 114,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1254",
+        "resting_bp": 127,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1255",
+        "resting_bp": 128,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1256",
+        "resting_bp": 131,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1257",
+        "resting_bp": 112,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1258",
+        "resting_bp": 87,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1259",
+        "resting_bp": 131,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1260",
+        "resting_bp": 126,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1261",
+        "resting_bp": 110,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1262",
+        "resting_bp": 128,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1263",
+        "resting_bp": 98,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1264",
+        "resting_bp": 135,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1265",
+        "resting_bp": 114,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1266",
+        "resting_bp": 107,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1267",
+        "resting_bp": 110,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1268",
+        "resting_bp": 116,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1269",
+        "resting_bp": 119,
+        "readmitted": 1
+    },
+    {
+        "patient_id": "PID_1270",
+        "resting_bp": 120,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1271",
+        "resting_bp": 113,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1272",
+        "resting_bp": 123,
+        "readmitted": 1
+    },
+    {
+        "patient_id": "PID_1273",
+        "resting_bp": 120,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1274",
+        "resting_bp": 110,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1275",
+        "resting_bp": 108,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1276",
+        "resting_bp": 129,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1277",
+        "resting_bp": 127,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1278",
+        "resting_bp": 120,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1279",
+        "resting_bp": 133,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1280",
+        "resting_bp": 90,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1281",
+        "resting_bp": 111,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1282",
+        "resting_bp": 102,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1283",
+        "resting_bp": 153,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1284",
+        "resting_bp": 130,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1285",
+        "resting_bp": 118,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1286",
+        "resting_bp": 131,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1287",
+        "resting_bp": 136,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1288",
+        "resting_bp": 136,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1289",
+        "resting_bp": 133,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1290",
+        "resting_bp": 116,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1291",
+        "resting_bp": 112,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1292",
+        "resting_bp": 105,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1293",
+        "resting_bp": 127,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1294",
+        "resting_bp": 117,
+        "readmitted": 1
+    },
+    {
+        "patient_id": "PID_1295",
+        "resting_bp": 113,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1296",
+        "resting_bp": 112,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1297",
+        "resting_bp": 141,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1298",
+        "resting_bp": 134,
+        "readmitted": 1
+    },
+    {
+        "patient_id": "PID_1299",
+        "resting_bp": 147,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1300",
+        "resting_bp": 127,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1301",
+        "resting_bp": 120,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1302",
+        "resting_bp": 119,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1303",
+        "resting_bp": 104,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1304",
+        "resting_bp": 101,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1305",
+        "resting_bp": 127,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1306",
+        "resting_bp": 105,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1307",
+        "resting_bp": 123,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1308",
+        "resting_bp": 136,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1309",
+        "resting_bp": 110,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1310",
+        "resting_bp": 150,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1311",
+        "resting_bp": 105,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1312",
+        "resting_bp": 134,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1313",
+        "resting_bp": 126,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1314",
+        "resting_bp": 137,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1315",
+        "resting_bp": 103,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1316",
+        "resting_bp": 154,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1317",
+        "resting_bp": 117,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1318",
+        "resting_bp": 130,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1319",
+        "resting_bp": 141,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1320",
+        "resting_bp": 110,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1321",
+        "resting_bp": 132,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1322",
+        "resting_bp": 108,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1323",
+        "resting_bp": 140,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1324",
+        "resting_bp": 108,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1325",
+        "resting_bp": 120,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1326",
+        "resting_bp": 124,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1327",
+        "resting_bp": 131,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1328",
+        "resting_bp": 149,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1329",
+        "resting_bp": 113,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1330",
+        "resting_bp": 137,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1331",
+        "resting_bp": 149,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1332",
+        "resting_bp": 122,
+        "readmitted": 1
+    },
+    {
+        "patient_id": "PID_1333",
+        "resting_bp": 111,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1334",
+        "resting_bp": 94,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1335",
+        "resting_bp": 148,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1336",
+        "resting_bp": 116,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1337",
+        "resting_bp": 104,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1338",
+        "resting_bp": 99,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1339",
+        "resting_bp": 104,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1340",
+        "resting_bp": 133,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1341",
+        "resting_bp": 135,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1342",
+        "resting_bp": 129,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1343",
+        "resting_bp": 121,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1344",
+        "resting_bp": 101,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1345",
+        "resting_bp": 109,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1346",
+        "resting_bp": 103,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1347",
+        "resting_bp": 128,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1348",
+        "resting_bp": 104,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1349",
+        "resting_bp": 109,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1350",
+        "resting_bp": 117,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1351",
+        "resting_bp": 94,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1352",
+        "resting_bp": 120,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1353",
+        "resting_bp": 118,
+        "readmitted": 1
+    },
+    {
+        "patient_id": "PID_1354",
+        "resting_bp": 137,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1355",
+        "resting_bp": 107,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1356",
+        "resting_bp": 100,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1357",
+        "resting_bp": 114,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1358",
+        "resting_bp": 103,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1359",
+        "resting_bp": 120,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1360",
+        "resting_bp": 92,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1361",
+        "resting_bp": 110,
+        "readmitted": 1
+    },
+    {
+        "patient_id": "PID_1362",
+        "resting_bp": 106,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1363",
+        "resting_bp": 128,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1364",
+        "resting_bp": 107,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1365",
+        "resting_bp": 93,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1366",
+        "resting_bp": 116,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1367",
+        "resting_bp": 124,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1368",
+        "resting_bp": 115,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1369",
+        "resting_bp": 110,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1370",
+        "resting_bp": 109,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1371",
+        "resting_bp": 121,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1372",
+        "resting_bp": 106,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1373",
+        "resting_bp": 115,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1374",
+        "resting_bp": 131,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1375",
+        "resting_bp": 100,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1376",
+        "resting_bp": 119,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1377",
+        "resting_bp": 93,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1378",
+        "resting_bp": 123,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1379",
+        "resting_bp": 105,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1380",
+        "resting_bp": 135,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1381",
+        "resting_bp": 97,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1382",
+        "resting_bp": 126,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1383",
+        "resting_bp": 138,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1384",
+        "resting_bp": 104,
+        "readmitted": 1
+    },
+    {
+        "patient_id": "PID_1385",
+        "resting_bp": 107,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1386",
+        "resting_bp": 105,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1387",
+        "resting_bp": 112,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1388",
+        "resting_bp": 127,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1389",
+        "resting_bp": 111,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1390",
+        "resting_bp": 103,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1391",
+        "resting_bp": 89,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1392",
+        "resting_bp": 144,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1393",
+        "resting_bp": 145,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1394",
+        "resting_bp": 128,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1395",
+        "resting_bp": 107,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1396",
+        "resting_bp": 131,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1397",
+        "resting_bp": 134,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1398",
+        "resting_bp": 116,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1399",
+        "resting_bp": 120,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1400",
+        "resting_bp": 138,
+        "readmitted": 1
+    },
+    {
+        "patient_id": "PID_1401",
+        "resting_bp": 95,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1402",
+        "resting_bp": 134,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1403",
+        "resting_bp": 115,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1404",
+        "resting_bp": 103,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1405",
+        "resting_bp": 104,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1406",
+        "resting_bp": 107,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1407",
+        "resting_bp": 101,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1408",
+        "resting_bp": 146,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1409",
+        "resting_bp": 127,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1410",
+        "resting_bp": 135,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1411",
+        "resting_bp": 128,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1412",
+        "resting_bp": 120,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1413",
+        "resting_bp": 121,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1414",
+        "resting_bp": 114,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1415",
+        "resting_bp": 115,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1416",
+        "resting_bp": 98,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1417",
+        "resting_bp": 136,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1418",
+        "resting_bp": 92,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1419",
+        "resting_bp": 104,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1420",
+        "resting_bp": 150,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1421",
+        "resting_bp": 122,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1422",
+        "resting_bp": 122,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1423",
+        "resting_bp": 129,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1424",
+        "resting_bp": 96,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1425",
+        "resting_bp": 99,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1426",
+        "resting_bp": 113,
+        "readmitted": 1
+    },
+    {
+        "patient_id": "PID_1427",
+        "resting_bp": 106,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1428",
+        "resting_bp": 118,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1429",
+        "resting_bp": 127,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1430",
+        "resting_bp": 140,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1431",
+        "resting_bp": 132,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1432",
+        "resting_bp": 105,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1433",
+        "resting_bp": 114,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1434",
+        "resting_bp": 110,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1435",
+        "resting_bp": 104,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1436",
+        "resting_bp": 101,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1437",
+        "resting_bp": 144,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1438",
+        "resting_bp": 120,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1439",
+        "resting_bp": 116,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1440",
+        "resting_bp": 127,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1441",
+        "resting_bp": 128,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1442",
+        "resting_bp": 136,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1443",
+        "resting_bp": 108,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1444",
+        "resting_bp": 126,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1445",
+        "resting_bp": 106,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1446",
+        "resting_bp": 117,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1447",
+        "resting_bp": 120,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1448",
+        "resting_bp": 122,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1449",
+        "resting_bp": 121,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1450",
+        "resting_bp": 132,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1451",
+        "resting_bp": 111,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1452",
+        "resting_bp": 122,
+        "readmitted": 1
+    },
+    {
+        "patient_id": "PID_1453",
+        "resting_bp": 108,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1454",
+        "resting_bp": 163,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1455",
+        "resting_bp": 106,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1456",
+        "resting_bp": 109,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1457",
+        "resting_bp": 133,
+        "readmitted": 1
+    },
+    {
+        "patient_id": "PID_1458",
+        "resting_bp": 113,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1459",
+        "resting_bp": 133,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1460",
+        "resting_bp": 122,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1461",
+        "resting_bp": 113,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1462",
+        "resting_bp": 108,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1463",
+        "resting_bp": 108,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1464",
+        "resting_bp": 114,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1465",
+        "resting_bp": 117,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1466",
+        "resting_bp": 107,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1467",
+        "resting_bp": 118,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1468",
+        "resting_bp": 103,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1469",
+        "resting_bp": 131,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1470",
+        "resting_bp": 134,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1471",
+        "resting_bp": 109,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1472",
+        "resting_bp": 108,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1473",
+        "resting_bp": 122,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1474",
+        "resting_bp": 138,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1475",
+        "resting_bp": 142,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1476",
+        "resting_bp": 98,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1477",
+        "resting_bp": 135,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1478",
+        "resting_bp": 119,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1479",
+        "resting_bp": 119,
+        "readmitted": 1
+    },
+    {
+        "patient_id": "PID_1480",
+        "resting_bp": 127,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1481",
+        "resting_bp": 112,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1482",
+        "resting_bp": 136,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1483",
+        "resting_bp": 141,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1484",
+        "resting_bp": 141,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1485",
+        "resting_bp": 92,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1486",
+        "resting_bp": 116,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1487",
+        "resting_bp": 90,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1488",
+        "resting_bp": 108,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1489",
+        "resting_bp": 84,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1490",
+        "resting_bp": 126,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1491",
+        "resting_bp": 123,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1492",
+        "resting_bp": 113,
+        "readmitted": 1
+    },
+    {
+        "patient_id": "PID_1493",
+        "resting_bp": 108,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1494",
+        "resting_bp": 124,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1495",
+        "resting_bp": 104,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1496",
+        "resting_bp": 103,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1497",
+        "resting_bp": 101,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1498",
+        "resting_bp": 116,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1499",
+        "resting_bp": 111,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1500",
+        "resting_bp": 114,
+        "readmitted": 1
+    },
+    {
+        "patient_id": "PID_1501",
+        "resting_bp": 127,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1502",
+        "resting_bp": 134,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1503",
+        "resting_bp": 141,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1504",
+        "resting_bp": 120,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1505",
+        "resting_bp": 125,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1506",
+        "resting_bp": 122,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1507",
+        "resting_bp": 94,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1508",
+        "resting_bp": 114,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1509",
+        "resting_bp": 114,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1510",
+        "resting_bp": 112,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1511",
+        "resting_bp": 119,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1512",
+        "resting_bp": 116,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1513",
+        "resting_bp": 105,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1514",
+        "resting_bp": 117,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1515",
+        "resting_bp": 110,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1516",
+        "resting_bp": 80,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1517",
+        "resting_bp": 99,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1518",
+        "resting_bp": 121,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1519",
+        "resting_bp": 136,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1520",
+        "resting_bp": -120,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1521",
+        "resting_bp": 106,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1522",
+        "resting_bp": 126,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1523",
+        "resting_bp": 133,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1524",
+        "resting_bp": 113,
+        "readmitted": 1
+    },
+    {
+        "patient_id": "PID_1525",
+        "resting_bp": 109,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1526",
+        "resting_bp": 138,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1527",
+        "resting_bp": 131,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1528",
+        "resting_bp": 132,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1529",
+        "resting_bp": 112,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1530",
+        "resting_bp": 136,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1531",
+        "resting_bp": 90,
+        "readmitted": 1
+    },
+    {
+        "patient_id": "PID_1532",
+        "resting_bp": 136,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1533",
+        "resting_bp": 119,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1534",
+        "resting_bp": 121,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1535",
+        "resting_bp": 105,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1536",
+        "resting_bp": 92,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1537",
+        "resting_bp": 121,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1538",
+        "resting_bp": 128,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1539",
+        "resting_bp": 130,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1540",
+        "resting_bp": 128,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1541",
+        "resting_bp": 125,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1542",
+        "resting_bp": 106,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1543",
+        "resting_bp": 131,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1544",
+        "resting_bp": 104,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1545",
+        "resting_bp": 136,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1546",
+        "resting_bp": 118,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1547",
+        "resting_bp": 119,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1548",
+        "resting_bp": 132,
+        "readmitted": 1
+    },
+    {
+        "patient_id": "PID_1549",
+        "resting_bp": 135,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1550",
+        "resting_bp": 131,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1551",
+        "resting_bp": 107,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1552",
+        "resting_bp": 131,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1553",
+        "resting_bp": 107,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1554",
+        "resting_bp": 131,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1555",
+        "resting_bp": 98,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1556",
+        "resting_bp": 118,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1557",
+        "resting_bp": 107,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1558",
+        "resting_bp": 133,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1559",
+        "resting_bp": 136,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1560",
+        "resting_bp": 122,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1561",
+        "resting_bp": 122,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1562",
+        "resting_bp": 130,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1563",
+        "resting_bp": 136,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1564",
+        "resting_bp": 120,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1565",
+        "resting_bp": 112,
+        "readmitted": 1
+    },
+    {
+        "patient_id": "PID_1566",
+        "resting_bp": 129,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1567",
+        "resting_bp": 92,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1568",
+        "resting_bp": 133,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1569",
+        "resting_bp": 109,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1570",
+        "resting_bp": 116,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1571",
+        "resting_bp": 133,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1572",
+        "resting_bp": 113,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1573",
+        "resting_bp": 129,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1574",
+        "resting_bp": 137,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1575",
+        "resting_bp": 121,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1576",
+        "resting_bp": 124,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1577",
+        "resting_bp": 118,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1578",
+        "resting_bp": 121,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1579",
+        "resting_bp": 103,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1580",
+        "resting_bp": 115,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1581",
+        "resting_bp": 100,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1582",
+        "resting_bp": 106,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1583",
+        "resting_bp": 89,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1584",
+        "resting_bp": 123,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1585",
+        "resting_bp": 145,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1586",
+        "resting_bp": 113,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1587",
+        "resting_bp": 134,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1588",
+        "resting_bp": 136,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1589",
+        "resting_bp": 102,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1590",
+        "resting_bp": 105,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1591",
+        "resting_bp": 134,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1592",
+        "resting_bp": 118,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1593",
+        "resting_bp": 100,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1594",
+        "resting_bp": 110,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1595",
+        "resting_bp": 126,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1596",
+        "resting_bp": 108,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1597",
+        "resting_bp": 78,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1598",
+        "resting_bp": 115,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1599",
+        "resting_bp": 116,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1600",
+        "resting_bp": 120,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1601",
+        "resting_bp": 138,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1602",
+        "resting_bp": 120,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1603",
+        "resting_bp": 123,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1604",
+        "resting_bp": 135,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1605",
+        "resting_bp": 120,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1606",
+        "resting_bp": 152,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1607",
+        "resting_bp": 101,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1608",
+        "resting_bp": 105,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1609",
+        "resting_bp": 129,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1610",
+        "resting_bp": 138,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1611",
+        "resting_bp": 116,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1612",
+        "resting_bp": 104,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1613",
+        "resting_bp": 146,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1614",
+        "resting_bp": 108,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1615",
+        "resting_bp": -120,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1616",
+        "resting_bp": 139,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1617",
+        "resting_bp": 113,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1618",
+        "resting_bp": 110,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1619",
+        "resting_bp": 111,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1620",
+        "resting_bp": 133,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1621",
+        "resting_bp": 135,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1622",
+        "resting_bp": 120,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1623",
+        "resting_bp": 148,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1624",
+        "resting_bp": 120,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1625",
+        "resting_bp": 139,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1626",
+        "resting_bp": 113,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1627",
+        "resting_bp": 155,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1628",
+        "resting_bp": 143,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1629",
+        "resting_bp": 118,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1630",
+        "resting_bp": 141,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1631",
+        "resting_bp": 140,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1632",
+        "resting_bp": 143,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1633",
+        "resting_bp": 82,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1634",
+        "resting_bp": 130,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1635",
+        "resting_bp": 128,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1636",
+        "resting_bp": 127,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1637",
+        "resting_bp": 123,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1638",
+        "resting_bp": 123,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1639",
+        "resting_bp": 139,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1640",
+        "resting_bp": 128,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1641",
+        "resting_bp": 123,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1642",
+        "resting_bp": 137,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1643",
+        "resting_bp": 126,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1644",
+        "resting_bp": 127,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1645",
+        "resting_bp": 148,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1646",
+        "resting_bp": 113,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1647",
+        "resting_bp": 97,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1648",
+        "resting_bp": 121,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1649",
+        "resting_bp": 123,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1650",
+        "resting_bp": 130,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1651",
+        "resting_bp": 121,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1652",
+        "resting_bp": 131,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1653",
+        "resting_bp": 157,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1654",
+        "resting_bp": 132,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1655",
+        "resting_bp": 134,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1656",
+        "resting_bp": 118,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1657",
+        "resting_bp": 99,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1658",
+        "resting_bp": 85,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1659",
+        "resting_bp": 112,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1660",
+        "resting_bp": 81,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1661",
+        "resting_bp": 127,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1662",
+        "resting_bp": 114,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1663",
+        "resting_bp": 100,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1664",
+        "resting_bp": 121,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1665",
+        "resting_bp": 108,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1666",
+        "resting_bp": 126,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1667",
+        "resting_bp": 130,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1668",
+        "resting_bp": 109,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1669",
+        "resting_bp": 116,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1670",
+        "resting_bp": 123,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1671",
+        "resting_bp": 98,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1672",
+        "resting_bp": -120,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1673",
+        "resting_bp": 98,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1674",
+        "resting_bp": 128,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1675",
+        "resting_bp": 113,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1676",
+        "resting_bp": 98,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1677",
+        "resting_bp": 111,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1678",
+        "resting_bp": 111,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1679",
+        "resting_bp": 136,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1680",
+        "resting_bp": 122,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1681",
+        "resting_bp": 105,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1682",
+        "resting_bp": 144,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1683",
+        "resting_bp": 129,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1684",
+        "resting_bp": 114,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1685",
+        "resting_bp": 96,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1686",
+        "resting_bp": 113,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1687",
+        "resting_bp": 116,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1688",
+        "resting_bp": 125,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1689",
+        "resting_bp": 129,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1690",
+        "resting_bp": 132,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1691",
+        "resting_bp": 95,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1692",
+        "resting_bp": 123,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1693",
+        "resting_bp": 117,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1694",
+        "resting_bp": 160,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1695",
+        "resting_bp": 120,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1696",
+        "resting_bp": 110,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1697",
+        "resting_bp": 121,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1698",
+        "resting_bp": 119,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1699",
+        "resting_bp": 90,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1700",
+        "resting_bp": 126,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1701",
+        "resting_bp": 115,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1702",
+        "resting_bp": 119,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1703",
+        "resting_bp": 106,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1704",
+        "resting_bp": 103,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1705",
+        "resting_bp": 133,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1706",
+        "resting_bp": 136,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1707",
+        "resting_bp": 126,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1708",
+        "resting_bp": 92,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1709",
+        "resting_bp": 127,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1710",
+        "resting_bp": 93,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1711",
+        "resting_bp": 110,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1712",
+        "resting_bp": 132,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1713",
+        "resting_bp": 129,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1714",
+        "resting_bp": 126,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1715",
+        "resting_bp": 139,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1716",
+        "resting_bp": 128,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1717",
+        "resting_bp": 89,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1718",
+        "resting_bp": 114,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1719",
+        "resting_bp": 119,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1720",
+        "resting_bp": 117,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1721",
+        "resting_bp": 110,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1722",
+        "resting_bp": 104,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1723",
+        "resting_bp": 156,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1724",
+        "resting_bp": 114,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1725",
+        "resting_bp": 155,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1726",
+        "resting_bp": 102,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1727",
+        "resting_bp": 129,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1728",
+        "resting_bp": 123,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1729",
+        "resting_bp": 106,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1730",
+        "resting_bp": 112,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1731",
+        "resting_bp": 119,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1732",
+        "resting_bp": 107,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1733",
+        "resting_bp": 116,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1734",
+        "resting_bp": 84,
+        "readmitted": 1
+    },
+    {
+        "patient_id": "PID_1735",
+        "resting_bp": 130,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1736",
+        "resting_bp": 138,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1737",
+        "resting_bp": 126,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1738",
+        "resting_bp": 153,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1739",
+        "resting_bp": 130,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1740",
+        "resting_bp": 137,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1741",
+        "resting_bp": 138,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1742",
+        "resting_bp": 78,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1743",
+        "resting_bp": 126,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1744",
+        "resting_bp": 99,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1745",
+        "resting_bp": 102,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1746",
+        "resting_bp": 104,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1747",
+        "resting_bp": 115,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1748",
+        "resting_bp": 129,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1749",
+        "resting_bp": 126,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1750",
+        "resting_bp": 119,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1751",
+        "resting_bp": 130,
+        "readmitted": 1
+    },
+    {
+        "patient_id": "PID_1752",
+        "resting_bp": 131,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1753",
+        "resting_bp": 126,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1754",
+        "resting_bp": 94,
+        "readmitted": 1
+    },
+    {
+        "patient_id": "PID_1755",
+        "resting_bp": 108,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1756",
+        "resting_bp": 120,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1757",
+        "resting_bp": 131,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1758",
+        "resting_bp": 100,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1759",
+        "resting_bp": 119,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1760",
+        "resting_bp": -120,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1761",
+        "resting_bp": 135,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1762",
+        "resting_bp": 123,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1763",
+        "resting_bp": 99,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1764",
+        "resting_bp": 99,
+        "readmitted": 1
+    },
+    {
+        "patient_id": "PID_1765",
+        "resting_bp": 125,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1766",
+        "resting_bp": 140,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1767",
+        "resting_bp": 103,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1768",
+        "resting_bp": 131,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1769",
+        "resting_bp": 111,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1770",
+        "resting_bp": 132,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1771",
+        "resting_bp": 130,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1772",
+        "resting_bp": 122,
+        "readmitted": 1
+    },
+    {
+        "patient_id": "PID_1773",
+        "resting_bp": 92,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1774",
+        "resting_bp": 130,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1775",
+        "resting_bp": 127,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1776",
+        "resting_bp": 126,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1777",
+        "resting_bp": 122,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1778",
+        "resting_bp": 106,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1779",
+        "resting_bp": 136,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1780",
+        "resting_bp": 133,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1781",
+        "resting_bp": 103,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1782",
+        "resting_bp": 139,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1783",
+        "resting_bp": 121,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1784",
+        "resting_bp": 121,
+        "readmitted": 1
+    },
+    {
+        "patient_id": "PID_1785",
+        "resting_bp": 117,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1786",
+        "resting_bp": 118,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1787",
+        "resting_bp": 140,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1788",
+        "resting_bp": 135,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1789",
+        "resting_bp": 135,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1790",
+        "resting_bp": 122,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1791",
+        "resting_bp": 133,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1792",
+        "resting_bp": 107,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1793",
+        "resting_bp": 128,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1794",
+        "resting_bp": 117,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1795",
+        "resting_bp": 89,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1796",
+        "resting_bp": 96,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1797",
+        "resting_bp": 110,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1798",
+        "resting_bp": 126,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1799",
+        "resting_bp": 110,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1800",
+        "resting_bp": 111,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1801",
+        "resting_bp": 131,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1802",
+        "resting_bp": 111,
+        "readmitted": 1
+    },
+    {
+        "patient_id": "PID_1803",
+        "resting_bp": 139,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1804",
+        "resting_bp": 137,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1805",
+        "resting_bp": 120,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1806",
+        "resting_bp": 131,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1807",
+        "resting_bp": 129,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1808",
+        "resting_bp": 116,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1809",
+        "resting_bp": 132,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1810",
+        "resting_bp": 135,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1811",
+        "resting_bp": 105,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1812",
+        "resting_bp": 122,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1813",
+        "resting_bp": 122,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1814",
+        "resting_bp": 132,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1815",
+        "resting_bp": 113,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1816",
+        "resting_bp": 111,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1817",
+        "resting_bp": 122,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1818",
+        "resting_bp": 137,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1819",
+        "resting_bp": 102,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1820",
+        "resting_bp": 104,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1821",
+        "resting_bp": 112,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1822",
+        "resting_bp": 114,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1823",
+        "resting_bp": 93,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1824",
+        "resting_bp": 142,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1825",
+        "resting_bp": 118,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1826",
+        "resting_bp": 115,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1827",
+        "resting_bp": 144,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1828",
+        "resting_bp": 130,
+        "readmitted": 1
+    },
+    {
+        "patient_id": "PID_1829",
+        "resting_bp": 111,
+        "readmitted": 1
+    },
+    {
+        "patient_id": "PID_1830",
+        "resting_bp": 122,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1831",
+        "resting_bp": 119,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1832",
+        "resting_bp": 141,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1833",
+        "resting_bp": 117,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1834",
+        "resting_bp": 98,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1835",
+        "resting_bp": 91,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1836",
+        "resting_bp": 142,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1837",
+        "resting_bp": 108,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1838",
+        "resting_bp": 130,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1839",
+        "resting_bp": 121,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1840",
+        "resting_bp": 113,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1841",
+        "resting_bp": 116,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1842",
+        "resting_bp": 143,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1843",
+        "resting_bp": 98,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1844",
+        "resting_bp": 114,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1845",
+        "resting_bp": 133,
+        "readmitted": 1
+    },
+    {
+        "patient_id": "PID_1846",
+        "resting_bp": 100,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1847",
+        "resting_bp": 139,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1848",
+        "resting_bp": 133,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1849",
+        "resting_bp": 124,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1850",
+        "resting_bp": 112,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1851",
+        "resting_bp": 98,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1852",
+        "resting_bp": 130,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1853",
+        "resting_bp": 161,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1854",
+        "resting_bp": 122,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1855",
+        "resting_bp": 92,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1856",
+        "resting_bp": 126,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1857",
+        "resting_bp": 132,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1858",
+        "resting_bp": 106,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1859",
+        "resting_bp": 110,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1860",
+        "resting_bp": 108,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1861",
+        "resting_bp": 112,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1862",
+        "resting_bp": 117,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1863",
+        "resting_bp": 107,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1864",
+        "resting_bp": 101,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1865",
+        "resting_bp": 122,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1866",
+        "resting_bp": 117,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1867",
+        "resting_bp": 113,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1868",
+        "resting_bp": 121,
+        "readmitted": 1
+    },
+    {
+        "patient_id": "PID_1869",
+        "resting_bp": 97,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1870",
+        "resting_bp": 123,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1871",
+        "resting_bp": 113,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1872",
+        "resting_bp": 123,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1873",
+        "resting_bp": 125,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1874",
+        "resting_bp": 136,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1875",
+        "resting_bp": 121,
+        "readmitted": 1
+    },
+    {
+        "patient_id": "PID_1876",
+        "resting_bp": 136,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1877",
+        "resting_bp": 115,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1878",
+        "resting_bp": 115,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1879",
+        "resting_bp": 118,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1880",
+        "resting_bp": 131,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1881",
+        "resting_bp": 129,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1882",
+        "resting_bp": 122,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1883",
+        "resting_bp": 101,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1884",
+        "resting_bp": 129,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1885",
+        "resting_bp": 107,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1886",
+        "resting_bp": 106,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1887",
+        "resting_bp": 102,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1888",
+        "resting_bp": 118,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1889",
+        "resting_bp": 138,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1890",
+        "resting_bp": 105,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1891",
+        "resting_bp": 145,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1892",
+        "resting_bp": 133,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1893",
+        "resting_bp": 98,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1894",
+        "resting_bp": 114,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1895",
+        "resting_bp": 104,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1896",
+        "resting_bp": 129,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1897",
+        "resting_bp": 105,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1898",
+        "resting_bp": 95,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1899",
+        "resting_bp": 115,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1900",
+        "resting_bp": 137,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1901",
+        "resting_bp": 117,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1902",
+        "resting_bp": 125,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1903",
+        "resting_bp": 126,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1904",
+        "resting_bp": 97,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1905",
+        "resting_bp": 106,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1906",
+        "resting_bp": 120,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1907",
+        "resting_bp": 111,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1908",
+        "resting_bp": 145,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1909",
+        "resting_bp": 101,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1910",
+        "resting_bp": -120,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1911",
+        "resting_bp": 124,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1912",
+        "resting_bp": 110,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1913",
+        "resting_bp": 76,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1914",
+        "resting_bp": 149,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1915",
+        "resting_bp": 103,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1916",
+        "resting_bp": 128,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1917",
+        "resting_bp": 101,
+        "readmitted": 1
+    },
+    {
+        "patient_id": "PID_1918",
+        "resting_bp": 107,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1919",
+        "resting_bp": 95,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1920",
+        "resting_bp": 108,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1921",
+        "resting_bp": 110,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1922",
+        "resting_bp": 118,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1923",
+        "resting_bp": 114,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1924",
+        "resting_bp": 98,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1925",
+        "resting_bp": 112,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1926",
+        "resting_bp": 141,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1927",
+        "resting_bp": -120,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1928",
+        "resting_bp": 126,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1929",
+        "resting_bp": 129,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1930",
+        "resting_bp": 150,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1931",
+        "resting_bp": 128,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1932",
+        "resting_bp": -120,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1933",
+        "resting_bp": 96,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1934",
+        "resting_bp": 103,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1935",
+        "resting_bp": 119,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1936",
+        "resting_bp": 107,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1937",
+        "resting_bp": 105,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1938",
+        "resting_bp": 106,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1939",
+        "resting_bp": 98,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1940",
+        "resting_bp": 108,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1941",
+        "resting_bp": 125,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1942",
+        "resting_bp": 146,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1943",
+        "resting_bp": 131,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1944",
+        "resting_bp": 129,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1945",
+        "resting_bp": -120,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1946",
+        "resting_bp": 121,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1947",
+        "resting_bp": 118,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1948",
+        "resting_bp": 124,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1949",
+        "resting_bp": 114,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1950",
+        "resting_bp": 144,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1951",
+        "resting_bp": 120,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1952",
+        "resting_bp": 122,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1953",
+        "resting_bp": 90,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1954",
+        "resting_bp": 118,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1955",
+        "resting_bp": 137,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1956",
+        "resting_bp": 128,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1957",
+        "resting_bp": 87,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1958",
+        "resting_bp": 113,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1959",
+        "resting_bp": 145,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1960",
+        "resting_bp": 117,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1961",
+        "resting_bp": 124,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1962",
+        "resting_bp": 144,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1963",
+        "resting_bp": 117,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1964",
+        "resting_bp": 131,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1965",
+        "resting_bp": 126,
+        "readmitted": 1
+    },
+    {
+        "patient_id": "PID_1966",
+        "resting_bp": 129,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1967",
+        "resting_bp": 125,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1968",
+        "resting_bp": 111,
+        "readmitted": 1
+    },
+    {
+        "patient_id": "PID_1969",
+        "resting_bp": 113,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1970",
+        "resting_bp": 107,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1971",
+        "resting_bp": 95,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1972",
+        "resting_bp": 138,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1973",
+        "resting_bp": 120,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1974",
+        "resting_bp": 137,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1975",
+        "resting_bp": 143,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1976",
+        "resting_bp": 120,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1977",
+        "resting_bp": 100,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1978",
+        "resting_bp": 117,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1979",
+        "resting_bp": 109,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1980",
+        "resting_bp": 90,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1981",
+        "resting_bp": 112,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1982",
+        "resting_bp": 118,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1983",
+        "resting_bp": 110,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1984",
+        "resting_bp": 108,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1985",
+        "resting_bp": 100,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1986",
+        "resting_bp": 122,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1987",
+        "resting_bp": 148,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1988",
+        "resting_bp": 139,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1989",
+        "resting_bp": 129,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1990",
+        "resting_bp": 130,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1991",
+        "resting_bp": 118,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1992",
+        "resting_bp": 92,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1993",
+        "resting_bp": 114,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1994",
+        "resting_bp": 105,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1995",
+        "resting_bp": 122,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1996",
+        "resting_bp": 138,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1997",
+        "resting_bp": 149,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1998",
+        "resting_bp": 120,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1999",
+        "resting_bp": 94,
+        "readmitted": 0
+    },
+    {
+        "patient_id": "PID_1042",
+        "resting_bp": 104,
+        "readmitted": 1
+    }
+]
