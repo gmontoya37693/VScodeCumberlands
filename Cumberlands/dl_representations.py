@@ -40,6 +40,31 @@ NOTES:
 - The encoder output is passed forward to the next stage.
 - The decoder reconstruction is not passed forward; it is used only for the
 	reconstruction loss of the current stage.
+
+UPDATED PSEUDOCODE (MATCHES THIS SCRIPT):
+1) Load Fashion-MNIST, normalize to [0, 1], flatten each image to 784 features.
+2) Stage 1 pretraining:
+	- Train AE1 on x to reconstruct x.
+	- Encoder1: 784 -> 256 (ReLU)
+	- Decoder1: 256 -> 784 (sigmoid, because x is in [0, 1])
+	- Keep h1 = Encoder1(x) as passed-forward representation.
+3) Stage 2 pretraining:
+	- Train AE2 on h1 to reconstruct h1.
+	- Encoder2: 256 -> 128 (ReLU)
+	- Decoder2: 128 -> 256 (linear, latent-space reconstruction)
+	- Keep h2 = Encoder2(h1) as passed-forward representation.
+4) Stage 3 pretraining:
+	- Train AE3 on h2 to reconstruct h2.
+	- Encoder3: 128 -> 64 (ReLU)
+	- Decoder3: 64 -> 128 (linear, latent-space reconstruction)
+	- Keep h3 = Encoder3(h2) as final representation.
+5) Report what is passed vs reconstruction-only:
+	- Passed forward: h1 -> h2 -> h3
+	- Reconstruction only: x_hat, h1_hat, h2_hat
+6) Analysis-only visualization (not training objective):
+	- Project deeper codes to image space through chained decoders:
+	  h2 -> h1_hat -> x_hat
+	  h3 -> h2_hat -> h1_hat -> x_hat
 """
 
 from pathlib import Path
