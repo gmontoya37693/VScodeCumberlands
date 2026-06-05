@@ -1,4 +1,4 @@
-asset_id,property_id,allocation,asset_description,asset_value,start_date,term_months,bank_rate_annual,nim_annual,gl_account,status,salvage_value
-A001,P100,Leasing,Pressure Washer,10000,2026-06-04,24,0.0500,0.0000,1700,active,416.67
-A002,P200,Grounds,Leaf Blower Set,6000,2026-07-01,18,0.0510,0.0000,1700,active,250.00
-A003,P100,Maintenance,Generator,8000,2026-05-01,36,0.0525,0.0010,1705,active,300.00
+asset_id,property_id,allocation,asset_description,asset_value,start_date,term_months,bank_rate_annual,nim_annual,gl_account,status,tax_amount,admin_expense,risk_cost_recovery,salvage_value,salvage_periods
+A001,P100,Leasing,Pressure Washer,10000,2026-06-04,24,0.0500,0.0000,1700,active,600,500,416.67,416.67,1
+A002,P200,Grounds,Leaf Blower Set,6000,2026-07-01,18,0.0510,0.0000,1700,active,0,0,0,250.00,0
+A003,P100,Maintenance,Generator,8000,2026-05-01,36,0.0525,0.0010,1705,active,0,0,0,300.00,0

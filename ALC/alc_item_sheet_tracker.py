@@ -18,7 +18,7 @@ Acento Leasing Company (ALC)
 What the script does
 --------------------
 - Tracks each asset by property/allocation
-- Recalculates the monthly payment using bank rate + NIM
+- Recalculates the monthly payment using bank APR + NIM converted to an effective monthly lease rate
 - Produces a point-in-time portfolio snapshot
 - Produces a monthly invoice list
 - Produces a monthly bank-payable summary
@@ -32,7 +32,7 @@ Inputs
     term_months,bank_rate_annual,nim_annual,gl_account,status
 
     Optional columns:
-    salvage_value
+    tax_amount,admin_expense,risk_cost_recovery,salvage_value,salvage_periods
 
 2) rates.csv
     Required columns:
@@ -44,6 +44,7 @@ Outputs
 -------
 - Daily portfolio report
 - Asset-level snapshot with balance and amortization progress
+- Asset-level projected amortization schedule
 - Monthly invoice lines
 - Monthly bank-payable summary
 - CSV exports when requested
@@ -57,7 +58,7 @@ Suggested operation
 4) Run month-end invoicing once per month for all active assets.
 
 Date format: YYYY-MM-DD
-Rate format: decimal annual rate (5% = 0.05)
+Rate format: decimal annual APR (5% = 0.05)
 """
 
 from __future__ import annotations
@@ -68,7 +69,7 @@ import math
 from dataclasses import dataclass
 from datetime import date, datetime
 from pathlib import Path
-from typing import Dict, List, Tuple
+from typing import Dict, List, Optional, Tuple
 
 
 def parse_date(value: str) -> date:
@@ -97,6 +98,12 @@ def pmt(principal: float, monthly_rate: float, n_periods: int) -> float:
     return principal * (monthly_rate / (1.0 - math.pow(1.0 + monthly_rate, -n_periods)))
 
 
+def effective_monthly_rate(annual_rate: float) -> float:
+    if abs(annual_rate) < 1e-12:
+        return 0.0
+    return math.pow(1.0 + annual_rate, 1.0 / 12.0) - 1.0
+
+
 @dataclass
 class Asset:
     asset_id: str
@@ -110,7 +117,11 @@ class Asset:
     nim_annual: float
     gl_account: str
     status: str
+    tax_amount: float = 0.0
+    admin_expense: float = 0.0
+    risk_cost_recovery: float = 0.0
     salvage_value: float = 0.0
+    salvage_periods: int = 0
 
     @property
     def start_month(self) -> date:
@@ -118,7 +129,18 @@ class Asset:
 
     @property
     def final_month(self) -> date:
-        return add_months(self.start_month, self.term_months)
+        return add_months(self.start_month, self.payment_months)
+
+    @property
+    def payment_months(self) -> int:
+        return max(0, self.term_months - self.salvage_periods)
+
+    @property
+    def lease_base(self) -> float:
+        return max(
+            0.0,
+            self.asset_value + self.tax_amount + self.admin_expense + self.risk_cost_recovery - self.salvage_value,
+        )
 
 
 def load_assets(path: Path) -> List[Asset]:
@@ -156,7 +178,11 @@ def load_assets(path: Path) -> List[Asset]:
                     nim_annual=float(row["nim_annual"]),
                     gl_account=row["gl_account"].strip(),
                     status=row["status"].strip().lower(),
+                    tax_amount=float(row.get("tax_amount", "0") or 0),
+                    admin_expense=float(row.get("admin_expense", "0") or 0),
+                    risk_cost_recovery=float(row.get("risk_cost_recovery", "0") or 0),
                     salvage_value=float(row.get("salvage_value", "0") or 0),
+                    salvage_periods=int(row.get("salvage_periods", "0") or 0),
                 )
             )
     return out
@@ -178,6 +204,86 @@ def load_rates(path: Path) -> List[Tuple[date, float]]:
     return rates
 
 
+def load_posted_invoices(path: Path) -> List[Dict[str, object]]:
+    if not path.exists():
+        return []
+
+    with path.open("r", newline="", encoding="utf-8") as f:
+        reader = csv.DictReader(f)
+        out: List[Dict[str, object]] = []
+        for row in reader:
+            out.append(
+                {
+                    "asset_id": row["asset_id"].strip(),
+                    "property_id": row.get("property_id", "").strip(),
+                    "allocation": row.get("allocation", "").strip(),
+                    "gl_account": row.get("gl_account", "").strip(),
+                    "payment_month": row["payment_month"].strip(),
+                    "period": int(row["period"]),
+                    "term_to_maturity": int(row["term_to_maturity"]),
+                    "bank_rate_annual": float(row["bank_rate_annual"]),
+                    "nim_annual": float(row["nim_annual"]),
+                    "lease_rate_monthly": float(row["lease_rate_monthly"]),
+                    "lease_base": float(row["lease_base"]),
+                    "opening_balance": float(row["opening_balance"]),
+                    "payment": float(row["payment"]),
+                    "interest": float(row["interest"]),
+                    "amortization": float(row["amortization"]),
+                    "ending_balance": float(row["ending_balance"]),
+                    "rate_source": row.get("rate_source", "posted_ledger"),
+                    "posted_timestamp": row.get("posted_timestamp", ""),
+                }
+            )
+    return out
+
+
+def posted_invoice_map(rows: List[Dict[str, object]]) -> Dict[Tuple[str, str], Dict[str, object]]:
+    return {(str(r["asset_id"]), str(r["payment_month"])): r for r in rows}
+
+
+def save_posted_invoices(path: Path, rows: List[Dict[str, object]]) -> None:
+    if not rows:
+        return
+
+    normalized = []
+    for row in rows:
+        normalized.append(
+            {
+                "asset_id": row["asset_id"],
+                "property_id": row["property_id"],
+                "allocation": row["allocation"],
+                "gl_account": row.get("gl_account", ""),
+                "payment_month": row["payment_month"],
+                "period": int(row["period"]),
+                "term_to_maturity": int(row["term_to_maturity"]),
+                "bank_rate_annual": round(float(row["bank_rate_annual"]), 6),
+                "nim_annual": round(float(row["nim_annual"]), 6),
+                "lease_rate_monthly": round(float(row["lease_rate_monthly"]), 8),
+                "lease_base": round(float(row["lease_base"]), 2),
+                "opening_balance": round(float(row["opening_balance"]), 2),
+                "payment": round(float(row["payment"]), 2),
+                "interest": round(float(row["interest"]), 2),
+                "amortization": round(float(row["amortization"]), 2),
+                "ending_balance": round(float(row["ending_balance"]), 2),
+                "rate_source": row.get("rate_source", "posted_ledger"),
+                "posted_timestamp": row.get("posted_timestamp", datetime.now().isoformat(timespec="seconds")),
+            }
+        )
+
+    normalized.sort(key=lambda r: (str(r["asset_id"]), str(r["payment_month"])))
+    with path.open("w", newline="", encoding="utf-8") as f:
+        writer = csv.DictWriter(f, fieldnames=list(normalized[0].keys()))
+        writer.writeheader()
+        writer.writerows(normalized)
+
+
+def merge_posted_invoices(existing: List[Dict[str, object]], new_rows: List[Dict[str, object]]) -> List[Dict[str, object]]:
+    merged = posted_invoice_map(existing)
+    for row in new_rows:
+        merged[(str(row["asset_id"]), str(row["payment_month"]))] = row
+    return list(merged.values())
+
+
 def bank_rate_for_month(month: date, default_rate: float, rate_table: List[Tuple[date, float]]) -> float:
     chosen = default_rate
     for eff, rate in rate_table:
@@ -188,7 +294,112 @@ def bank_rate_for_month(month: date, default_rate: float, rate_table: List[Tuple
     return chosen
 
 
-def amortize_until(asset: Asset, as_of: date, rate_table: List[Tuple[date, float]]) -> Dict[str, float]:
+def rate_override_for_month(month: date, rate_table: List[Tuple[date, float]]) -> bool:
+    return any(eff <= month for eff, _ in rate_table)
+
+
+def build_asset_schedule(
+    asset: Asset,
+    rate_table: List[Tuple[date, float]],
+    posted_rows: Optional[Dict[Tuple[str, str], Dict[str, object]]] = None,
+) -> List[Dict[str, object]]:
+    balance = asset.lease_base
+    rows: List[Dict[str, object]] = []
+    posted_rows = posted_rows or {}
+
+    for i in range(asset.payment_months):
+        payment_month = add_months(asset.start_month, i + 1)
+        payment_month_key = payment_month.isoformat()
+        posted_row = posted_rows.get((asset.asset_id, payment_month_key))
+
+        if posted_row is not None:
+            row = {
+                "asset_id": asset.asset_id,
+                "property_id": posted_row.get("property_id", asset.property_id),
+                "allocation": posted_row.get("allocation", asset.allocation),
+                "gl_account": posted_row.get("gl_account", asset.gl_account),
+                "payment_month": payment_month_key,
+                "period": int(posted_row["period"]),
+                "term_to_maturity": int(posted_row["term_to_maturity"]),
+                "bank_rate_annual": round(float(posted_row["bank_rate_annual"]), 6),
+                "nim_annual": round(float(posted_row["nim_annual"]), 6),
+                "lease_rate_monthly": round(float(posted_row["lease_rate_monthly"]), 8),
+                "lease_base": round(float(posted_row["lease_base"]), 2),
+                "opening_balance": round(float(posted_row["opening_balance"]), 2),
+                "payment": round(float(posted_row["payment"]), 2),
+                "interest": round(float(posted_row["interest"]), 2),
+                "amortization": round(float(posted_row["amortization"]), 2),
+                "ending_balance": round(float(posted_row["ending_balance"]), 2),
+                "rate_source": "posted_ledger",
+            }
+            rows.append(row)
+            balance = float(posted_row["ending_balance"])
+            if balance <= 0.0:
+                break
+            continue
+
+        remaining = asset.payment_months - i
+        annual_bank_rate = bank_rate_for_month(payment_month, asset.bank_rate_annual, rate_table)
+        annual_rate = annual_bank_rate + asset.nim_annual
+        monthly_rate = effective_monthly_rate(annual_rate)
+        payment = pmt(balance, monthly_rate, remaining)
+        interest = balance * monthly_rate
+        principal = payment - interest
+
+        if principal > balance:
+            principal = balance
+            payment = interest + principal
+
+        ending_balance = balance - principal
+        if ending_balance <= 1e-8:
+            ending_balance = 0.0
+
+        rows.append(
+            {
+                "asset_id": asset.asset_id,
+                "property_id": asset.property_id,
+                "allocation": asset.allocation,
+                "gl_account": asset.gl_account,
+                "payment_month": payment_month.isoformat(),
+                "period": i + 1,
+                "term_to_maturity": remaining,
+                "bank_rate_annual": round(annual_bank_rate, 6),
+                "nim_annual": round(asset.nim_annual, 6),
+                "lease_rate_monthly": round(monthly_rate, 8),
+                "lease_base": round(asset.lease_base, 2),
+                "opening_balance": round(balance, 2),
+                "payment": round(payment, 2),
+                "interest": round(interest, 2),
+                "amortization": round(principal, 2),
+                "ending_balance": round(ending_balance, 2),
+                "rate_source": "rate_table" if rate_override_for_month(payment_month, rate_table) else "asset_default",
+            }
+        )
+
+        balance = ending_balance
+        if balance <= 0.0:
+            break
+
+    return rows
+
+
+def build_schedule(
+    assets: List[Asset],
+    rate_table: List[Tuple[date, float]],
+    posted_rows: Optional[Dict[Tuple[str, str], Dict[str, object]]] = None,
+) -> List[Dict[str, object]]:
+    rows: List[Dict[str, object]] = []
+    for asset in assets:
+        rows.extend(build_asset_schedule(asset, rate_table, posted_rows=posted_rows))
+    return rows
+
+
+def amortize_until(
+    asset: Asset,
+    as_of: date,
+    rate_table: List[Tuple[date, float]],
+    posted_rows: Optional[Dict[Tuple[str, str], Dict[str, object]]] = None,
+) -> Dict[str, float]:
     as_of_month = month_start(as_of)
     if as_of_month < asset.start_month:
         return {
@@ -196,43 +407,20 @@ def amortize_until(asset: Asset, as_of: date, rate_table: List[Tuple[date, float
             "interest_paid": 0.0,
             "amortization_paid": 0.0,
             "current_payment": 0.0,
-            "balance": asset.asset_value,
-            "months_remaining": asset.term_months,
+            "balance": asset.lease_base,
+            "months_remaining": asset.payment_months,
         }
 
-    elapsed = months_between(asset.start_month, as_of_month) + 1
-    periods = max(0, min(asset.term_months, elapsed))
+    schedule_rows = build_asset_schedule(asset, rate_table, posted_rows=posted_rows)
+    paid_rows = [r for r in schedule_rows if month_start(parse_date(str(r["payment_month"]))) <= as_of_month]
 
-    balance = asset.asset_value
-    interest_paid = 0.0
-    amort_paid = 0.0
-    current_payment = 0.0
+    periods = len(paid_rows)
+    interest_paid = sum(float(r["interest"]) for r in paid_rows)
+    amort_paid = sum(float(r["amortization"]) for r in paid_rows)
+    current_payment = float(paid_rows[-1]["payment"]) if paid_rows else 0.0
+    balance = float(paid_rows[-1]["ending_balance"]) if paid_rows else asset.lease_base
 
-    for i in range(periods):
-        current_month = add_months(asset.start_month, i)
-        remaining = asset.term_months - i
-        annual_rate = bank_rate_for_month(current_month, asset.bank_rate_annual, rate_table) + asset.nim_annual
-        monthly_rate = annual_rate / 12.0
-
-        payment = pmt(balance, monthly_rate, remaining)
-        interest = balance * monthly_rate
-        principal = payment - interest
-
-        # Keep ending balance from becoming tiny negative due to float rounding.
-        if principal > balance:
-            principal = balance
-            payment = interest + principal
-
-        balance -= principal
-        interest_paid += interest
-        amort_paid += principal
-        current_payment = payment
-
-        if balance <= 1e-8:
-            balance = 0.0
-            break
-
-    months_remaining = max(0, asset.term_months - periods)
+    months_remaining = max(0, asset.payment_months - periods)
     return {
         "installments_paid": periods,
         "interest_paid": interest_paid,
@@ -243,11 +431,16 @@ def amortize_until(asset: Asset, as_of: date, rate_table: List[Tuple[date, float
     }
 
 
-def build_snapshot(assets: List[Asset], rate_table: List[Tuple[date, float]], as_of: date) -> List[Dict[str, object]]:
+def build_snapshot(
+    assets: List[Asset],
+    rate_table: List[Tuple[date, float]],
+    as_of: date,
+    posted_rows: Optional[Dict[Tuple[str, str], Dict[str, object]]] = None,
+) -> List[Dict[str, object]]:
     rows: List[Dict[str, object]] = []
     for a in assets:
-        m = amortize_until(a, as_of, rate_table)
-        final_date = add_months(a.start_month, a.term_months)
+        m = amortize_until(a, as_of, rate_table, posted_rows=posted_rows)
+        final_date = a.final_month
         days_to_maturity = (final_date - as_of).days
         active = a.status == "active" and m["balance"] > 0 and as_of >= a.start_date
 
@@ -258,6 +451,12 @@ def build_snapshot(assets: List[Asset], rate_table: List[Tuple[date, float]], as
                 "allocation": a.allocation,
                 "status": "active" if active else "inactive",
                 "asset_value": round(a.asset_value, 2),
+                "tax_amount": round(a.tax_amount, 2),
+                "admin_expense": round(a.admin_expense, 2),
+                "risk_cost_recovery": round(a.risk_cost_recovery, 2),
+                "salvage_value": round(a.salvage_value, 2),
+                "salvage_periods": a.salvage_periods,
+                "lease_base": round(a.lease_base, 2),
                 "start_date": a.start_date.isoformat(),
                 "final_date": final_date.isoformat(),
                 "term_months": a.term_months,
@@ -280,6 +479,7 @@ def rows_total(rows: List[Dict[str, object]]) -> Dict[str, float]:
     total_assets = len(rows)
     active_assets = sum(1 for r in rows if r["status"] == "active")
     principal = sum(float(r["asset_value"]) for r in rows)
+    lease_base = sum(float(r["lease_base"]) for r in rows)
     interest_paid = sum(float(r["interest_paid"]) for r in rows)
     amort_paid = sum(float(r["amortization_paid"]) for r in rows)
     balance = sum(float(r["balance"]) for r in rows)
@@ -288,6 +488,7 @@ def rows_total(rows: List[Dict[str, object]]) -> Dict[str, float]:
         "total_assets": total_assets,
         "active_assets": active_assets,
         "asset_value_total": round(principal, 2),
+        "lease_base_total": round(lease_base, 2),
         "interest_paid_total": round(interest_paid, 2),
         "amortization_paid_total": round(amort_paid, 2),
         "balance_total": round(balance, 2),
@@ -314,6 +515,37 @@ def invoice_for_month(rows: List[Dict[str, object]], target_month: date) -> List
     return out
 
 
+def invoice_for_month_from_schedule(rows: List[Dict[str, object]], target_month: date) -> List[Dict[str, object]]:
+    out: List[Dict[str, object]] = []
+    for r in rows:
+        if month_start(parse_date(str(r["payment_month"]))) != target_month:
+            continue
+
+        out.append(
+            {
+                "invoice_month": target_month.isoformat(),
+                "payment_month": r["payment_month"],
+                "asset_id": r["asset_id"],
+                "property_id": r["property_id"],
+                "allocation": r["allocation"],
+                "gl_account": r["gl_account"],
+                "period": r["period"],
+                "term_to_maturity": r["term_to_maturity"],
+                "bank_rate_annual": r["bank_rate_annual"],
+                "nim_annual": r["nim_annual"],
+                "invoice_amount": r["payment"],
+                "interest_amount": r["interest"],
+                "amortization_amount": r["amortization"],
+                "lease_rate_monthly": r["lease_rate_monthly"],
+                "lease_base": r["lease_base"],
+                "opening_balance": r["opening_balance"],
+                "ending_balance": r["ending_balance"],
+                "rate_source": r["rate_source"],
+            }
+        )
+    return out
+
+
 def write_csv(path: Path, rows: List[Dict[str, object]]) -> None:
     if not rows:
         return
@@ -333,8 +565,9 @@ def print_totals(totals: Dict[str, float], title: str) -> None:
 def run_snapshot(args: argparse.Namespace) -> None:
     assets = load_assets(Path(args.assets))
     rates = load_rates(Path(args.rates))
+    posted_rows = posted_invoice_map(load_posted_invoices(Path(args.posted_ledger)))
     as_of = parse_date(args.as_of)
-    rows = build_snapshot(assets, rates, as_of)
+    rows = build_snapshot(assets, rates, as_of, posted_rows=posted_rows)
     totals = rows_total(rows)
 
     if args.output:
@@ -347,13 +580,44 @@ def run_snapshot(args: argparse.Namespace) -> None:
 def run_invoice(args: argparse.Namespace) -> None:
     assets = load_assets(Path(args.assets))
     rates = load_rates(Path(args.rates))
+    posted_path = Path(args.posted_ledger)
+    posted_existing = load_posted_invoices(posted_path)
+    posted_rows = posted_invoice_map(posted_existing)
     target_month = month_start(parse_date(args.month + "-01"))
-    rows = build_snapshot(assets, rates, target_month)
-    invoices = invoice_for_month(rows, target_month)
+    schedule_rows = build_schedule(assets, rates, posted_rows=posted_rows)
+    invoices = invoice_for_month_from_schedule(schedule_rows, target_month)
 
     total_invoice = round(sum(float(r["invoice_amount"]) for r in invoices), 2)
     print(f"invoice lines: {len(invoices)}")
     print(f"invoice total ({target_month.isoformat()}): {total_invoice}")
+
+    posted_batch = []
+    timestamp = datetime.now().isoformat(timespec="seconds")
+    for row in invoices:
+        posted_batch.append(
+            {
+                "asset_id": row["asset_id"],
+                "property_id": row["property_id"],
+                "allocation": row["allocation"],
+                "gl_account": row["gl_account"],
+                "payment_month": row["payment_month"],
+                "period": row["period"],
+                "term_to_maturity": row["term_to_maturity"],
+                "bank_rate_annual": row["bank_rate_annual"],
+                "nim_annual": row["nim_annual"],
+                "lease_rate_monthly": row["lease_rate_monthly"],
+                "lease_base": row["lease_base"],
+                "opening_balance": row["opening_balance"],
+                "payment": row["invoice_amount"],
+                "interest": row["interest_amount"],
+                "amortization": row["amortization_amount"],
+                "ending_balance": row["ending_balance"],
+                "rate_source": row["rate_source"],
+                "posted_timestamp": timestamp,
+            }
+        )
+    save_posted_invoices(posted_path, merge_posted_invoices(posted_existing, posted_batch))
+    print(f"posted invoice ledger updated: {args.posted_ledger}")
 
     if args.output:
         write_csv(Path(args.output), invoices)
@@ -363,9 +627,10 @@ def run_invoice(args: argparse.Namespace) -> None:
 def run_bank_payable(args: argparse.Namespace) -> None:
     assets = load_assets(Path(args.assets))
     rates = load_rates(Path(args.rates))
+    posted_rows = posted_invoice_map(load_posted_invoices(Path(args.posted_ledger)))
     target_month = month_start(parse_date(args.month + "-01"))
-    rows = build_snapshot(assets, rates, target_month)
-    invoices = invoice_for_month(rows, target_month)
+    schedule_rows = build_schedule(assets, rates, posted_rows=posted_rows)
+    invoices = invoice_for_month_from_schedule(schedule_rows, target_month)
     bank_payable = round(sum(float(r["invoice_amount"]) for r in invoices), 2)
     print(f"bank payable for {target_month.isoformat()}: {bank_payable}")
 
@@ -373,18 +638,36 @@ def run_bank_payable(args: argparse.Namespace) -> None:
 def run_daily(args: argparse.Namespace) -> None:
     assets = load_assets(Path(args.assets))
     rates = load_rates(Path(args.rates))
+    posted_rows = posted_invoice_map(load_posted_invoices(Path(args.posted_ledger)))
     as_of = parse_date(args.as_of)
-    rows = build_snapshot(assets, rates, as_of)
+    rows = build_snapshot(assets, rates, as_of, posted_rows=posted_rows)
     totals = rows_total(rows)
     print_totals(totals, f"Daily portfolio report ({as_of.isoformat()})")
 
     current_month = month_start(as_of)
-    invoices = invoice_for_month(rows, current_month)
+    schedule_rows = build_schedule(assets, rates, posted_rows=posted_rows)
+    invoices = invoice_for_month_from_schedule(schedule_rows, current_month)
     due_count = len(invoices)
     due_amount = round(sum(float(r["invoice_amount"]) for r in invoices), 2)
     print(f"\nmonth_to_invoice: {current_month.isoformat()}")
     print(f"invoice_lines_due: {due_count}")
     print(f"invoice_amount_due: {due_amount}")
+
+
+def run_schedule(args: argparse.Namespace) -> None:
+    assets = load_assets(Path(args.assets))
+    rates = load_rates(Path(args.rates))
+    posted_rows = posted_invoice_map(load_posted_invoices(Path(args.posted_ledger)))
+    rows = build_schedule(assets, rates, posted_rows=posted_rows)
+
+    if args.asset_id:
+        rows = [r for r in rows if r["asset_id"] == args.asset_id]
+
+    if args.output:
+        write_csv(Path(args.output), rows)
+        print(f"schedule written to {args.output}")
+
+    print(f"schedule rows: {len(rows)}")
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -394,6 +677,7 @@ def build_parser() -> argparse.ArgumentParser:
     common = argparse.ArgumentParser(add_help=False)
     common.add_argument("--assets", default="assets.csv", help="path to assets.csv")
     common.add_argument("--rates", default="rates.csv", help="path to rates.csv")
+    common.add_argument("--posted-ledger", default="posted_invoices.csv", help="path to posted invoice ledger csv")
 
     s1 = sub.add_parser("snapshot", parents=[common], help="point-in-time asset snapshot")
     s1.add_argument("--as-of", required=True, help="YYYY-MM-DD")
@@ -412,6 +696,11 @@ def build_parser() -> argparse.ArgumentParser:
     s4 = sub.add_parser("daily", parents=[common], help="daily operating report")
     s4.add_argument("--as-of", required=True, help="YYYY-MM-DD")
     s4.set_defaults(func=run_daily)
+
+    s5 = sub.add_parser("schedule", parents=[common], help="projected amortization schedule")
+    s5.add_argument("--asset-id", help="limit schedule to one asset")
+    s5.add_argument("--output", help="csv output path")
+    s5.set_defaults(func=run_schedule)
 
     return p
 

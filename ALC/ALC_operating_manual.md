@@ -7,7 +7,8 @@ The system is designed to be simple:
 - One script
 - One asset table
 - One rate table
-- One monthly ledger
+- One projected amortization schedule
+- One posted invoice ledger
 - One daily report
 - One monthly invoice run
 - One bank-payable run
@@ -64,16 +65,25 @@ When a new asset is purchased or allocated:
 - Create the asset record
 - Assign property and allocation
 - Set start date and lease term
-- Set asset value and salvage value
-- Assign bank rate and NIM assumption
+- Set asset value, tax, admin expense, risk recovery, and salvage value
+- Set salvage periods when a final residual month is reserved
+- Assign bank APR and NIM assumption
 - Assign GL account
 - Mark asset as active
 
 The system then calculates:
-- monthly installment
+- lease base
+- projected monthly installment table
 - expected maturity date
 - opening balance
-- amortization schedule
+- projected amortization schedule
+
+The projected schedule uses the entry-time bank APR plus NIM across the full remaining term until a month-specific bank rate is loaded.
+
+The lease math is:
+- lease base = asset value + tax + admin expense + risk cost recovery - salvage value
+- lease rate = effective monthly rate derived from annual APR + NIM
+- payment months = term months - salvage periods
 
 ### 2. Daily Operations Workflow
 Each morning the operator runs the daily script.
@@ -87,6 +97,8 @@ The script outputs:
 - assets with missing fields
 - balance reconciliation totals
 
+For any month already invoiced, the script reads the posted invoice ledger first and treats those rows as locked historical actuals.
+
 If no action is needed, the operator simply reviews the report and closes the task.
 
 ### 3. Monthly Invoicing Workflow
@@ -97,6 +109,13 @@ Recommended policy:
 - Invoice all active assets as of the close date
 - Include line-item detail by asset or allocation
 - Group by property for customer invoicing
+
+At invoicing time the script should:
+- read the projected schedule for the target month
+- replace the target-month rate with the current bank rate if a month-specific rate exists
+- generate invoice lines from that month's schedule rows
+- write the billed rows to the posted invoice ledger
+- keep those posted rows fixed in future runs
 
 This is easier than anniversary billing because it keeps accounting, collections, and bank reconciliation aligned.
 
@@ -116,8 +135,9 @@ The operator uses this to pay the bank and cross-check the debt ledger.
 At month-end the operator should:
 - confirm all asset changes are entered
 - confirm the bank rate table is current
-- run the month-end ledger close
+- review the projected schedule for reasonableness
 - generate invoices
+- update the posted invoice ledger
 - generate bank payable report
 - export reports to accounting
 - save a locked month snapshot
@@ -139,9 +159,11 @@ After close, changes should be handled by adjustment entries, not by editing clo
 1. Invoice register
 2. Property-level billing summary
 3. Asset-level amortization report
-4. Bank debt summary
-5. Closed-month snapshot
-6. Variance report
+4. Projected amortization schedule
+5. Posted invoice ledger
+6. Bank debt summary
+7. Closed-month snapshot
+8. Variance report
 
 ### Exception Reports
 1. Asset missing start date
@@ -158,6 +180,7 @@ After close, changes should be handled by adjustment entries, not by editing clo
 - Review exception list
 - Enter new assets
 - Confirm rate changes
+- Review projected schedule for new assets
 - Launch invoicing on month-end
 - Launch bank payable run
 - Save or export reports
@@ -199,11 +222,19 @@ That means the operator always has a clear next step.
 
 1. Are all assets entered?
 2. Are all rates updated?
-3. Has the month been closed?
+3. Has the projected schedule been reviewed?
 4. Generate invoices.
-5. Generate bank payable report.
-6. Export closed-month package.
-7. Lock the month.
+5. Post the invoice rows to the invoice ledger.
+6. Generate bank payable report.
+7. Export closed-month package.
+8. Lock the month.
+
+## Schedule and Ledger Rules
+
+- The projected amortization schedule may change for the current month and future months when a new bank rate is loaded.
+- A posted invoice row is a historical actual and must not be recalculated by later runs.
+- Future months should always roll forward from the ending balance of the latest posted month.
+- If a closed month needs correction, post an adjustment entry instead of editing the posted ledger row.
 
 ## Operating Principle
 
