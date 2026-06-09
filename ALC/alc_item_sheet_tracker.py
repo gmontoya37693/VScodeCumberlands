@@ -72,7 +72,11 @@ from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 
 
+# ---------------------------
+# Date and Finance Utilities
+# ---------------------------
 def parse_date(value: str) -> date:
+    """Parse a YYYY-MM-DD string into a date object."""
     return datetime.strptime(value, "%Y-%m-%d").date()
 
 
@@ -91,6 +95,7 @@ def months_between(start_month: date, end_month: date) -> int:
 
 
 def pmt(principal: float, monthly_rate: float, n_periods: int) -> float:
+    """Return the fixed payment amount for an annuity-style amortization."""
     if n_periods <= 0:
         return 0.0
     if abs(monthly_rate) < 1e-12:
@@ -99,11 +104,15 @@ def pmt(principal: float, monthly_rate: float, n_periods: int) -> float:
 
 
 def effective_monthly_rate(annual_rate: float) -> float:
+    """Convert annual APR to an effective monthly rate."""
     if abs(annual_rate) < 1e-12:
         return 0.0
     return math.pow(1.0 + annual_rate, 1.0 / 12.0) - 1.0
 
 
+# ------------------
+# Core Data Models
+# ------------------
 @dataclass
 class Asset:
     asset_id: str
@@ -144,6 +153,7 @@ class Asset:
 
 
 def load_assets(path: Path) -> List[Asset]:
+    # Asset rows define the contract inputs used to build lease base and schedule.
     out: List[Asset] = []
     with path.open("r", newline="", encoding="utf-8") as f:
         reader = csv.DictReader(f)
@@ -188,7 +198,11 @@ def load_assets(path: Path) -> List[Asset]:
     return out
 
 
+# -------------------------
+# Input/Output Data Access
+# -------------------------
 def load_rates(path: Path) -> List[Tuple[date, float]]:
+    # Rates are sorted so month lookups can take the latest effective rate <= target month.
     rates: List[Tuple[date, float]] = []
     with path.open("r", newline="", encoding="utf-8") as f:
         reader = csv.DictReader(f)
@@ -205,6 +219,7 @@ def load_rates(path: Path) -> List[Tuple[date, float]]:
 
 
 def load_posted_invoices(path: Path) -> List[Dict[str, object]]:
+    # Posted rows are historical actuals and should override recalculated values.
     if not path.exists():
         return []
 
@@ -238,10 +253,12 @@ def load_posted_invoices(path: Path) -> List[Dict[str, object]]:
 
 
 def posted_invoice_map(rows: List[Dict[str, object]]) -> Dict[Tuple[str, str], Dict[str, object]]:
+    # Key by (asset_id, payment_month) for fast row replacement while building schedules.
     return {(str(r["asset_id"]), str(r["payment_month"])): r for r in rows}
 
 
 def save_posted_invoices(path: Path, rows: List[Dict[str, object]]) -> None:
+    # Normalize numeric precision before writing to keep ledger exports stable.
     if not rows:
         return
 
@@ -278,13 +295,18 @@ def save_posted_invoices(path: Path, rows: List[Dict[str, object]]) -> None:
 
 
 def merge_posted_invoices(existing: List[Dict[str, object]], new_rows: List[Dict[str, object]]) -> List[Dict[str, object]]:
+    # New postings replace matching month keys to keep one final row per asset/month.
     merged = posted_invoice_map(existing)
     for row in new_rows:
         merged[(str(row["asset_id"]), str(row["payment_month"]))] = row
     return list(merged.values())
 
 
+# -------------------------
+# Rate and Schedule Engine
+# -------------------------
 def bank_rate_for_month(month: date, default_rate: float, rate_table: List[Tuple[date, float]]) -> float:
+    # Use the latest known bank rate on or before the requested month.
     chosen = default_rate
     for eff, rate in rate_table:
         if eff <= month:
@@ -303,6 +325,10 @@ def build_asset_schedule(
     rate_table: List[Tuple[date, float]],
     posted_rows: Optional[Dict[Tuple[str, str], Dict[str, object]]] = None,
 ) -> List[Dict[str, object]]:
+    """Build the month-by-month schedule for one asset.
+
+    If a month already exists in the posted ledger, that month is reused as locked history.
+    """
     balance = asset.lease_base
     rows: List[Dict[str, object]] = []
     posted_rows = posted_rows or {}
@@ -313,6 +339,7 @@ def build_asset_schedule(
         posted_row = posted_rows.get((asset.asset_id, payment_month_key))
 
         if posted_row is not None:
+            # Locked month: keep posted values and continue from posted ending balance.
             row = {
                 "asset_id": asset.asset_id,
                 "property_id": posted_row.get("property_id", asset.property_id),
@@ -339,6 +366,7 @@ def build_asset_schedule(
             continue
 
         remaining = asset.payment_months - i
+        # Open month: compute payment from current balance and remaining term.
         annual_bank_rate = bank_rate_for_month(payment_month, asset.bank_rate_annual, rate_table)
         annual_rate = annual_bank_rate + asset.nim_annual
         monthly_rate = effective_monthly_rate(annual_rate)
@@ -388,18 +416,23 @@ def build_schedule(
     rate_table: List[Tuple[date, float]],
     posted_rows: Optional[Dict[Tuple[str, str], Dict[str, object]]] = None,
 ) -> List[Dict[str, object]]:
+    """Build projected/actual schedule rows across all assets."""
     rows: List[Dict[str, object]] = []
     for asset in assets:
         rows.extend(build_asset_schedule(asset, rate_table, posted_rows=posted_rows))
     return rows
 
 
+# ---------------------------------
+# Snapshot and Invoice Transforming
+# ---------------------------------
 def amortize_until(
     asset: Asset,
     as_of: date,
     rate_table: List[Tuple[date, float]],
     posted_rows: Optional[Dict[Tuple[str, str], Dict[str, object]]] = None,
 ) -> Dict[str, float]:
+    """Summarize payments, interest, amortization, and remaining balance up to as_of."""
     as_of_month = month_start(as_of)
     if as_of_month < asset.start_month:
         return {
@@ -411,6 +444,7 @@ def amortize_until(
             "months_remaining": asset.payment_months,
         }
 
+    # Reuse schedule logic so snapshot math and invoice math stay aligned.
     schedule_rows = build_asset_schedule(asset, rate_table, posted_rows=posted_rows)
     paid_rows = [r for r in schedule_rows if month_start(parse_date(str(r["payment_month"]))) <= as_of_month]
 
@@ -437,6 +471,7 @@ def build_snapshot(
     as_of: date,
     posted_rows: Optional[Dict[Tuple[str, str], Dict[str, object]]] = None,
 ) -> List[Dict[str, object]]:
+    """Return one current-state row per asset for reporting and exports."""
     rows: List[Dict[str, object]] = []
     for a in assets:
         m = amortize_until(a, as_of, rate_table, posted_rows=posted_rows)
@@ -516,6 +551,7 @@ def invoice_for_month(rows: List[Dict[str, object]], target_month: date) -> List
 
 
 def invoice_for_month_from_schedule(rows: List[Dict[str, object]], target_month: date) -> List[Dict[str, object]]:
+    # Invoices are produced directly from schedule rows of the selected month.
     out: List[Dict[str, object]] = []
     for r in rows:
         if month_start(parse_date(str(r["payment_month"]))) != target_month:
@@ -562,6 +598,9 @@ def print_totals(totals: Dict[str, float], title: str) -> None:
         print(f"{k}: {v}")
 
 
+# ----------------------
+# Command Entry Handlers
+# ----------------------
 def run_snapshot(args: argparse.Namespace) -> None:
     assets = load_assets(Path(args.assets))
     rates = load_rates(Path(args.rates))
@@ -593,6 +632,7 @@ def run_invoice(args: argparse.Namespace) -> None:
 
     posted_batch = []
     timestamp = datetime.now().isoformat(timespec="seconds")
+    # Persist the invoiced month as posted so later runs treat it as locked history.
     for row in invoices:
         posted_batch.append(
             {
@@ -655,6 +695,7 @@ def run_daily(args: argparse.Namespace) -> None:
 
 
 def run_schedule(args: argparse.Namespace) -> None:
+    # Useful for reviewing full projected/posted schedule before month-end close.
     assets = load_assets(Path(args.assets))
     rates = load_rates(Path(args.rates))
     posted_rows = posted_invoice_map(load_posted_invoices(Path(args.posted_ledger)))
@@ -670,7 +711,11 @@ def run_schedule(args: argparse.Namespace) -> None:
     print(f"schedule rows: {len(rows)}")
 
 
+# ---------------------
+# CLI Wiring and Main
+# ---------------------
 def build_parser() -> argparse.ArgumentParser:
+    # All commands share the same source files to keep reporting and invoicing consistent.
     p = argparse.ArgumentParser(description="ALC lease tracker")
     sub = p.add_subparsers(dest="command", required=True)
 

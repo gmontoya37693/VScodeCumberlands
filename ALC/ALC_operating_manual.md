@@ -1,5 +1,12 @@
 # ALC Item Sheet Operating Manual
 
+## Quick Navigation
+- Purpose and operating model
+- Daily behavior and script prompts
+- Core workflows (asset entry, invoicing, bank payable, month-end)
+- Reports, duties by role, and decision flows
+- Schedule and ledger rules
+
 ## Purpose
 This manual defines the daily, weekly, month-end, and exception-handling workflow for Acento Leasing Company (ALC) asset invoicing and lease tracking.
 
