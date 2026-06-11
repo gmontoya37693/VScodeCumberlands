@@ -65,11 +65,38 @@ from __future__ import annotations
 
 import argparse
 import csv
+import hashlib
+import json
 import math
+import shutil
+import uuid
 from dataclasses import dataclass
 from datetime import date, datetime
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
+
+
+SCRIPT_VERSION = "2026.07.10-compliance-v1"
+POSTED_LEDGER_FIELDS = [
+    "asset_id",
+    "property_id",
+    "allocation",
+    "gl_account",
+    "payment_month",
+    "period",
+    "term_to_maturity",
+    "bank_rate_annual",
+    "nim_annual",
+    "lease_rate_monthly",
+    "lease_base",
+    "opening_balance",
+    "payment",
+    "interest",
+    "amortization",
+    "ending_balance",
+    "rate_source",
+    "posted_timestamp",
+]
 
 
 # ---------------------------
@@ -108,6 +135,92 @@ def effective_monthly_rate(annual_rate: float) -> float:
     if abs(annual_rate) < 1e-12:
         return 0.0
     return math.pow(1.0 + annual_rate, 1.0 / 12.0) - 1.0
+
+
+def month_key(d: date) -> str:
+    return d.strftime("%Y-%m")
+
+
+def generate_run_id() -> str:
+    return f"{datetime.now().strftime('%Y%m%dT%H%M%S')}-{uuid.uuid4().hex[:8]}"
+
+
+def ensure_parent(path: Path) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+
+
+def hash_file(path: Path) -> str:
+    if not path.exists():
+        return ""
+
+    h = hashlib.sha256()
+    with path.open("rb") as f:
+        for chunk in iter(lambda: f.read(1024 * 1024), b""):
+            h.update(chunk)
+    return h.hexdigest()
+
+
+def collect_hashes(paths: Dict[str, Path]) -> Dict[str, str]:
+    return {k: hash_file(v) for k, v in paths.items()}
+
+
+def backup_file(path: Path, backup_dir: Path, run_id: str) -> Optional[str]:
+    if not path.exists():
+        return None
+
+    dest = backup_dir / run_id / path.name
+    dest.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copy2(path, dest)
+    return str(dest)
+
+
+def write_manifest(manifest_dir: Path, run_id: str, payload: Dict[str, object]) -> Path:
+    manifest_path = manifest_dir / f"{run_id}.json"
+    ensure_parent(manifest_path)
+    manifest_path.write_text(json.dumps(payload, indent=2, sort_keys=True), encoding="utf-8")
+    return manifest_path
+
+
+def load_baseline_config(path: Path) -> Dict[str, object]:
+    if not path.exists():
+        return {}
+    return json.loads(path.read_text(encoding="utf-8"))
+
+
+def save_baseline_config(path: Path, cfg: Dict[str, object]) -> None:
+    ensure_parent(path)
+    path.write_text(json.dumps(cfg, indent=2, sort_keys=True), encoding="utf-8")
+
+
+def load_closed_periods(path: Path) -> List[str]:
+    if not path.exists():
+        return []
+
+    months: List[str] = []
+    with path.open("r", newline="", encoding="utf-8") as f:
+        reader = csv.DictReader(f)
+        for row in reader:
+            m = (row.get("month") or "").strip()
+            if m:
+                months.append(m)
+    return sorted(set(months))
+
+
+def save_closed_periods(path: Path, months: List[str]) -> None:
+    ensure_parent(path)
+    unique_months = sorted(set(months))
+    with path.open("w", newline="", encoding="utf-8") as f:
+        writer = csv.DictWriter(f, fieldnames=["month"])
+        writer.writeheader()
+        for m in unique_months:
+            writer.writerow({"month": m})
+
+
+def initialize_posted_ledger(path: Path) -> None:
+    ensure_parent(path)
+    with path.open("w", newline="", encoding="utf-8") as f:
+        writer = csv.DictWriter(f, fieldnames=POSTED_LEDGER_FIELDS)
+        writer.writeheader()
 
 
 # ------------------
@@ -288,8 +401,9 @@ def save_posted_invoices(path: Path, rows: List[Dict[str, object]]) -> None:
         )
 
     normalized.sort(key=lambda r: (str(r["asset_id"]), str(r["payment_month"])))
+    ensure_parent(path)
     with path.open("w", newline="", encoding="utf-8") as f:
-        writer = csv.DictWriter(f, fieldnames=list(normalized[0].keys()))
+        writer = csv.DictWriter(f, fieldnames=POSTED_LEDGER_FIELDS)
         writer.writeheader()
         writer.writerows(normalized)
 
@@ -585,6 +699,7 @@ def invoice_for_month_from_schedule(rows: List[Dict[str, object]], target_month:
 def write_csv(path: Path, rows: List[Dict[str, object]]) -> None:
     if not rows:
         return
+    ensure_parent(path)
     with path.open("w", newline="", encoding="utf-8") as f:
         writer = csv.DictWriter(f, fieldnames=list(rows[0].keys()))
         writer.writeheader()
@@ -602,9 +717,21 @@ def print_totals(totals: Dict[str, float], title: str) -> None:
 # Command Entry Handlers
 # ----------------------
 def run_snapshot(args: argparse.Namespace) -> None:
-    assets = load_assets(Path(args.assets))
-    rates = load_rates(Path(args.rates))
-    posted_rows = posted_invoice_map(load_posted_invoices(Path(args.posted_ledger)))
+    run_id = generate_run_id()
+    assets_path = Path(args.assets)
+    rates_path = Path(args.rates)
+    posted_path = Path(args.posted_ledger)
+    baseline_path = Path(args.baseline_config)
+    input_paths = {
+        "assets": assets_path,
+        "rates": rates_path,
+        "posted_ledger": posted_path,
+        "baseline_config": baseline_path,
+    }
+
+    assets = load_assets(assets_path)
+    rates = load_rates(rates_path)
+    posted_rows = posted_invoice_map(load_posted_invoices(posted_path))
     as_of = parse_date(args.as_of)
     rows = build_snapshot(assets, rates, as_of, posted_rows=posted_rows)
     totals = rows_total(rows)
@@ -615,14 +742,62 @@ def run_snapshot(args: argparse.Namespace) -> None:
 
     print_totals(totals, f"ALC Snapshot as of {as_of.isoformat()}")
 
+    manifest = {
+        "run_id": run_id,
+        "timestamp": datetime.now().isoformat(timespec="seconds"),
+        "command": "snapshot",
+        "script_version": SCRIPT_VERSION,
+        "operator": args.operator,
+        "as_of": as_of.isoformat(),
+        "row_count": len(rows),
+        "totals": totals,
+        "input_hashes": collect_hashes(input_paths),
+        "output_file": args.output or "",
+    }
+    manifest_path = write_manifest(Path(args.manifest_dir), run_id, manifest)
+    print(f"run manifest: {manifest_path}")
+
 
 def run_invoice(args: argparse.Namespace) -> None:
-    assets = load_assets(Path(args.assets))
-    rates = load_rates(Path(args.rates))
+    run_id = generate_run_id()
+    assets_path = Path(args.assets)
+    rates_path = Path(args.rates)
     posted_path = Path(args.posted_ledger)
+    closed_periods_path = Path(args.closed_periods)
+    baseline_path = Path(args.baseline_config)
+    backup_dir = Path(args.backup_dir)
+    output_path = Path(args.output) if args.output else None
+    input_paths = {
+        "assets": assets_path,
+        "rates": rates_path,
+        "posted_ledger": posted_path,
+        "closed_periods": closed_periods_path,
+        "baseline_config": baseline_path,
+    }
+    backups: List[str] = []
+    pre_hashes = collect_hashes(input_paths)
+
+    baseline_cfg = load_baseline_config(baseline_path)
+    target_month = month_start(parse_date(args.month + "-01"))
+    go_live_str = str(baseline_cfg.get("go_live_date", "")).strip()
+    if go_live_str:
+        go_live_month = month_start(parse_date(go_live_str))
+        if target_month < go_live_month and not args.allow_closed_adjustment:
+            raise ValueError(
+                f"invoice month {target_month.isoformat()} is before go-live {go_live_month.isoformat()}"
+            )
+
+    closed_months = load_closed_periods(closed_periods_path)
+    target_month_key = month_key(target_month)
+    if target_month_key in closed_months and not args.allow_closed_adjustment:
+        raise ValueError(
+            f"invoice month {target_month_key} is closed. Use --allow-closed-adjustment for authorized corrections."
+        )
+
+    assets = load_assets(assets_path)
+    rates = load_rates(rates_path)
     posted_existing = load_posted_invoices(posted_path)
     posted_rows = posted_invoice_map(posted_existing)
-    target_month = month_start(parse_date(args.month + "-01"))
     schedule_rows = build_schedule(assets, rates, posted_rows=posted_rows)
     invoices = invoice_for_month_from_schedule(schedule_rows, target_month)
 
@@ -656,29 +831,94 @@ def run_invoice(args: argparse.Namespace) -> None:
                 "posted_timestamp": timestamp,
             }
         )
+
+    b = backup_file(posted_path, backup_dir, run_id)
+    if b:
+        backups.append(b)
     save_posted_invoices(posted_path, merge_posted_invoices(posted_existing, posted_batch))
     print(f"posted invoice ledger updated: {args.posted_ledger}")
 
+    if args.close_period:
+        b = backup_file(closed_periods_path, backup_dir, run_id)
+        if b:
+            backups.append(b)
+        save_closed_periods(closed_periods_path, closed_months + [target_month_key])
+        print(f"period closed: {target_month_key}")
+
     if args.output:
-        write_csv(Path(args.output), invoices)
+        if output_path is not None:
+            b = backup_file(output_path, backup_dir, run_id)
+            if b:
+                backups.append(b)
+            write_csv(output_path, invoices)
         print(f"invoice file written to {args.output}")
+
+    post_hashes = collect_hashes(input_paths)
+    manifest = {
+        "run_id": run_id,
+        "timestamp": datetime.now().isoformat(timespec="seconds"),
+        "command": "invoice",
+        "script_version": SCRIPT_VERSION,
+        "operator": args.operator,
+        "month": target_month.isoformat(),
+        "allow_closed_adjustment": args.allow_closed_adjustment,
+        "close_period": args.close_period,
+        "invoice_lines": len(invoices),
+        "invoice_total": total_invoice,
+        "posted_ledger": str(posted_path),
+        "input_hashes_before": pre_hashes,
+        "input_hashes_after": post_hashes,
+        "backups": backups,
+        "output_file": args.output or "",
+    }
+    manifest_path = write_manifest(Path(args.manifest_dir), run_id, manifest)
+    print(f"run manifest: {manifest_path}")
 
 
 def run_bank_payable(args: argparse.Namespace) -> None:
-    assets = load_assets(Path(args.assets))
-    rates = load_rates(Path(args.rates))
-    posted_rows = posted_invoice_map(load_posted_invoices(Path(args.posted_ledger)))
+    run_id = generate_run_id()
+    assets_path = Path(args.assets)
+    rates_path = Path(args.rates)
+    posted_path = Path(args.posted_ledger)
+    assets = load_assets(assets_path)
+    rates = load_rates(rates_path)
+    posted_rows = posted_invoice_map(load_posted_invoices(posted_path))
     target_month = month_start(parse_date(args.month + "-01"))
     schedule_rows = build_schedule(assets, rates, posted_rows=posted_rows)
     invoices = invoice_for_month_from_schedule(schedule_rows, target_month)
     bank_payable = round(sum(float(r["invoice_amount"]) for r in invoices), 2)
     print(f"bank payable for {target_month.isoformat()}: {bank_payable}")
 
+    manifest = {
+        "run_id": run_id,
+        "timestamp": datetime.now().isoformat(timespec="seconds"),
+        "command": "bank-payable",
+        "script_version": SCRIPT_VERSION,
+        "operator": args.operator,
+        "month": target_month.isoformat(),
+        "invoice_lines": len(invoices),
+        "bank_payable_total": bank_payable,
+        "input_hashes": collect_hashes(
+            {
+                "assets": assets_path,
+                "rates": rates_path,
+                "posted_ledger": posted_path,
+                "baseline_config": Path(args.baseline_config),
+            }
+        ),
+    }
+    manifest_path = write_manifest(Path(args.manifest_dir), run_id, manifest)
+    print(f"run manifest: {manifest_path}")
+
 
 def run_daily(args: argparse.Namespace) -> None:
-    assets = load_assets(Path(args.assets))
-    rates = load_rates(Path(args.rates))
-    posted_rows = posted_invoice_map(load_posted_invoices(Path(args.posted_ledger)))
+    run_id = generate_run_id()
+    assets_path = Path(args.assets)
+    rates_path = Path(args.rates)
+    posted_path = Path(args.posted_ledger)
+    assets = load_assets(assets_path)
+    rates = load_rates(rates_path)
+    posted_rows = posted_invoice_map(load_posted_invoices(posted_path))
     as_of = parse_date(args.as_of)
     rows = build_snapshot(assets, rates, as_of, posted_rows=posted_rows)
     totals = rows_total(rows)
@@ -693,12 +933,38 @@ def run_daily(args: argparse.Namespace) -> None:
     print(f"invoice_lines_due: {due_count}")
     print(f"invoice_amount_due: {due_amount}")
 
+    manifest = {
+        "run_id": run_id,
+        "timestamp": datetime.now().isoformat(timespec="seconds"),
+        "command": "daily",
+        "script_version": SCRIPT_VERSION,
+        "operator": args.operator,
+        "as_of": as_of.isoformat(),
+        "portfolio_totals": totals,
+        "invoice_lines_due": due_count,
+        "invoice_amount_due": due_amount,
+        "input_hashes": collect_hashes(
+            {
+                "assets": assets_path,
+                "rates": rates_path,
+                "posted_ledger": posted_path,
+                "baseline_config": Path(args.baseline_config),
+            }
+        ),
+    }
+    manifest_path = write_manifest(Path(args.manifest_dir), run_id, manifest)
+    print(f"run manifest: {manifest_path}")
+
 
 def run_schedule(args: argparse.Namespace) -> None:
     # Useful for reviewing full projected/posted schedule before month-end close.
-    assets = load_assets(Path(args.assets))
-    rates = load_rates(Path(args.rates))
-    posted_rows = posted_invoice_map(load_posted_invoices(Path(args.posted_ledger)))
+    run_id = generate_run_id()
+    assets_path = Path(args.assets)
+    rates_path = Path(args.rates)
+    posted_path = Path(args.posted_ledger)
+    assets = load_assets(assets_path)
+    rates = load_rates(rates_path)
+    posted_rows = posted_invoice_map(load_posted_invoices(posted_path))
     rows = build_schedule(assets, rates, posted_rows=posted_rows)
 
     if args.asset_id:
@@ -709,6 +975,86 @@ def run_schedule(args: argparse.Namespace) -> None:
         print(f"schedule written to {args.output}")
 
     print(f"schedule rows: {len(rows)}")
+
+    manifest = {
+        "run_id": run_id,
+        "timestamp": datetime.now().isoformat(timespec="seconds"),
+        "command": "schedule",
+        "script_version": SCRIPT_VERSION,
+        "operator": args.operator,
+        "asset_filter": args.asset_id or "",
+        "row_count": len(rows),
+        "output_file": args.output or "",
+        "input_hashes": collect_hashes(
+            {
+                "assets": assets_path,
+                "rates": rates_path,
+                "posted_ledger": posted_path,
+                "baseline_config": Path(args.baseline_config),
+            }
+        ),
+    }
+    manifest_path = write_manifest(Path(args.manifest_dir), run_id, manifest)
+    print(f"run manifest: {manifest_path}")
+
+
+def run_init_baseline(args: argparse.Namespace) -> None:
+    run_id = generate_run_id()
+    go_live = month_start(parse_date(args.go_live))
+
+    assets_path = Path(args.assets)
+    rates_path = Path(args.rates)
+    posted_path = Path(args.posted_ledger)
+    closed_periods_path = Path(args.closed_periods)
+    baseline_path = Path(args.baseline_config)
+    backup_dir = Path(args.backup_dir)
+
+    inputs = {
+        "assets": assets_path,
+        "rates": rates_path,
+        "posted_ledger": posted_path,
+        "closed_periods": closed_periods_path,
+        "baseline_config": baseline_path,
+    }
+    backups: List[str] = []
+    for p in inputs.values():
+        b = backup_file(p, backup_dir, run_id)
+        if b:
+            backups.append(b)
+
+    if args.reset_posted_ledger:
+        initialize_posted_ledger(posted_path)
+        print(f"posted ledger initialized: {posted_path}")
+
+    if args.reset_closed_periods:
+        save_closed_periods(closed_periods_path, [])
+        print(f"closed periods reset: {closed_periods_path}")
+
+    baseline_cfg = {
+        "go_live_date": go_live.isoformat(),
+        "initialized_at": datetime.now().isoformat(timespec="seconds"),
+        "initialized_by": args.operator,
+        "run_id": run_id,
+        "notes": args.notes or "",
+        "script_version": SCRIPT_VERSION,
+    }
+    save_baseline_config(baseline_path, baseline_cfg)
+    print(f"baseline config written: {baseline_path}")
+
+    manifest = {
+        "run_id": run_id,
+        "timestamp": datetime.now().isoformat(timespec="seconds"),
+        "command": "init-baseline",
+        "script_version": SCRIPT_VERSION,
+        "operator": args.operator,
+        "go_live_date": go_live.isoformat(),
+        "reset_posted_ledger": args.reset_posted_ledger,
+        "reset_closed_periods": args.reset_closed_periods,
+        "backups": backups,
+        "input_hashes_after": collect_hashes(inputs),
+    }
+    manifest_path = write_manifest(Path(args.manifest_dir), run_id, manifest)
+    print(f"run manifest: {manifest_path}")
 
 
 # ---------------------
@@ -723,6 +1069,11 @@ def build_parser() -> argparse.ArgumentParser:
     common.add_argument("--assets", default="assets.csv", help="path to assets.csv")
     common.add_argument("--rates", default="rates.csv", help="path to rates.csv")
     common.add_argument("--posted-ledger", default="posted_invoices.csv", help="path to posted invoice ledger csv")
+    common.add_argument("--closed-periods", default="closed_periods.csv", help="path to closed periods csv")
+    common.add_argument("--baseline-config", default="baseline_config.json", help="path to baseline config json")
+    common.add_argument("--manifest-dir", default="run_manifests", help="directory for run manifest json files")
+    common.add_argument("--backup-dir", default="backups", help="directory for pre-write backups")
+    common.add_argument("--operator", default="unknown", help="operator name or id for audit logs")
 
     s1 = sub.add_parser("snapshot", parents=[common], help="point-in-time asset snapshot")
     s1.add_argument("--as-of", required=True, help="YYYY-MM-DD")
@@ -732,6 +1083,12 @@ def build_parser() -> argparse.ArgumentParser:
     s2 = sub.add_parser("invoice", parents=[common], help="invoice list for YYYY-MM")
     s2.add_argument("--month", required=True, help="YYYY-MM")
     s2.add_argument("--output", help="csv output path")
+    s2.add_argument(
+        "--allow-closed-adjustment",
+        action="store_true",
+        help="allow invoicing a month already marked closed",
+    )
+    s2.add_argument("--close-period", action="store_true", help="mark the invoiced month as closed after posting")
     s2.set_defaults(func=run_invoice)
 
     s3 = sub.add_parser("bank-payable", parents=[common], help="bank payable for YYYY-MM")
@@ -746,6 +1103,13 @@ def build_parser() -> argparse.ArgumentParser:
     s5.add_argument("--asset-id", help="limit schedule to one asset")
     s5.add_argument("--output", help="csv output path")
     s5.set_defaults(func=run_schedule)
+
+    s6 = sub.add_parser("init-baseline", parents=[common], help="initialize clean production baseline")
+    s6.add_argument("--go-live", required=True, help="go-live date YYYY-MM-DD (e.g. 2026-07-01)")
+    s6.add_argument("--reset-posted-ledger", action="store_true", help="reset posted ledger to header only")
+    s6.add_argument("--reset-closed-periods", action="store_true", help="reset closed periods file to empty")
+    s6.add_argument("--notes", help="optional baseline notes")
+    s6.set_defaults(func=run_init_baseline)
 
     return p
 

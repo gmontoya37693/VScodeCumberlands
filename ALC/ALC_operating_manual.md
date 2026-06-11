@@ -4,6 +4,7 @@
 - Purpose and operating model
 - Daily behavior and script prompts
 - Core workflows (asset entry, invoicing, bank payable, month-end)
+- Baseline initialization and compliance artifacts
 - Reports, duties by role, and decision flows
 - Schedule and ledger rules
 
@@ -151,6 +152,25 @@ At month-end the operator should:
 
 After close, changes should be handled by adjustment entries, not by editing closed rows.
 
+### 6. Baseline Initialization Workflow
+Use this once before production start (example: go-live on 2026-07-01).
+
+Recommended baseline steps:
+- Back up current working files.
+- Initialize baseline config with go-live date.
+- Reset posted invoice ledger for clean production history.
+- Reset closed periods file.
+- Store the baseline run manifest.
+
+Suggested command pattern:
+- run `init-baseline` with `--go-live YYYY-MM-DD`
+- include `--reset-posted-ledger` and `--reset-closed-periods` for clean start
+- include `--operator` for traceability
+
+After baseline:
+- Invoicing before go-live is blocked unless explicitly authorized.
+- Closed months are blocked unless `allow-closed-adjustment` is explicitly used.
+
 ## Reports
 
 ### Daily Reports
@@ -171,6 +191,23 @@ After close, changes should be handled by adjustment entries, not by editing clo
 6. Bank debt summary
 7. Closed-month snapshot
 8. Variance report
+
+## Compliance Artifacts
+
+The script now maintains operational traceability files:
+- `baseline_config.json`: go-live date and baseline metadata
+- `posted_invoices.csv`: posted invoice ledger (historical actuals)
+- `closed_periods.csv`: list of closed months (`YYYY-MM`)
+- `run_manifests/*.json`: one manifest per command run
+- `backups/<run_id>/...`: file snapshots created before write operations
+
+Each manifest should include:
+- run ID
+- operator
+- command and timestamp
+- key totals and row counts
+- input file hashes (before and after when applicable)
+- backup file references
 
 ### Exception Reports
 1. Asset missing start date

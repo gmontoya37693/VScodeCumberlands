@@ -1,0 +1,32 @@
+{
+  "allow_closed_adjustment": false,
+  "backups": [
+    "ALC/backups/20260610T145941-45d59a3b/posted_invoices.baseline.csv",
+    "ALC/backups/20260610T145941-45d59a3b/closed_periods.baseline.csv"
+  ],
+  "close_period": true,
+  "command": "invoice",
+  "input_hashes_after": {
+    "assets": "26b9cc92eab5827bb3eee2bdba2cc7dcd805921a284fe06fa9eeb6d93f655531",
+    "baseline_config": "77f1f8fd503231323d4efb319b41f71fc038f96de26079db65b904767bbc2a4d",
+    "closed_periods": "c1203f6d01991dac1580bdb99710ac82708e41f4e79b0305e3d95c281fc02e8f",
+    "posted_ledger": "b789dc923bf4596c1b7492280884ac7db8394e0fb7f6d3b8e3cfce4558cec7f4",
+    "rates": "03aa6f4644046e3c246b0134b5bda45cfdd07686b21d48fe082a3c6bb795f756"
+  },
+  "input_hashes_before": {
+    "assets": "26b9cc92eab5827bb3eee2bdba2cc7dcd805921a284fe06fa9eeb6d93f655531",
+    "baseline_config": "77f1f8fd503231323d4efb319b41f71fc038f96de26079db65b904767bbc2a4d",
+    "closed_periods": "06e85f7d81c00e873e9db2d61c20e29ceb84bd86d406f0e796ebdbf55a6f242b",
+    "posted_ledger": "4769f88d91ef099d8c95c19c0db01bb7dca60bb8f1b1ed00c8b14f3667c6090f",
+    "rates": "03aa6f4644046e3c246b0134b5bda45cfdd07686b21d48fe082a3c6bb795f756"
+  },
+  "invoice_lines": 2,
+  "invoice_total": 738.07,
+  "month": "2026-07-01",
+  "operator": "german",
+  "output_file": "ALC/invoices_2026-07.baseline.csv",
+  "posted_ledger": "ALC/posted_invoices.baseline.csv",
+  "run_id": "20260610T145941-45d59a3b",
+  "script_version": "2026.07.10-compliance-v1",
+  "timestamp": "2026-06-10T14:59:41"
+}
