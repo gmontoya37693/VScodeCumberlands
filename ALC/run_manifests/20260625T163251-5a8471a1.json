@@ -1,0 +1,26 @@
+{
+  "as_of": "2026-06-25",
+  "command": "daily",
+  "input_hashes": {
+    "assets": "26b9cc92eab5827bb3eee2bdba2cc7dcd805921a284fe06fa9eeb6d93f655531",
+    "baseline_config": "77f1f8fd503231323d4efb319b41f71fc038f96de26079db65b904767bbc2a4d",
+    "posted_ledger": "7e00db2cafaa6bcbaadfe88b2abedee284d39846f035de59d03c7a0feb0a28d6",
+    "rates": "03aa6f4644046e3c246b0134b5bda45cfdd07686b21d48fe082a3c6bb795f756"
+  },
+  "invoice_amount_due": 230.72,
+  "invoice_lines_due": 1,
+  "operator": "german",
+  "portfolio_totals": {
+    "active_assets": 2,
+    "amortization_paid_total": 198.74,
+    "asset_value_total": 24000.0,
+    "balance_total": 24351.26,
+    "current_payment_active_total": 230.72,
+    "interest_paid_total": 31.98,
+    "lease_base_total": 24550.0,
+    "total_assets": 3
+  },
+  "run_id": "20260625T163251-5a8471a1",
+  "script_version": "2026.07.10-compliance-v1",
+  "timestamp": "2026-06-25T16:32:51"
+}
