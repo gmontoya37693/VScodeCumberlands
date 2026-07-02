@@ -5,6 +5,7 @@
 - Daily behavior and script prompts
 - Core workflows (asset entry, invoicing, bank payable, month-end)
 - Baseline initialization and compliance artifacts
+- Official file locations and short operator commands
 - Reports, duties by role, and decision flows
 - Schedule and ledger rules
 
@@ -34,6 +35,37 @@ The script should support two modes:
 - If nothing changed and no billing action is due, the script skips questions.
 - It generates the daily report, inventory snapshot, and maturity summary.
 - It exits cleanly with a message such as: "No operational actions required today."
+
+## Official File Locations
+
+The script now defaults to one official set of files inside the ALC folder:
+- assets input: [ALC/assets.csv](ALC/assets.csv)
+- rates input: [ALC/rates.csv](ALC/rates.csv)
+- posted ledger: [ALC/posted_invoices.csv](ALC/posted_invoices.csv)
+- closed periods: [ALC/closed_periods.csv](ALC/closed_periods.csv)
+- baseline config: [ALC/baseline_config.json](ALC/baseline_config.json)
+- manifests folder: [ALC/run_manifests](ALC/run_manifests)
+- backups folder: [ALC/backups](ALC/backups)
+- one-pager workbook: [ALC/ALC - Asset Calculation Unit.xlsx](ALC/ALC%20-%20Asset%20Calculation%20Unit.xlsx)
+
+CLI overrides are still available for admin/testing use, but operators should use the official default paths.
+
+## Official Operator Command Set
+
+Short wrapper scripts are available in [ALC/scripts](ALC/scripts):
+- baseline reset: [ALC/scripts/op_init_baseline.sh](ALC/scripts/op_init_baseline.sh)
+- daily run: [ALC/scripts/op_daily.sh](ALC/scripts/op_daily.sh)
+- schedule review: [ALC/scripts/op_schedule.sh](ALC/scripts/op_schedule.sh)
+- month-end invoice: [ALC/scripts/op_invoice.sh](ALC/scripts/op_invoice.sh)
+- bank payable: [ALC/scripts/op_bank_payable.sh](ALC/scripts/op_bank_payable.sh)
+- one-pager workbook: [ALC/scripts/op_one_pager.sh](ALC/scripts/op_one_pager.sh)
+
+Examples:
+- baseline: `ALC/scripts/op_init_baseline.sh german 2026-07-01 "Production start"`
+- daily: `ALC/scripts/op_daily.sh german 2026-07-02`
+- invoice: `ALC/scripts/op_invoice.sh german 2026-07`
+- bank payable: `ALC/scripts/op_bank_payable.sh german 2026-07`
+- one-pager: `ALC/scripts/op_one_pager.sh german`
 
 ## Daily Behavior
 

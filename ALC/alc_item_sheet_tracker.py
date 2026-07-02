@@ -76,7 +76,16 @@ from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 
 
+BASE_DIR = Path(__file__).resolve().parent
 SCRIPT_VERSION = "2026.07.10-compliance-v1"
+DEFAULT_ASSETS = BASE_DIR / "assets.csv"
+DEFAULT_RATES = BASE_DIR / "rates.csv"
+DEFAULT_POSTED_LEDGER = BASE_DIR / "posted_invoices.csv"
+DEFAULT_CLOSED_PERIODS = BASE_DIR / "closed_periods.csv"
+DEFAULT_BASELINE_CONFIG = BASE_DIR / "baseline_config.json"
+DEFAULT_MANIFEST_DIR = BASE_DIR / "run_manifests"
+DEFAULT_BACKUP_DIR = BASE_DIR / "backups"
+DEFAULT_ONE_PAGER = BASE_DIR / "ALC - Asset Calculation Unit.xlsx"
 POSTED_LEDGER_FIELDS = [
     "asset_id",
     "property_id",
@@ -1298,13 +1307,17 @@ def build_parser() -> argparse.ArgumentParser:
     sub = p.add_subparsers(dest="command", required=True)
 
     common = argparse.ArgumentParser(add_help=False)
-    common.add_argument("--assets", default="assets.csv", help="path to assets.csv")
-    common.add_argument("--rates", default="rates.csv", help="path to rates.csv")
-    common.add_argument("--posted-ledger", default="posted_invoices.csv", help="path to posted invoice ledger csv")
-    common.add_argument("--closed-periods", default="closed_periods.csv", help="path to closed periods csv")
-    common.add_argument("--baseline-config", default="baseline_config.json", help="path to baseline config json")
-    common.add_argument("--manifest-dir", default="run_manifests", help="directory for run manifest json files")
-    common.add_argument("--backup-dir", default="backups", help="directory for pre-write backups")
+    common.add_argument("--assets", default=str(DEFAULT_ASSETS), help="path to assets.csv")
+    common.add_argument("--rates", default=str(DEFAULT_RATES), help="path to rates.csv")
+    common.add_argument(
+        "--posted-ledger", default=str(DEFAULT_POSTED_LEDGER), help="path to posted invoice ledger csv"
+    )
+    common.add_argument("--closed-periods", default=str(DEFAULT_CLOSED_PERIODS), help="path to closed periods csv")
+    common.add_argument("--baseline-config", default=str(DEFAULT_BASELINE_CONFIG), help="path to baseline config json")
+    common.add_argument(
+        "--manifest-dir", default=str(DEFAULT_MANIFEST_DIR), help="directory for run manifest json files"
+    )
+    common.add_argument("--backup-dir", default=str(DEFAULT_BACKUP_DIR), help="directory for pre-write backups")
     common.add_argument("--operator", default="unknown", help="operator name or id for audit logs")
 
     s1 = sub.add_parser("snapshot", parents=[common], help="point-in-time asset snapshot")
@@ -1347,7 +1360,7 @@ def build_parser() -> argparse.ArgumentParser:
     s7.add_argument("--asset-id", help="generate workbook for one asset only")
     s7.add_argument(
         "--output",
-        default="ALC - Asset Calculation Unit.xlsx",
+        default=str(DEFAULT_ONE_PAGER),
         help="excel workbook output path (created once, tabs updated by asset)",
     )
     s7.set_defaults(func=run_one_pager)
