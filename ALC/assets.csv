@@ -1,0 +1,4 @@
+asset_id,property_id,allocation,asset_description,asset_value,start_date,term_months,bank_rate_annual,nim_annual,gl_account,status,tax_amount,admin_expense,risk_cost_recovery,salvage_value,salvage_periods
+,,,,"$11,100.00",,23,,0.0%,,,$600.00,$500.00,$416.67,$416.67,1
+,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,

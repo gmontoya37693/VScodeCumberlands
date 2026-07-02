@@ -103,8 +103,14 @@ POSTED_LEDGER_FIELDS = [
 # Date and Finance Utilities
 # ---------------------------
 def parse_date(value: str) -> date:
-    """Parse a YYYY-MM-DD string into a date object."""
-    return datetime.strptime(value, "%Y-%m-%d").date()
+    """Parse common date formats used in CSV exports into a date object."""
+    raw = value.strip()
+    for fmt in ("%Y-%m-%d", "%m/%d/%y", "%m/%d/%Y"):
+        try:
+            return datetime.strptime(raw, fmt).date()
+        except ValueError:
+            continue
+    raise ValueError(f"unsupported date format: {value!r}")
 
 
 def month_start(d: date) -> date:
@@ -706,6 +712,181 @@ def write_csv(path: Path, rows: List[Dict[str, object]]) -> None:
         writer.writerows(rows)
 
 
+def safe_sheet_title(raw: str) -> str:
+    invalid = set('[]:*?/\\')
+    cleaned = "".join(ch for ch in (raw or "") if ch not in invalid).strip()
+    return (cleaned or "asset")[:31]
+
+
+def asset_schedule_with_opening_row(
+    asset: Asset,
+    rate_table: List[Tuple[date, float]],
+    posted_rows: Optional[Dict[Tuple[str, str], Dict[str, object]]] = None,
+) -> List[Dict[str, object]]:
+    rows: List[Dict[str, object]] = []
+    opening_annual = bank_rate_for_month(asset.start_month, asset.bank_rate_annual, rate_table)
+    opening_monthly = effective_monthly_rate(opening_annual + asset.nim_annual)
+    rows.append(
+        {
+            "ledger_date": asset.start_month,
+            "period": 0,
+            "loan_rate_annual": opening_annual,
+            "lease_rate_monthly": opening_monthly,
+            "term_to_maturity": asset.payment_months,
+            "installment": asset.lease_base,
+            "interest": 0.0,
+            "amortization": 0.0,
+            "balance": asset.lease_base,
+            "rate_source": "opening",
+        }
+    )
+
+    schedule = build_asset_schedule(asset, rate_table, posted_rows=posted_rows)
+    for row in schedule:
+        rows.append(
+            {
+                "ledger_date": parse_date(str(row["payment_month"])),
+                "period": int(row["period"]),
+                "loan_rate_annual": float(row["bank_rate_annual"]),
+                "lease_rate_monthly": float(row["lease_rate_monthly"]),
+                "term_to_maturity": int(row["term_to_maturity"]),
+                "installment": float(row["payment"]),
+                "interest": float(row["interest"]),
+                "amortization": float(row["amortization"]),
+                "balance": float(row["ending_balance"]),
+                "rate_source": str(row.get("rate_source", "")),
+            }
+        )
+    return rows
+
+
+def write_asset_one_pager_sheet(
+    ws,
+    asset: Asset,
+    rate_table: List[Tuple[date, float]],
+    posted_rows: Optional[Dict[Tuple[str, str], Dict[str, object]]] = None,
+) -> None:
+    from openpyxl.styles import Alignment, Font, PatternFill
+
+    title_fill = PatternFill(fill_type="solid", fgColor="1F3A68")
+    input_fill = PatternFill(fill_type="solid", fgColor="D9EAD3")
+    header_fill = PatternFill(fill_type="solid", fgColor="E9EEF5")
+
+    ws.merge_cells("A1:I1")
+    ws["A1"] = "ALC - Acento Leasing Company Asset Calculation Model"
+    ws["A1"].font = Font(color="FFFFFF", bold=True, size=14)
+    ws["A1"].alignment = Alignment(horizontal="center")
+    ws["A1"].fill = title_fill
+
+    input_rows = [
+        ("Asset ID", asset.asset_id),
+        ("Property ID", asset.property_id),
+        ("Allocation", asset.allocation),
+        ("Asset Description", asset.asset_description),
+        ("Asset Cost", asset.asset_value),
+        ("Tax", asset.tax_amount),
+        ("Admin Expenses", asset.admin_expense),
+        ("Risk Cost Recovery", asset.risk_cost_recovery),
+        ("Salvage Value", asset.salvage_value),
+        ("Lease Base", asset.lease_base),
+        ("Salvage Periods", asset.salvage_periods),
+        ("Lifespan (months)", asset.term_months),
+        ("NIM (annual)", asset.nim_annual),
+    ]
+    for idx, (label, value) in enumerate(input_rows, start=3):
+        ws[f"A{idx}"] = label
+        ws[f"B{idx}"] = value
+        ws[f"A{idx}"].fill = input_fill
+        ws[f"B{idx}"].fill = input_fill
+        ws[f"A{idx}"].font = Font(bold=True)
+
+    ws["A18"] = "Ledger Date"
+    ws["B18"] = "Period"
+    ws["C18"] = "Loan Rate"
+    ws["D18"] = "Lease Rate"
+    ws["E18"] = "Term to Maturity"
+    ws["F18"] = "Installment"
+    ws["G18"] = "Interest"
+    ws["H18"] = "Amortization"
+    ws["I18"] = "Balance"
+    for cell in ws[18]:
+        cell.font = Font(bold=True)
+        cell.fill = header_fill
+        cell.alignment = Alignment(horizontal="center")
+
+    schedule_rows = asset_schedule_with_opening_row(asset, rate_table, posted_rows=posted_rows)
+    row_idx = 19
+    for row in schedule_rows:
+        ws[f"A{row_idx}"] = row["ledger_date"]
+        ws[f"B{row_idx}"] = row["period"]
+        ws[f"C{row_idx}"] = row["loan_rate_annual"]
+        ws[f"D{row_idx}"] = row["lease_rate_monthly"]
+        ws[f"E{row_idx}"] = row["term_to_maturity"]
+        ws[f"F{row_idx}"] = row["installment"]
+        ws[f"G{row_idx}"] = row["interest"]
+        ws[f"H{row_idx}"] = row["amortization"]
+        ws[f"I{row_idx}"] = row["balance"]
+        row_idx += 1
+
+    for r in range(19, row_idx):
+        ws[f"A{r}"].number_format = "yyyy-mm-dd"
+        ws[f"C{r}"].number_format = "0.00%"
+        ws[f"D{r}"].number_format = "0.00%"
+        ws[f"F{r}"].number_format = "$#,##0.00"
+        ws[f"G{r}"].number_format = "$#,##0.00"
+        ws[f"H{r}"].number_format = "$#,##0.00"
+        ws[f"I{r}"].number_format = "$#,##0.00"
+
+    ws["B7"].number_format = "$#,##0.00"
+    ws["B8"].number_format = "$#,##0.00"
+    ws["B9"].number_format = "$#,##0.00"
+    ws["B10"].number_format = "$#,##0.00"
+    ws["B11"].number_format = "$#,##0.00"
+    ws["B12"].number_format = "$#,##0.00"
+    ws["B15"].number_format = "0.00%"
+
+    ws.column_dimensions["A"].width = 18
+    ws.column_dimensions["B"].width = 14
+    ws.column_dimensions["C"].width = 12
+    ws.column_dimensions["D"].width = 12
+    ws.column_dimensions["E"].width = 16
+    ws.column_dimensions["F"].width = 14
+    ws.column_dimensions["G"].width = 12
+    ws.column_dimensions["H"].width = 14
+    ws.column_dimensions["I"].width = 14
+    ws.freeze_panes = "A19"
+
+
+def write_one_pager_workbook(
+    assets: List[Asset],
+    rate_table: List[Tuple[date, float]],
+    posted_rows: Optional[Dict[Tuple[str, str], Dict[str, object]]],
+    output_path: Path,
+) -> None:
+    try:
+        from openpyxl import Workbook, load_workbook
+    except ImportError as exc:
+        raise RuntimeError("openpyxl is required for one-pager workbook generation") from exc
+
+    ensure_parent(output_path)
+    if output_path.exists():
+        wb = load_workbook(output_path)
+    else:
+        wb = Workbook()
+
+    if "Sheet" in wb.sheetnames and len(wb.sheetnames) == 1:
+        del wb["Sheet"]
+
+    for asset in assets:
+        desired = safe_sheet_title(asset.asset_id)
+        if desired in wb.sheetnames:
+            del wb[desired]
+        ws = wb.create_sheet(desired)
+        write_asset_one_pager_sheet(ws, asset, rate_table, posted_rows=posted_rows)
+
+    wb.save(output_path)
+
+
 def print_totals(totals: Dict[str, float], title: str) -> None:
     print(f"\n{title}")
     print("-" * len(title))
@@ -998,6 +1179,57 @@ def run_schedule(args: argparse.Namespace) -> None:
     print(f"run manifest: {manifest_path}")
 
 
+def run_one_pager(args: argparse.Namespace) -> None:
+    run_id = generate_run_id()
+    assets_path = Path(args.assets)
+    rates_path = Path(args.rates)
+    posted_path = Path(args.posted_ledger)
+    output_path = Path(args.output)
+    backup_dir = Path(args.backup_dir)
+
+    assets = load_assets(assets_path)
+    rates = load_rates(rates_path)
+    posted_rows = posted_invoice_map(load_posted_invoices(posted_path))
+
+    backups: List[str] = []
+    b = backup_file(output_path, backup_dir, run_id)
+    if b:
+        backups.append(b)
+
+    if args.asset_id:
+        assets = [a for a in assets if a.asset_id == args.asset_id]
+
+    if not assets:
+        raise ValueError("no assets found for one-pager generation")
+
+    write_one_pager_workbook(assets, rates, posted_rows, output_path)
+    print(f"one-pager workbook written: {output_path}")
+    print(f"tabs generated: {len(assets)}")
+
+    manifest = {
+        "run_id": run_id,
+        "timestamp": datetime.now().isoformat(timespec="seconds"),
+        "command": "one-pager",
+        "script_version": SCRIPT_VERSION,
+        "operator": args.operator,
+        "asset_filter": args.asset_id or "",
+        "assets_processed": len(assets),
+        "output_file": str(output_path),
+        "backups": backups,
+        "input_hashes": collect_hashes(
+            {
+                "assets": assets_path,
+                "rates": rates_path,
+                "posted_ledger": posted_path,
+                "baseline_config": Path(args.baseline_config),
+            }
+        ),
+        "output_hash": hash_file(output_path),
+    }
+    manifest_path = write_manifest(Path(args.manifest_dir), run_id, manifest)
+    print(f"run manifest: {manifest_path}")
+
+
 def run_init_baseline(args: argparse.Namespace) -> None:
     run_id = generate_run_id()
     go_live = month_start(parse_date(args.go_live))
@@ -1110,6 +1342,15 @@ def build_parser() -> argparse.ArgumentParser:
     s6.add_argument("--reset-closed-periods", action="store_true", help="reset closed periods file to empty")
     s6.add_argument("--notes", help="optional baseline notes")
     s6.set_defaults(func=run_init_baseline)
+
+    s7 = sub.add_parser("one-pager", parents=[common], help="create/update one worksheet tab per asset")
+    s7.add_argument("--asset-id", help="generate workbook for one asset only")
+    s7.add_argument(
+        "--output",
+        default="ALC - Asset Calculation Unit.xlsx",
+        help="excel workbook output path (created once, tabs updated by asset)",
+    )
+    s7.set_defaults(func=run_one_pager)
 
     return p
 
