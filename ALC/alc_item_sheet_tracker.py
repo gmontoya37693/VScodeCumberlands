@@ -64,6 +64,7 @@ Rate format: decimal annual APR (5% = 0.05)
 from __future__ import annotations
 
 import argparse
+import calendar
 import csv
 import hashlib
 import json
@@ -71,7 +72,7 @@ import math
 import shutil
 import uuid
 from dataclasses import dataclass
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 
@@ -86,12 +87,15 @@ DEFAULT_BASELINE_CONFIG = BASE_DIR / "baseline_config.json"
 DEFAULT_MANIFEST_DIR = BASE_DIR / "run_manifests"
 DEFAULT_BACKUP_DIR = BASE_DIR / "backups"
 DEFAULT_ONE_PAGER = BASE_DIR / "ALC - Asset Calculation Unit.xlsx"
+DEFAULT_BANK_PAYABLE = BASE_DIR / "bank_payable.csv"
 POSTED_LEDGER_FIELDS = [
     "asset_id",
     "property_id",
     "allocation",
     "gl_account",
     "payment_month",
+    "due_date",
+    "billing_date",
     "period",
     "term_to_maturity",
     "bank_rate_annual",
@@ -105,6 +109,14 @@ POSTED_LEDGER_FIELDS = [
     "ending_balance",
     "rate_source",
     "posted_timestamp",
+]
+BANK_PAYABLE_FIELDS = [
+    "month",
+    "billing_date",
+    "invoice_lines",
+    "bank_payable_total",
+    "operator",
+    "updated_at",
 ]
 
 
@@ -130,6 +142,35 @@ def add_months(d: date, months: int) -> date:
     y = d.year + (d.month - 1 + months) // 12
     m = (d.month - 1 + months) % 12 + 1
     return date(y, m, 1)
+
+
+def add_months_keep_day(d: date, months: int) -> date:
+    y = d.year + (d.month - 1 + months) // 12
+    m = (d.month - 1 + months) % 12 + 1
+    last_day = calendar.monthrange(y, m)[1]
+    return date(y, m, min(d.day, last_day))
+
+
+def next_working_day(d: date) -> date:
+    out = d
+    while out.weekday() >= 5:
+        out += timedelta(days=1)
+    return out
+
+
+def billing_run_date_for_month(target_month: date, billing_day: int) -> date:
+    month = month_start(target_month)
+    if billing_day < 1 or billing_day > 31:
+        raise ValueError("billing_day must be between 1 and 31")
+    last_day = calendar.monthrange(month.year, month.month)[1]
+    anchor = date(month.year, month.month, min(billing_day, last_day))
+    return next_working_day(anchor)
+
+
+def billing_cycle_window(target_month: date, billing_day: int) -> Tuple[date, date]:
+    current_billing = billing_run_date_for_month(target_month, billing_day)
+    previous_billing = billing_run_date_for_month(add_months(target_month, -1), billing_day)
+    return previous_billing, current_billing
 
 
 def months_between(start_month: date, end_month: date) -> int:
@@ -266,7 +307,7 @@ class Asset:
 
     @property
     def final_month(self) -> date:
-        return add_months(self.start_month, self.payment_months)
+        return add_months_keep_day(self.start_date, self.payment_months)
 
     @property
     def payment_months(self) -> int:
@@ -355,13 +396,17 @@ def load_posted_invoices(path: Path) -> List[Dict[str, object]]:
         reader = csv.DictReader(f)
         out: List[Dict[str, object]] = []
         for row in reader:
+            due_date = (row.get("due_date") or row.get("payment_month") or "").strip()
+            billing_date = (row.get("billing_date") or "").strip()
             out.append(
                 {
                     "asset_id": row["asset_id"].strip(),
                     "property_id": row.get("property_id", "").strip(),
                     "allocation": row.get("allocation", "").strip(),
                     "gl_account": row.get("gl_account", "").strip(),
-                    "payment_month": row["payment_month"].strip(),
+                    "payment_month": due_date,
+                    "due_date": due_date,
+                    "billing_date": billing_date,
                     "period": int(row["period"]),
                     "term_to_maturity": int(row["term_to_maturity"]),
                     "bank_rate_annual": float(row["bank_rate_annual"]),
@@ -399,6 +444,8 @@ def save_posted_invoices(path: Path, rows: List[Dict[str, object]]) -> None:
                 "allocation": row["allocation"],
                 "gl_account": row.get("gl_account", ""),
                 "payment_month": row["payment_month"],
+                "due_date": row.get("due_date", row["payment_month"]),
+                "billing_date": row.get("billing_date", ""),
                 "period": int(row["period"]),
                 "term_to_maturity": int(row["term_to_maturity"]),
                 "bank_rate_annual": round(float(row["bank_rate_annual"]), 6),
@@ -429,6 +476,59 @@ def merge_posted_invoices(existing: List[Dict[str, object]], new_rows: List[Dict
     for row in new_rows:
         merged[(str(row["asset_id"]), str(row["payment_month"]))] = row
     return list(merged.values())
+
+
+def load_bank_payable_rows(path: Path) -> List[Dict[str, object]]:
+    if not path.exists():
+        return []
+
+    out: List[Dict[str, object]] = []
+    with path.open("r", newline="", encoding="utf-8") as f:
+        reader = csv.DictReader(f)
+        for row in reader:
+            m = (row.get("month") or "").strip()
+            if not m:
+                continue
+            out.append(
+                {
+                    "month": m,
+                    "billing_date": (row.get("billing_date") or "").strip(),
+                    "invoice_lines": int(row.get("invoice_lines") or 0),
+                    "bank_payable_total": float(row.get("bank_payable_total") or 0.0),
+                    "operator": (row.get("operator") or "").strip(),
+                    "updated_at": (row.get("updated_at") or "").strip(),
+                }
+            )
+    return out
+
+
+def save_bank_payable_rows(path: Path, rows: List[Dict[str, object]]) -> None:
+    ensure_parent(path)
+    normalized = []
+    for row in rows:
+        normalized.append(
+            {
+                "month": str(row["month"]),
+                "billing_date": str(row.get("billing_date", "")),
+                "invoice_lines": int(row.get("invoice_lines", 0)),
+                "bank_payable_total": round(float(row.get("bank_payable_total", 0.0)), 2),
+                "operator": str(row.get("operator", "")),
+                "updated_at": str(row.get("updated_at", "")),
+            }
+        )
+
+    normalized.sort(key=lambda r: str(r["month"]))
+    with path.open("w", newline="", encoding="utf-8") as f:
+        writer = csv.DictWriter(f, fieldnames=BANK_PAYABLE_FIELDS)
+        writer.writeheader()
+        writer.writerows(normalized)
+
+
+def upsert_bank_payable_month(path: Path, month: str, row: Dict[str, object]) -> None:
+    rows = load_bank_payable_rows(path)
+    by_month = {str(r["month"]): r for r in rows}
+    by_month[month] = row
+    save_bank_payable_rows(path, list(by_month.values()))
 
 
 # -------------------------
@@ -463,9 +563,9 @@ def build_asset_schedule(
     posted_rows = posted_rows or {}
 
     for i in range(asset.payment_months):
-        payment_month = add_months(asset.start_month, i + 1)
-        payment_month_key = payment_month.isoformat()
-        posted_row = posted_rows.get((asset.asset_id, payment_month_key))
+        payment_due_date = add_months_keep_day(asset.start_date, i + 1)
+        payment_due_key = payment_due_date.isoformat()
+        posted_row = posted_rows.get((asset.asset_id, payment_due_key))
 
         if posted_row is not None:
             # Locked month: keep posted values and continue from posted ending balance.
@@ -474,7 +574,9 @@ def build_asset_schedule(
                 "property_id": posted_row.get("property_id", asset.property_id),
                 "allocation": posted_row.get("allocation", asset.allocation),
                 "gl_account": posted_row.get("gl_account", asset.gl_account),
-                "payment_month": payment_month_key,
+                "payment_month": payment_due_key,
+                "due_date": str(posted_row.get("due_date", payment_due_key)),
+                "billing_date": str(posted_row.get("billing_date", "")),
                 "period": int(posted_row["period"]),
                 "term_to_maturity": int(posted_row["term_to_maturity"]),
                 "bank_rate_annual": round(float(posted_row["bank_rate_annual"]), 6),
@@ -496,7 +598,7 @@ def build_asset_schedule(
 
         remaining = asset.payment_months - i
         # Open month: compute payment from current balance and remaining term.
-        annual_bank_rate = bank_rate_for_month(payment_month, asset.bank_rate_annual, rate_table)
+        annual_bank_rate = bank_rate_for_month(month_start(payment_due_date), asset.bank_rate_annual, rate_table)
         annual_rate = annual_bank_rate + asset.nim_annual
         monthly_rate = effective_monthly_rate(annual_rate)
         payment = pmt(balance, monthly_rate, remaining)
@@ -517,7 +619,9 @@ def build_asset_schedule(
                 "property_id": asset.property_id,
                 "allocation": asset.allocation,
                 "gl_account": asset.gl_account,
-                "payment_month": payment_month.isoformat(),
+                "payment_month": payment_due_date.isoformat(),
+                "due_date": payment_due_date.isoformat(),
+                "billing_date": "",
                 "period": i + 1,
                 "term_to_maturity": remaining,
                 "bank_rate_annual": round(annual_bank_rate, 6),
@@ -529,7 +633,9 @@ def build_asset_schedule(
                 "interest": round(interest, 2),
                 "amortization": round(principal, 2),
                 "ending_balance": round(ending_balance, 2),
-                "rate_source": "rate_table" if rate_override_for_month(payment_month, rate_table) else "asset_default",
+                "rate_source": "rate_table"
+                if rate_override_for_month(month_start(payment_due_date), rate_table)
+                else "asset_default",
             }
         )
 
@@ -562,8 +668,7 @@ def amortize_until(
     posted_rows: Optional[Dict[Tuple[str, str], Dict[str, object]]] = None,
 ) -> Dict[str, float]:
     """Summarize payments, interest, amortization, and remaining balance up to as_of."""
-    as_of_month = month_start(as_of)
-    if as_of_month < asset.start_month:
+    if as_of < asset.start_date:
         return {
             "installments_paid": 0,
             "interest_paid": 0.0,
@@ -575,7 +680,7 @@ def amortize_until(
 
     # Reuse schedule logic so snapshot math and invoice math stay aligned.
     schedule_rows = build_asset_schedule(asset, rate_table, posted_rows=posted_rows)
-    paid_rows = [r for r in schedule_rows if month_start(parse_date(str(r["payment_month"]))) <= as_of_month]
+    paid_rows = [r for r in schedule_rows if parse_date(str(r["payment_month"])) <= as_of]
 
     periods = len(paid_rows)
     interest_paid = sum(float(r["interest"]) for r in paid_rows)
@@ -679,16 +784,24 @@ def invoice_for_month(rows: List[Dict[str, object]], target_month: date) -> List
     return out
 
 
-def invoice_for_month_from_schedule(rows: List[Dict[str, object]], target_month: date) -> List[Dict[str, object]]:
-    # Invoices are produced directly from schedule rows of the selected month.
+def invoice_for_month_from_schedule(
+    rows: List[Dict[str, object]],
+    target_month: date,
+    billing_day: int,
+) -> List[Dict[str, object]]:
+    # Invoices are produced for installments due between previous and current billing runs.
     out: List[Dict[str, object]] = []
+    previous_billing_date, billing_date = billing_cycle_window(target_month, billing_day)
     for r in rows:
-        if month_start(parse_date(str(r["payment_month"]))) != target_month:
+        due_date = parse_date(str(r["payment_month"]))
+        if not (previous_billing_date < due_date <= billing_date):
             continue
 
         out.append(
             {
                 "invoice_month": target_month.isoformat(),
+                "billing_date": billing_date.isoformat(),
+                "due_date": due_date.isoformat(),
                 "payment_month": r["payment_month"],
                 "asset_id": r["asset_id"],
                 "property_id": r["property_id"],
@@ -733,11 +846,11 @@ def asset_schedule_with_opening_row(
     posted_rows: Optional[Dict[Tuple[str, str], Dict[str, object]]] = None,
 ) -> List[Dict[str, object]]:
     rows: List[Dict[str, object]] = []
-    opening_annual = bank_rate_for_month(asset.start_month, asset.bank_rate_annual, rate_table)
+    opening_annual = bank_rate_for_month(month_start(asset.start_date), asset.bank_rate_annual, rate_table)
     opening_monthly = effective_monthly_rate(opening_annual + asset.nim_annual)
     rows.append(
         {
-            "ledger_date": asset.start_month,
+            "ledger_date": asset.start_date,
             "period": 0,
             "loan_rate_annual": opening_annual,
             "lease_rate_monthly": opening_monthly,
@@ -842,7 +955,7 @@ def write_asset_one_pager_sheet(
         ws[f"I{row_idx}"] = row["balance"]
         row_idx += 1
 
-    for r in range(19, row_idx):
+    for r in range(header_row + 1, row_idx):
         ws[f"A{r}"].number_format = "yyyy-mm-dd"
         ws[f"C{r}"].number_format = "0.00%"
         ws[f"D{r}"].number_format = "0.00%"
@@ -1077,10 +1190,12 @@ def run_invoice(args: argparse.Namespace) -> None:
     posted_existing = load_posted_invoices(posted_path)
     posted_rows = posted_invoice_map(posted_existing)
     schedule_rows = build_schedule(assets, rates, posted_rows=posted_rows)
-    invoices = invoice_for_month_from_schedule(schedule_rows, target_month)
+    invoices = invoice_for_month_from_schedule(schedule_rows, target_month, args.billing_day)
+    _, billing_date = billing_cycle_window(target_month, args.billing_day)
 
     total_invoice = round(sum(float(r["invoice_amount"]) for r in invoices), 2)
     print(f"invoice lines: {len(invoices)}")
+    print(f"billing date ({target_month.isoformat()}): {billing_date.isoformat()}")
     print(f"invoice total ({target_month.isoformat()}): {total_invoice}")
 
     posted_batch = []
@@ -1094,6 +1209,8 @@ def run_invoice(args: argparse.Namespace) -> None:
                 "allocation": row["allocation"],
                 "gl_account": row["gl_account"],
                 "payment_month": row["payment_month"],
+                "due_date": row["due_date"],
+                "billing_date": row["billing_date"],
                 "period": row["period"],
                 "term_to_maturity": row["term_to_maturity"],
                 "bank_rate_annual": row["bank_rate_annual"],
@@ -1147,6 +1264,8 @@ def run_invoice(args: argparse.Namespace) -> None:
         "script_version": SCRIPT_VERSION,
         "operator": args.operator,
         "month": target_month.isoformat(),
+        "billing_day": args.billing_day,
+        "billing_date": billing_date.isoformat(),
         "allow_closed_adjustment": args.allow_closed_adjustment,
         "close_period": args.close_period,
         "invoice_lines": len(invoices),
@@ -1167,14 +1286,37 @@ def run_bank_payable(args: argparse.Namespace) -> None:
     assets_path = Path(args.assets)
     rates_path = Path(args.rates)
     posted_path = Path(args.posted_ledger)
+    bank_payable_path = Path(args.bank_payable_file)
+    backup_dir = Path(args.backup_dir)
     assets = load_assets(assets_path)
     rates = load_rates(rates_path)
     posted_rows = posted_invoice_map(load_posted_invoices(posted_path))
     target_month = month_start(parse_date(args.month + "-01"))
     schedule_rows = build_schedule(assets, rates, posted_rows=posted_rows)
-    invoices = invoice_for_month_from_schedule(schedule_rows, target_month)
+    invoices = invoice_for_month_from_schedule(schedule_rows, target_month, args.billing_day)
+    _, billing_date = billing_cycle_window(target_month, args.billing_day)
     bank_payable = round(sum(float(r["invoice_amount"]) for r in invoices), 2)
-    print(f"bank payable for {target_month.isoformat()}: {bank_payable}")
+    print(f"bank payable for {target_month.isoformat()} (billing date {billing_date.isoformat()}): {bank_payable}")
+
+    backups: List[str] = []
+    b = backup_file(bank_payable_path, backup_dir, run_id)
+    if b:
+        backups.append(b)
+
+    month_str = month_key(target_month)
+    upsert_bank_payable_month(
+        bank_payable_path,
+        month_str,
+        {
+            "month": month_str,
+            "billing_date": billing_date.isoformat(),
+            "invoice_lines": len(invoices),
+            "bank_payable_total": bank_payable,
+            "operator": args.operator,
+            "updated_at": datetime.now().isoformat(timespec="seconds"),
+        },
+    )
+    print(f"bank payable summary updated: {bank_payable_path}")
 
     manifest = {
         "run_id": run_id,
@@ -1183,8 +1325,12 @@ def run_bank_payable(args: argparse.Namespace) -> None:
         "script_version": SCRIPT_VERSION,
         "operator": args.operator,
         "month": target_month.isoformat(),
+        "billing_day": args.billing_day,
+        "billing_date": billing_date.isoformat(),
         "invoice_lines": len(invoices),
         "bank_payable_total": bank_payable,
+        "bank_payable_file": str(bank_payable_path),
+        "backups": backups,
         "input_hashes": collect_hashes(
             {
                 "assets": assets_path,
@@ -1193,6 +1339,59 @@ def run_bank_payable(args: argparse.Namespace) -> None:
                 "baseline_config": Path(args.baseline_config),
             }
         ),
+    }
+    manifest_path = write_manifest(Path(args.manifest_dir), run_id, manifest)
+    print(f"run manifest: {manifest_path}")
+
+
+def run_close_period(args: argparse.Namespace) -> None:
+    run_id = generate_run_id()
+    closed_periods_path = Path(args.closed_periods)
+    baseline_path = Path(args.baseline_config)
+    backup_dir = Path(args.backup_dir)
+    target_month = month_start(parse_date(args.month + "-01"))
+    target_month_key = month_key(target_month)
+
+    input_paths = {
+        "closed_periods": closed_periods_path,
+        "baseline_config": baseline_path,
+    }
+    pre_hashes = collect_hashes(input_paths)
+    backups: List[str] = []
+
+    baseline_cfg = load_baseline_config(baseline_path)
+    go_live_str = str(baseline_cfg.get("go_live_date", "")).strip()
+    if go_live_str:
+        go_live_month = month_start(parse_date(go_live_str))
+        if target_month < go_live_month:
+            raise ValueError(
+                f"close month {target_month.isoformat()} is before go-live {go_live_month.isoformat()}"
+            )
+
+    closed_months = load_closed_periods(closed_periods_path)
+    already_closed = target_month_key in closed_months
+
+    if already_closed:
+        print(f"period already closed: {target_month_key}")
+    else:
+        b = backup_file(closed_periods_path, backup_dir, run_id)
+        if b:
+            backups.append(b)
+        save_closed_periods(closed_periods_path, closed_months + [target_month_key])
+        print(f"period closed: {target_month_key}")
+
+    post_hashes = collect_hashes(input_paths)
+    manifest = {
+        "run_id": run_id,
+        "timestamp": datetime.now().isoformat(timespec="seconds"),
+        "command": "close-period",
+        "script_version": SCRIPT_VERSION,
+        "operator": args.operator,
+        "month": target_month.isoformat(),
+        "already_closed": already_closed,
+        "input_hashes_before": pre_hashes,
+        "input_hashes_after": post_hashes,
+        "backups": backups,
     }
     manifest_path = write_manifest(Path(args.manifest_dir), run_id, manifest)
     print(f"run manifest: {manifest_path}")
@@ -1212,13 +1411,27 @@ def run_daily(args: argparse.Namespace) -> None:
     print_totals(totals, f"Daily portfolio report ({as_of.isoformat()})")
 
     current_month = month_start(as_of)
+    current_billing_date = billing_run_date_for_month(current_month, args.billing_day)
+    if as_of <= current_billing_date:
+        billing_month = current_month
+        billing_date = current_billing_date
+    else:
+        billing_month = add_months(current_month, 1)
+        billing_date = billing_run_date_for_month(billing_month, args.billing_day)
+
     schedule_rows = build_schedule(assets, rates, posted_rows=posted_rows)
-    invoices = invoice_for_month_from_schedule(schedule_rows, current_month)
+    invoices = invoice_for_month_from_schedule(schedule_rows, billing_month, args.billing_day)
     due_count = len(invoices)
     due_amount = round(sum(float(r["invoice_amount"]) for r in invoices), 2)
-    print(f"\nmonth_to_invoice: {current_month.isoformat()}")
+    print(f"\nmonth_to_invoice: {billing_month.isoformat()}")
+    print(f"billing_date: {billing_date.isoformat()}")
     print(f"invoice_lines_due: {due_count}")
     print(f"invoice_amount_due: {due_amount}")
+
+    if as_of == billing_date - timedelta(days=1):
+        print("\nREMINDER: Invoice run is due tomorrow.")
+    elif as_of == billing_date:
+        print("\nREMINDER: Invoice run is due today.")
 
     manifest = {
         "run_id": run_id,
@@ -1227,6 +1440,9 @@ def run_daily(args: argparse.Namespace) -> None:
         "script_version": SCRIPT_VERSION,
         "operator": args.operator,
         "as_of": as_of.isoformat(),
+        "billing_day": args.billing_day,
+        "billing_month": billing_month.isoformat(),
+        "billing_date": billing_date.isoformat(),
         "portfolio_totals": totals,
         "invoice_lines_due": due_count,
         "invoice_amount_due": due_amount,
@@ -1416,6 +1632,7 @@ def build_parser() -> argparse.ArgumentParser:
     )
     common.add_argument("--backup-dir", default=str(DEFAULT_BACKUP_DIR), help="directory for pre-write backups")
     common.add_argument("--operator", default="unknown", help="operator name or id for audit logs")
+    common.add_argument("--billing-day", type=int, default=22, help="monthly invoice run day (shifted to next working day)")
 
     s1 = sub.add_parser("snapshot", parents=[common], help="point-in-time asset snapshot")
     s1.add_argument("--as-of", required=True, help="YYYY-MM-DD")
@@ -1440,7 +1657,16 @@ def build_parser() -> argparse.ArgumentParser:
 
     s3 = sub.add_parser("bank-payable", parents=[common], help="bank payable for YYYY-MM")
     s3.add_argument("--month", required=True, help="YYYY-MM")
+    s3.add_argument(
+        "--bank-payable-file",
+        default=str(DEFAULT_BANK_PAYABLE),
+        help="csv file storing one bank-payable row per month",
+    )
     s3.set_defaults(func=run_bank_payable)
+
+    s8 = sub.add_parser("close-period", parents=[common], help="mark a month as closed without reposting invoices")
+    s8.add_argument("--month", required=True, help="YYYY-MM")
+    s8.set_defaults(func=run_close_period)
 
     s4 = sub.add_parser("daily", parents=[common], help="daily operating report")
     s4.add_argument("--as-of", required=True, help="YYYY-MM-DD")

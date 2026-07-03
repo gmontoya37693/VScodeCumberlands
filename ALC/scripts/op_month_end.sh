@@ -15,8 +15,12 @@ if [[ ! -x "$python_bin" ]]; then
   python_bin="python3"
 fi
 
-"$python_bin" "$script_dir/alc_item_sheet_tracker.py" invoice \
+"$python_bin" "$script_dir/alc_item_sheet_tracker.py" bank-payable \
   --operator "$operator" \
   --month "$month" \
-  --billing-day "$billing_day" \
-  --output "$script_dir/invoices_${month}.csv"
+  --billing-day "$billing_day"
+
+"$python_bin" "$script_dir/alc_item_sheet_tracker.py" close-period \
+  --operator "$operator" \
+  --month "$month" \
+  --billing-day "$billing_day"
