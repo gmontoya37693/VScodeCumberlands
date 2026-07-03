@@ -773,6 +773,7 @@ def write_asset_one_pager_sheet(
     ws,
     asset: Asset,
     rate_table: List[Tuple[date, float]],
+    lifecycle_status: str,
     posted_rows: Optional[Dict[Tuple[str, str], Dict[str, object]]] = None,
 ) -> None:
     from openpyxl.styles import Alignment, Font, PatternFill
@@ -788,43 +789,47 @@ def write_asset_one_pager_sheet(
     ws["A1"].fill = title_fill
 
     input_rows = [
-        ("Asset ID", asset.asset_id),
-        ("Property ID", asset.property_id),
-        ("Allocation", asset.allocation),
-        ("Asset Description", asset.asset_description),
-        ("Asset Cost", asset.asset_value),
-        ("Tax", asset.tax_amount),
-        ("Admin Expenses", asset.admin_expense),
-        ("Risk Cost Recovery", asset.risk_cost_recovery),
-        ("Salvage Value", asset.salvage_value),
-        ("Lease Base", asset.lease_base),
-        ("Salvage Periods", asset.salvage_periods),
-        ("Lifespan (months)", asset.term_months),
-        ("NIM (annual)", asset.nim_annual),
+        ("Asset ID", asset.asset_id, None),
+        ("Property ID", asset.property_id, None),
+        ("Allocation", asset.allocation, None),
+        ("Asset Description", asset.asset_description, None),
+        ("Lifecycle Status", lifecycle_status, None),
+        ("Asset Cost", asset.asset_value, "$#,##0.00"),
+        ("Tax", asset.tax_amount, "$#,##0.00"),
+        ("Admin Expenses", asset.admin_expense, "$#,##0.00"),
+        ("Risk Cost Recovery", asset.risk_cost_recovery, "$#,##0.00"),
+        ("Salvage Value", asset.salvage_value, "$#,##0.00"),
+        ("Lease Base", asset.lease_base, "$#,##0.00"),
+        ("Salvage Periods", asset.salvage_periods, None),
+        ("Lifespan (months)", asset.term_months, None),
+        ("NIM (annual)", asset.nim_annual, "0.00%"),
     ]
-    for idx, (label, value) in enumerate(input_rows, start=3):
+    for idx, (label, value, number_format) in enumerate(input_rows, start=3):
         ws[f"A{idx}"] = label
         ws[f"B{idx}"] = value
         ws[f"A{idx}"].fill = input_fill
         ws[f"B{idx}"].fill = input_fill
         ws[f"A{idx}"].font = Font(bold=True)
+        if number_format:
+            ws[f"B{idx}"].number_format = number_format
 
-    ws["A18"] = "Ledger Date"
-    ws["B18"] = "Period"
-    ws["C18"] = "Loan Rate"
-    ws["D18"] = "Lease Rate"
-    ws["E18"] = "Term to Maturity"
-    ws["F18"] = "Installment"
-    ws["G18"] = "Interest"
-    ws["H18"] = "Amortization"
-    ws["I18"] = "Balance"
-    for cell in ws[18]:
+    header_row = 3 + len(input_rows) + 2
+    ws[f"A{header_row}"] = "Ledger Date"
+    ws[f"B{header_row}"] = "Period"
+    ws[f"C{header_row}"] = "Loan Rate"
+    ws[f"D{header_row}"] = "Lease Rate"
+    ws[f"E{header_row}"] = "Term to Maturity"
+    ws[f"F{header_row}"] = "Installment"
+    ws[f"G{header_row}"] = "Interest"
+    ws[f"H{header_row}"] = "Amortization"
+    ws[f"I{header_row}"] = "Balance"
+    for cell in ws[header_row]:
         cell.font = Font(bold=True)
         cell.fill = header_fill
         cell.alignment = Alignment(horizontal="center")
 
     schedule_rows = asset_schedule_with_opening_row(asset, rate_table, posted_rows=posted_rows)
-    row_idx = 19
+    row_idx = header_row + 1
     for row in schedule_rows:
         ws[f"A{row_idx}"] = row["ledger_date"]
         ws[f"B{row_idx}"] = row["period"]
@@ -846,14 +851,6 @@ def write_asset_one_pager_sheet(
         ws[f"H{r}"].number_format = "$#,##0.00"
         ws[f"I{r}"].number_format = "$#,##0.00"
 
-    ws["B7"].number_format = "$#,##0.00"
-    ws["B8"].number_format = "$#,##0.00"
-    ws["B9"].number_format = "$#,##0.00"
-    ws["B10"].number_format = "$#,##0.00"
-    ws["B11"].number_format = "$#,##0.00"
-    ws["B12"].number_format = "$#,##0.00"
-    ws["B15"].number_format = "0.00%"
-
     ws.column_dimensions["A"].width = 18
     ws.column_dimensions["B"].width = 14
     ws.column_dimensions["C"].width = 12
@@ -863,7 +860,96 @@ def write_asset_one_pager_sheet(
     ws.column_dimensions["G"].width = 12
     ws.column_dimensions["H"].width = 14
     ws.column_dimensions["I"].width = 14
-    ws.freeze_panes = "A19"
+    ws.freeze_panes = f"A{header_row + 1}"
+
+
+def write_inventory_sheet(
+    ws,
+    assets: List[Asset],
+    rate_table: List[Tuple[date, float]],
+    posted_rows: Optional[Dict[Tuple[str, str], Dict[str, object]]] = None,
+) -> None:
+    from openpyxl.styles import Alignment, Font, PatternFill
+
+    title_fill = PatternFill(fill_type="solid", fgColor="1F3A68")
+    header_fill = PatternFill(fill_type="solid", fgColor="E9EEF5")
+
+    ws.merge_cells("A1:N1")
+    ws["A1"] = "ALC - Asset Inventory"
+    ws["A1"].font = Font(color="FFFFFF", bold=True, size=14)
+    ws["A1"].alignment = Alignment(horizontal="center")
+    ws["A1"].fill = title_fill
+
+    headers = [
+        "Asset ID",
+        "Property ID",
+        "Allocation",
+        "Description",
+        "Status",
+        "Start Date",
+        "Final Date",
+        "Term Months",
+        "Asset Cost",
+        "Lease Base",
+        "Current Installment",
+        "Outstanding Balance",
+        "Bank APR",
+        "NIM",
+    ]
+    for idx, header in enumerate(headers, start=1):
+        cell = ws.cell(row=3, column=idx, value=header)
+        cell.font = Font(bold=True)
+        cell.fill = header_fill
+        cell.alignment = Alignment(horizontal="center")
+
+    snapshot_rows = build_snapshot(assets, rate_table, date.today(), posted_rows=posted_rows)
+    asset_by_id = {asset.asset_id: asset for asset in assets}
+    for row_idx, row in enumerate(snapshot_rows, start=4):
+        asset = asset_by_id[str(row["asset_id"])]
+        ws.cell(row=row_idx, column=1, value=row["asset_id"])
+        ws.cell(row=row_idx, column=2, value=row["property_id"])
+        ws.cell(row=row_idx, column=3, value=row["allocation"])
+        ws.cell(row=row_idx, column=4, value=asset.asset_description)
+        ws.cell(row=row_idx, column=5, value=row["status"])
+        ws.cell(row=row_idx, column=6, value=parse_date(str(row["start_date"])))
+        ws.cell(row=row_idx, column=7, value=parse_date(str(row["final_date"])))
+        ws.cell(row=row_idx, column=8, value=row["term_months"])
+        ws.cell(row=row_idx, column=9, value=row["asset_value"])
+        ws.cell(row=row_idx, column=10, value=row["lease_base"])
+        ws.cell(row=row_idx, column=11, value=row["current_payment"])
+        ws.cell(row=row_idx, column=12, value=row["balance"])
+        ws.cell(row=row_idx, column=13, value=row["bank_rate_annual_default"])
+        ws.cell(row=row_idx, column=14, value=row["nim_annual"])
+
+    for row_idx in range(4, len(snapshot_rows) + 4):
+        ws.cell(row=row_idx, column=6).number_format = "yyyy-mm-dd"
+        ws.cell(row=row_idx, column=7).number_format = "yyyy-mm-dd"
+        ws.cell(row=row_idx, column=9).number_format = "$#,##0.00"
+        ws.cell(row=row_idx, column=10).number_format = "$#,##0.00"
+        ws.cell(row=row_idx, column=11).number_format = "$#,##0.00"
+        ws.cell(row=row_idx, column=12).number_format = "$#,##0.00"
+        ws.cell(row=row_idx, column=13).number_format = "0.00%"
+        ws.cell(row=row_idx, column=14).number_format = "0.00%"
+
+    widths = {
+        "A": 12,
+        "B": 12,
+        "C": 14,
+        "D": 28,
+        "E": 12,
+        "F": 12,
+        "G": 12,
+        "H": 12,
+        "I": 14,
+        "J": 14,
+        "K": 18,
+        "L": 18,
+        "M": 10,
+        "N": 10,
+    }
+    for col, width in widths.items():
+        ws.column_dimensions[col].width = width
+    ws.freeze_panes = "A4"
 
 
 def write_one_pager_workbook(
@@ -873,25 +959,27 @@ def write_one_pager_workbook(
     output_path: Path,
 ) -> None:
     try:
-        from openpyxl import Workbook, load_workbook
+        from openpyxl import Workbook
     except ImportError as exc:
         raise RuntimeError("openpyxl is required for one-pager workbook generation") from exc
 
     ensure_parent(output_path)
-    if output_path.exists():
-        wb = load_workbook(output_path)
-    else:
-        wb = Workbook()
+    wb = Workbook()
 
-    if "Sheet" in wb.sheetnames and len(wb.sheetnames) == 1:
-        del wb["Sheet"]
+    inventory_ws = wb.active
+    inventory_ws.title = "Inventory"
+    write_inventory_sheet(inventory_ws, assets, rate_table, posted_rows=posted_rows)
+
+    snapshot_by_asset = {
+        str(row["asset_id"]): row
+        for row in build_snapshot(assets, rate_table, date.today(), posted_rows=posted_rows)
+    }
 
     for asset in assets:
         desired = safe_sheet_title(asset.asset_id)
-        if desired in wb.sheetnames:
-            del wb[desired]
         ws = wb.create_sheet(desired)
-        write_asset_one_pager_sheet(ws, asset, rate_table, posted_rows=posted_rows)
+        lifecycle_status = str(snapshot_by_asset.get(asset.asset_id, {}).get("status", "inactive"))
+        write_asset_one_pager_sheet(ws, asset, rate_table, lifecycle_status, posted_rows=posted_rows)
 
     wb.save(output_path)
 
@@ -1025,7 +1113,8 @@ def run_invoice(args: argparse.Namespace) -> None:
     b = backup_file(posted_path, backup_dir, run_id)
     if b:
         backups.append(b)
-    save_posted_invoices(posted_path, merge_posted_invoices(posted_existing, posted_batch))
+    merged_posted = merge_posted_invoices(posted_existing, posted_batch)
+    save_posted_invoices(posted_path, merged_posted)
     print(f"posted invoice ledger updated: {args.posted_ledger}")
 
     if args.close_period:
@@ -1042,6 +1131,13 @@ def run_invoice(args: argparse.Namespace) -> None:
                 backups.append(b)
             write_csv(output_path, invoices)
         print(f"invoice file written to {args.output}")
+
+    one_pager_path = Path(args.one_pager_output)
+    b = backup_file(one_pager_path, backup_dir, run_id)
+    if b:
+        backups.append(b)
+    write_one_pager_workbook(assets, rates, posted_invoice_map(merged_posted), one_pager_path)
+    print(f"one-pager workbook refreshed: {one_pager_path}")
 
     post_hashes = collect_hashes(input_paths)
     manifest = {
@@ -1060,6 +1156,7 @@ def run_invoice(args: argparse.Namespace) -> None:
         "input_hashes_after": post_hashes,
         "backups": backups,
         "output_file": args.output or "",
+        "one_pager_output_file": str(one_pager_path),
     }
     manifest_path = write_manifest(Path(args.manifest_dir), run_id, manifest)
     print(f"run manifest: {manifest_path}")
@@ -1328,6 +1425,11 @@ def build_parser() -> argparse.ArgumentParser:
     s2 = sub.add_parser("invoice", parents=[common], help="invoice list for YYYY-MM")
     s2.add_argument("--month", required=True, help="YYYY-MM")
     s2.add_argument("--output", help="csv output path")
+    s2.add_argument(
+        "--one-pager-output",
+        default=str(DEFAULT_ONE_PAGER),
+        help="excel workbook path to refresh after invoice posting",
+    )
     s2.add_argument(
         "--allow-closed-adjustment",
         action="store_true",
