@@ -1,3 +1,0 @@
-asset_id,property_id,allocation,gl_account,payment_month,period,term_to_maturity,bank_rate_annual,nim_annual,lease_rate_monthly,lease_base,opening_balance,payment,interest,amortization,ending_balance,rate_source,posted_timestamp
-A001,P100,Leasing,1700,2026-07-01,1,23,0.051,0.0,0.00415378,11100.0,11100.0,507.03,46.11,460.92,10639.08,rate_table,2026-06-10T14:59:41
-A003,P100,Maintenance,1705,2026-07-01,2,35,0.051,0.001,0.00423336,7700.0,7501.26,231.04,31.76,199.29,7301.97,rate_table,2026-06-10T14:59:41

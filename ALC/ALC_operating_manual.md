@@ -1,320 +1,329 @@
 # ALC Item Sheet Operating Manual
 
 ## Quick Navigation
-- Purpose and operating model
-- Daily behavior and script prompts
-- Core workflows (asset entry, invoicing, bank payable, month-end)
-- Baseline initialization and compliance artifacts
-- Official file locations and short operator commands
-- Reports, duties by role, and decision flows
-- Schedule and ledger rules
+- Purpose and operating principle
+- Clean baseline and go-live start
+- Official files and what operators edit
+- Daily, invoice-day, and month-end workflow
+- Due date vs billing date vs month close
+- Outputs, controls, and audit trail
+- Roles, guardrails, and recovery
 
 ## Purpose
-This manual defines the daily, weekly, month-end, and exception-handling workflow for Acento Leasing Company (ALC) asset invoicing and lease tracking.
+This manual defines how Acento Leasing Company (ALC) should operate the asset lease tracker in production.
 
-The system is designed to be simple:
-- One script
-- One asset table
-- One rate table
-- One projected amortization schedule
-- One posted invoice ledger
-- One daily report
-- One monthly invoice run
-- One bank-payable run
+The system is designed to stay simple:
+- Operators edit only assets and rates
+- The script builds and updates lease schedules
+- Daily run monitors the portfolio and upcoming billing
+- Invoice-day run posts invoice history and refreshes the workbook
+- Month-end run records bank payable and locks the month
+- Auditability is preserved through the posted ledger, closed periods, manifests, and backups
 
-## Operating Model
+## Operating Principle
+The company should run from the current data and the generated reports, not from memory.
 
-The script should support two modes:
+That means:
+- Assets and rates are the business inputs
+- Posted invoices are historical actuals
+- Closed months are locked
+- Future projections can change only for open periods
+- History begins only after real go-live activity
 
-1. Guided mode
-- The script asks the operator a short sequence of questions.
-- It only asks questions when action is needed.
-- It then routes the operator to the next required task.
+## Clean Baseline and Go-Live
+Baseline is a one-time clean production start.
 
-2. Report-only mode
-- If nothing changed and no billing action is due, the script skips questions.
-- It generates the daily report, inventory snapshot, and maturity summary.
-- It exits cleanly with a message such as: "No operational actions required today."
+At baseline:
+- The system creates baseline metadata
+- Posted invoice history starts empty
+- Closed periods start empty
+- Bank payable history starts empty
+- No fake, sample, or training transactions should remain in the live production files
 
-## Official File Locations
+Baseline is not:
+- a month close
+- an invoice run
+- a backfill of prior history
+- a training dataset
 
-The script now defaults to one official set of files inside the ALC folder:
-- assets input: [ALC/assets.csv](ALC/assets.csv)
-- rates input: [ALC/rates.csv](ALC/rates.csv)
-- posted ledger: [ALC/posted_invoices.csv](ALC/posted_invoices.csv)
-- closed periods: [ALC/closed_periods.csv](ALC/closed_periods.csv)
-- baseline config: [ALC/baseline_config.json](ALC/baseline_config.json)
-- manifests folder: [ALC/run_manifests](ALC/run_manifests)
-- backups folder: [ALC/backups](ALC/backups)
-- one-pager workbook: [ALC/ALC - Asset Calculation Unit.xlsx](ALC/ALC%20-%20Asset%20Calculation%20Unit.xlsx)
+Recommended baseline command:
+- `ALC/scripts/op_init_baseline.sh german 2026-07-01 "Production start"`
 
-CLI overrides are still available for admin/testing use, but operators should use the official default paths.
+Expected result after baseline:
+- `baseline_config.json` exists with go-live metadata
+- `posted_invoices.csv` contains header only
+- `closed_periods.csv` contains header only
+- `run_manifests/` contains the baseline manifest
+- `backups/` contains any pre-write file snapshots created by the baseline run
+
+## Official Files
+The live ALC folder should use one official file set.
+
+### User-Managed Business Inputs
+- `ALC/assets.csv`
+- `ALC/rates.csv`
+
+### System / Control Files
+- `ALC/baseline_config.json`
+- `ALC/posted_invoices.csv`
+- `ALC/closed_periods.csv`
+
+### Operational Outputs
+- `ALC/invoices_YYYY-MM.csv`
+- `ALC/bank_payable.csv`
+- `ALC/ALC - Asset Calculation Unit.xlsx`
+
+### Audit / Traceability
+- `ALC/run_manifests/`
+- `ALC/backups/`
+
+## What Operators Edit
+Operators should edit only:
+- `assets.csv`
+- `rates.csv`
+
+Operators should not manually edit during normal operation:
+- `posted_invoices.csv`
+- `closed_periods.csv`
+- `bank_payable.csv`
+- files inside `run_manifests/`
+- files inside `backups/`
 
 ## Official Operator Command Set
-
-Short wrapper scripts are available in [ALC/scripts](ALC/scripts):
-- baseline reset: [ALC/scripts/op_init_baseline.sh](ALC/scripts/op_init_baseline.sh)
-- daily run: [ALC/scripts/op_daily.sh](ALC/scripts/op_daily.sh)
-- schedule review: [ALC/scripts/op_schedule.sh](ALC/scripts/op_schedule.sh)
-- month-end invoice: [ALC/scripts/op_invoice.sh](ALC/scripts/op_invoice.sh)
-- bank payable: [ALC/scripts/op_bank_payable.sh](ALC/scripts/op_bank_payable.sh)
-- one-pager workbook: [ALC/scripts/op_one_pager.sh](ALC/scripts/op_one_pager.sh)
+Routine operation should use only these wrapper scripts:
+- baseline setup: `ALC/scripts/op_init_baseline.sh`
+- daily run: `ALC/scripts/op_daily.sh`
+- invoice-day run: `ALC/scripts/op_invoice.sh`
+- month-end run: `ALC/scripts/op_month_end.sh`
 
 Examples:
 - baseline: `ALC/scripts/op_init_baseline.sh german 2026-07-01 "Production start"`
-- daily: `ALC/scripts/op_daily.sh german 2026-07-02`
-- invoice: `ALC/scripts/op_invoice.sh german 2026-07`
-- bank payable: `ALC/scripts/op_bank_payable.sh german 2026-07`
-- one-pager: `ALC/scripts/op_one_pager.sh german`
+- daily: `ALC/scripts/op_daily.sh german 2026-07-21 22`
+- invoice day: `ALC/scripts/op_invoice.sh german 2026-07 22`
+- month-end: `ALC/scripts/op_month_end.sh german 2026-07 22`
 
-## Daily Behavior
+The optional last argument is the billing day. If omitted, the default is `22`.
 
-Every day the operator runs the script once.
+## Asset Lifecycle and Schedule Logic
+Each asset begins when it is entered in `assets.csv` with its activation / start date.
 
-The script checks, in this order:
-1. New assets added today?
-2. Any asset status changes?
-3. Any new bank rate effective today?
-4. Any invoices due today?
-5. Any bank payment due today?
-6. Any exceptions or mismatches?
+The script uses that start date to build the asset's full projected lease life.
 
-If the answer is "no" to all of the above, the script produces only the report package.
+For each asset, the schedule includes:
+- opening row at the asset start date
+- one expected installment due date per period
+- interest and amortization by period
+- remaining balance through maturity
 
-If the answer is "yes" to any item, the script prompts for the missing data and then continues.
-
-## What the Script Should Ask
-
-The script should only ask for facts the system cannot infer.
-
-Typical questions:
-- Did any new asset enter service today?
-- Was any asset disposed, transferred, or deactivated?
-- Did the bank publish a new annual rate?
-- Are we closing the month today?
-- Do you want to generate invoices now?
-- Do you want to generate the bank payment summary now?
-- Do you want to export CSV, PDF, or both?
-
-The script should not ask repetitive questions if no action is needed.
-
-## Core Workflows
-
-### 1. Asset Entry Workflow
-When a new asset is purchased or allocated:
-- Create the asset record
-- Assign property and allocation
-- Set start date and lease term
-- Set asset value, tax, admin expense, risk recovery, and salvage value
-- Set salvage periods when a final residual month is reserved
-- Assign bank APR and NIM assumption
-- Assign GL account
-- Mark asset as active
-
-The system then calculates:
-- lease base
-- projected monthly installment table
-- expected maturity date
-- opening balance
-- projected amortization schedule
-
-The projected schedule uses the entry-time bank APR plus NIM across the full remaining term until a month-specific bank rate is loaded.
-
-The lease math is:
+The schedule math uses:
 - lease base = asset value + tax + admin expense + risk cost recovery - salvage value
-- lease rate = effective monthly rate derived from annual APR + NIM
+- effective monthly rate derived from annual bank APR + NIM
 - payment months = term months - salvage periods
 
-### 2. Daily Operations Workflow
-Each morning the operator runs the daily script.
+Future open rows can change when rates change. Closed historical rows must not change.
 
-The script outputs:
-- active asset count
-- assets starting soon
-- assets maturing soon
-- invoices due today
-- bank payments due today
-- assets with missing fields
-- balance reconciliation totals
+## Due Date vs Billing Date vs Month Close
+These three concepts must be kept separate.
 
-For any month already invoiced, the script reads the posted invoice ledger first and treats those rows as locked historical actuals.
+### 1. Asset Due Date
+Each asset has its own due date pattern based on its activation / start date anniversary.
 
-If no action is needed, the operator simply reviews the report and closes the task.
+Examples:
+- if an asset starts on the 23rd, future due dates follow the 23rd pattern
+- if a month has fewer days, the date is clamped to the last valid day of that month
 
-### 3. Monthly Invoicing Workflow
-Use one monthly billing cycle for all active assets.
+### 2. Billing Date
+Invoices are posted in one monthly batch using the billing day.
 
-Recommended policy:
-- Close billing on the last day of the month
-- Invoice all active assets as of the close date
-- Include line-item detail by asset or allocation
-- Group by property for customer invoicing
+Rules:
+- default billing day is `22`
+- if the billing day falls on a weekend, the script shifts it to the next working day
+- the invoice-day run posts all asset installments whose due dates fall between the previous billing run date and the current billing run date
 
-At invoicing time the script should:
-- read the projected schedule for the target month
-- replace the target-month rate with the current bank rate if a month-specific rate exists
-- generate invoice lines from that month's schedule rows
-- write the billed rows to the posted invoice ledger
-- keep those posted rows fixed in future runs
+### 3. Month Close
+Month close is a separate control step.
 
-This is easier than anniversary billing because it keeps accounting, collections, and bank reconciliation aligned.
+At month-end the script:
+- updates the monthly bank payable summary
+- marks the month closed in `closed_periods.csv`
 
-### 4. Bank Payment Workflow
-The system should also create a monthly bank-payable summary.
+Once a month is closed, it is treated as locked history.
 
-That summary shows:
-- principal due
-- interest due
-- total debt service due
-- outstanding balance by asset
-- total portfolio balance
+## Daily Workflow
+Every day the operator should run the daily script once.
 
-The operator uses this to pay the bank and cross-check the debt ledger.
+Command:
+- `ALC/scripts/op_daily.sh <operator> <as-of YYYY-MM-DD> [billing_day]`
 
-### 5. Month-End Close Workflow
-At month-end the operator should:
-- confirm all asset changes are entered
-- confirm the bank rate table is current
-- review the projected schedule for reasonableness
-- generate invoices
-- update the posted invoice ledger
-- generate bank payable report
-- export reports to accounting
-- save a locked month snapshot
+Example:
+- `ALC/scripts/op_daily.sh german 2026-07-21 22`
 
-After close, changes should be handled by adjustment entries, not by editing closed rows.
+Daily run does not post history. It monitors the current state.
 
-### 6. Baseline Initialization Workflow
-Use this once before production start (example: go-live on 2026-07-01).
+What the daily run prints:
+- portfolio totals
+- billing month to watch
+- billing date
+- invoice lines due in the billing window
+- invoice amount due in the billing window
+- reminder the day before invoice day
+- reminder on invoice day
 
-Recommended baseline steps:
-- Back up current working files.
-- Initialize baseline config with go-live date.
-- Reset posted invoice ledger for clean production history.
-- Reset closed periods file.
-- Store the baseline run manifest.
+Use the daily run to catch:
+- newly added assets
+- rate changes already entered
+- assets moving toward maturity
+- invoice-day timing without relying on memory
 
-Suggested command pattern:
-- run `init-baseline` with `--go-live YYYY-MM-DD`
-- include `--reset-posted-ledger` and `--reset-closed-periods` for clean start
-- include `--operator` for traceability
+## Invoice-Day Workflow
+Use one invoice-day run per billing cycle.
 
-After baseline:
-- Invoicing before go-live is blocked unless explicitly authorized.
-- Closed months are blocked unless `allow-closed-adjustment` is explicitly used.
+Command:
+- `ALC/scripts/op_invoice.sh <operator> <month YYYY-MM> [billing_day]`
 
-## Reports
+Example:
+- `ALC/scripts/op_invoice.sh german 2026-07 22`
 
-### Daily Reports
-1. Portfolio summary
-2. Active asset inventory
-3. Maturity schedule
-4. Invoice due list
-5. Bank payable due list
-6. Exception list
-7. Reconciliation summary
+What the invoice-day run does:
+- reads current assets and rates
+- reads posted invoice history first
+- determines the billing date for the selected month
+- selects asset installments due between the previous billing date and the current billing date
+- creates the invoice CSV for the month
+- writes posted rows to `posted_invoices.csv`
+- refreshes `ALC - Asset Calculation Unit.xlsx`
+- writes a run manifest and any needed backups
 
-### Monthly Reports
-1. Invoice register
-2. Property-level billing summary
-3. Asset-level amortization report
-4. Projected amortization schedule
-5. Posted invoice ledger
-6. Bank debt summary
-7. Closed-month snapshot
-8. Variance report
+What the invoice-day run does not do:
+- it does not close the month by itself
+- it does not overwrite closed history
 
-## Compliance Artifacts
+### Workbook Refresh on Invoice Day
+The invoice-day run automatically refreshes the workbook.
 
-The script now maintains operational traceability files:
-- `baseline_config.json`: go-live date and baseline metadata
-- `posted_invoices.csv`: posted invoice ledger (historical actuals)
-- `closed_periods.csv`: list of closed months (`YYYY-MM`)
-- `run_manifests/*.json`: one manifest per command run
-- `backups/<run_id>/...`: file snapshots created before write operations
+Workbook structure:
+- first tab: `Inventory`
+- remaining tabs: one tab per asset
 
-Each manifest should include:
+Workbook behavior:
+- all assets remain represented, whether active or inactive
+- the Inventory tab shows current asset status and balances
+- each asset tab shows lease inputs, lifecycle status, and projected / actual schedule state
+
+## Month-End Workflow
+Use one month-end run after invoice-day activities are complete.
+
+Command:
+- `ALC/scripts/op_month_end.sh <operator> <month YYYY-MM> [billing_day]`
+
+Example:
+- `ALC/scripts/op_month_end.sh german 2026-07 22`
+
+What the month-end run does:
+- calculates bank payable for the month
+- updates `bank_payable.csv`
+- writes one row per month in that file
+- closes the month in `closed_periods.csv`
+- writes manifests and backups
+
+### Bank Payable File
+`bank_payable.csv` stores one row per month with:
+- month
+- billing date
+- invoice line count
+- bank payable total
+- operator
+- update timestamp
+
+If the same month-end run is repeated for the same month, the row is updated rather than duplicated.
+
+## History and Locking Rules
+The system uses two kinds of schedule rows:
+- projected future rows
+- posted historical rows
+
+Rules:
+- posted invoice rows are historical actuals
+- future runs must reuse posted rows instead of recalculating them
+- closed months must not be changed in normal operations
+- if a correction is needed after close, the default rule is to post the correction in a later open month
+- only authorized admin use should invoke a closed-period override route
+
+## Reports and Outputs
+### Daily Monitoring Output
+Daily run provides terminal monitoring output and a run manifest.
+
+### Invoice-Day Outputs
+Invoice-day run produces:
+- `invoices_YYYY-MM.csv`
+- updated `posted_invoices.csv`
+- refreshed `ALC - Asset Calculation Unit.xlsx`
+- run manifest
+- backups when files are overwritten
+
+### Month-End Outputs
+Month-end run produces:
+- updated `bank_payable.csv`
+- updated `closed_periods.csv`
+- run manifests
+- backups when files are overwritten
+
+## Audit Trail and Recovery
+The script maintains operational traceability through:
+- `baseline_config.json`
+- `posted_invoices.csv`
+- `closed_periods.csv`
+- `bank_payable.csv`
+- `run_manifests/*.json`
+- `backups/<run_id>/...`
+
+Each manifest should record:
 - run ID
 - operator
 - command and timestamp
-- key totals and row counts
-- input file hashes (before and after when applicable)
-- backup file references
+- month or as-of date where relevant
+- billing day and billing date where relevant
+- totals and row counts
+- input hashes before and after when applicable
+- backup references
 
-### Exception Reports
-1. Asset missing start date
-2. Asset missing GL account
-3. Asset with zero or negative balance unexpectedly
-4. Rate change with no effective date
-5. Invoice mismatch
-6. Bank balance mismatch
+Recovery principle:
+- if a generated file is corrupted, restore from the backup created before the last write operation
+- use manifests to identify the exact run that changed the file
 
-## Duties by Role
+## Roles and Guardrails
+### Operator
+- update `assets.csv`
+- update `rates.csv`
+- run the wrapper scripts
+- review daily output and generated files
+- verify that invoice-day and month-end outputs were produced
 
-### Operator / Agent
-- Run the script daily
-- Review exception list
-- Enter new assets
-- Confirm rate changes
-- Review projected schedule for new assets
-- Launch invoicing on month-end
-- Launch bank payable run
-- Save or export reports
+### Admin / Owner
+- manage go-live baseline
+- authorize exceptional closed-period adjustments if ever needed
+- manage structural changes to files or workflow
 
-### Accounting / Finance
-- Review invoices
-- Post receivables
-- Confirm bank payment
-- Reconcile ledger vs bank debt
-- Approve adjustment entries
+### Guardrails
+- never edit `posted_invoices.csv` manually during normal operation
+- never edit `closed_periods.csv` manually during normal operation
+- never create fake production history after baseline
+- use wrapper scripts for routine operations
 
-### Management
-- Review summary dashboards
-- Watch active inventory
-- Monitor maturity exposure
-- Track revenue and debt trends
+## Recommended Daily Decision Flow
+1. Update `assets.csv` if any asset changed.
+2. Update `rates.csv` if the bank published a new rate.
+3. Run the daily script.
+4. Review totals, billing date, and reminders.
+5. If today is invoice day, run the invoice-day script.
+6. If month-end processing is due, run the month-end script.
 
-## Recommended System Behavior
-
-The script should behave like a guided checklist:
-- If a task is needed, prompt for it
-- If a task is not needed, skip it
-- If no action is needed at all, generate reports and exit
-
-That means the operator always has a clear next step.
-
-## Suggested Daily Decision Flow
-
-1. Load master data.
-2. Check for new assets.
-3. Check for rate changes.
-4. Check for invoices due.
-5. Check for bank payment due.
-6. If action exists, prompt the operator.
-7. If no action exists, generate the daily report package.
-8. Exit.
-
-## Suggested Month-End Decision Flow
-
-1. Are all assets entered?
-2. Are all rates updated?
-3. Has the projected schedule been reviewed?
-4. Generate invoices.
-5. Post the invoice rows to the invoice ledger.
-6. Generate bank payable report.
-7. Export closed-month package.
-8. Lock the month.
-
-## Schedule and Ledger Rules
-
-- The projected amortization schedule may change for the current month and future months when a new bank rate is loaded.
-- A posted invoice row is a historical actual and must not be recalculated by later runs.
-- Future months should always roll forward from the ending balance of the latest posted month.
-- If a closed month needs correction, post an adjustment entry instead of editing the posted ledger row.
-
-## Operating Principle
-
-The company should be run from the report, not from memory.
-
-If the report is clean, no action is needed.
-If the report shows an exception, the script should surface it immediately and tell the operator what to do next.
+## Success Criteria
+The operating model is working correctly when:
+- operators edit only assets and rates
+- daily run is used consistently for monitoring
+- invoice-day run posts asset-level billing history by billing window
+- month-end run updates bank payable and closes the month
+- workbook stays current without separate manual refresh steps
+- locked history remains unchanged after close
+- manifests and backups exist for every write operation
