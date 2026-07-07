@@ -158,7 +158,7 @@ Invoice-day posts history. It does not close the month.
   - updates bank_payable.csv
   - stores one row per month
   - closes the month in closed_periods.csv
-  - writes manifests and backups
+  - writes two manifests (bank-payable and close-period) and backups
 
 Presenter note:
 Month-end records payable and locks the month. It is the control step.
@@ -184,8 +184,8 @@ Operators should review the workbook, not maintain it by hand.
 - Run the sequence in order:
   - ./scripts/op_daily.sh german 2026-07-09 22
   - ./scripts/op_daily.sh german 2026-07-21 22
-  - ./scripts/op_daily.sh german 2026-07-23 22
   - ./scripts/op_invoice.sh german 2026-07 22
+  - ./scripts/op_daily.sh german 2026-07-23 22
   - ./scripts/op_month_end.sh german 2026-07 22
   - ./scripts/op_invoice.sh german 2026-08 22
   - ./scripts/op_month_end.sh german 2026-08 22
@@ -201,6 +201,7 @@ This drill proves preview, post, close, and carry-forward behavior across two bi
 - bank_payable.csv has one row for the month after month-end
 - closed_periods.csv includes the month after month-end
 - manifest and backups exist after write operations
+- month-end run adds two manifests (bank-payable and close-period)
 - each run is clearly delimited in terminal by separator blocks
 
 Presenter note:

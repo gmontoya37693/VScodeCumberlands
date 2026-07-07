@@ -47,7 +47,7 @@ Baseline is not:
 - a training dataset
 
 Recommended baseline command:
-- `ALC/scripts/op_init_baseline.sh german 2026-07-01 "Production start"`
+- `./scripts/op_init_baseline.sh german 2026-07-01 "Production start"`
 
 Expected result after baseline:
 - `baseline_config.json` exists with go-live metadata
@@ -153,10 +153,10 @@ Once a month is closed, it is treated as locked history.
 Every day the operator should run the daily script once.
 
 Command:
-- `ALC/scripts/op_daily.sh <operator> <as-of YYYY-MM-DD> [billing_day]`
+- `./scripts/op_daily.sh <operator> <as-of YYYY-MM-DD> [billing_day]`
 
 Example:
-- `ALC/scripts/op_daily.sh german 2026-07-21 22`
+- `./scripts/op_daily.sh german 2026-07-21 22`
 
 Daily run does not post history. It monitors the current state.
 
@@ -179,10 +179,10 @@ Use the daily run to catch:
 Use one invoice-day run per billing cycle.
 
 Command:
-- `ALC/scripts/op_invoice.sh <operator> <month YYYY-MM> [billing_day]`
+- `./scripts/op_invoice.sh <operator> <month YYYY-MM> [billing_day]`
 
 Example:
-- `ALC/scripts/op_invoice.sh german 2026-07 22`
+- `./scripts/op_invoice.sh german 2026-07 22`
 
 What the invoice-day run does:
 - reads current assets and rates
@@ -214,17 +214,17 @@ Workbook behavior:
 Use one month-end run after invoice-day activities are complete.
 
 Command:
-- `ALC/scripts/op_month_end.sh <operator> <month YYYY-MM> [billing_day]`
+- `./scripts/op_month_end.sh <operator> <month YYYY-MM> [billing_day]`
 
 Example:
-- `ALC/scripts/op_month_end.sh german 2026-07 22`
+- `./scripts/op_month_end.sh german 2026-07 22`
 
 What the month-end run does:
 - calculates bank payable for the month
 - updates `bank_payable.csv`
 - writes one row per month in that file
 - closes the month in `closed_periods.csv`
-- writes manifests and backups
+- writes two manifests (bank-payable and close-period) and backups
 
 ### Bank Payable File
 `bank_payable.csv` stores one row per month with:

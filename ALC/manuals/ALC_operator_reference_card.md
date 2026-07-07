@@ -49,7 +49,7 @@
 - updates `bank_payable.csv`
 - stores one row per month
 - closes the month in `closed_periods.csv`
-- creates manifests and backups
+- creates two manifests (bank-payable + close-period) and backups
 
 ## Important Concepts
 ### Due Date
