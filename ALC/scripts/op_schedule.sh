@@ -14,8 +14,16 @@ if [[ ! -x "$python_bin" ]]; then
   python_bin="python3"
 fi
 
+echo ""
+echo "______________"
+echo ""
+
 if [[ -n "$asset_id" ]]; then
   "$python_bin" "$script_dir/alc_item_sheet_tracker.py" schedule --operator "$operator" --asset-id "$asset_id"
 else
   "$python_bin" "$script_dir/alc_item_sheet_tracker.py" schedule --operator "$operator"
 fi
+
+echo ""
+echo "______________"
+echo ""

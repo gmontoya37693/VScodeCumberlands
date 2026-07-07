@@ -980,6 +980,7 @@ def write_inventory_sheet(
     ws,
     assets: List[Asset],
     rate_table: List[Tuple[date, float]],
+    as_of: date,
     posted_rows: Optional[Dict[Tuple[str, str], Dict[str, object]]] = None,
 ) -> None:
     from openpyxl.styles import Alignment, Font, PatternFill
@@ -992,6 +993,9 @@ def write_inventory_sheet(
     ws["A1"].font = Font(color="FFFFFF", bold=True, size=14)
     ws["A1"].alignment = Alignment(horizontal="center")
     ws["A1"].fill = title_fill
+
+    ws["A2"] = f"As of: {as_of.isoformat()}"
+    ws["A2"].font = Font(italic=True)
 
     headers = [
         "Asset ID",
@@ -1015,7 +1019,7 @@ def write_inventory_sheet(
         cell.fill = header_fill
         cell.alignment = Alignment(horizontal="center")
 
-    snapshot_rows = build_snapshot(assets, rate_table, date.today(), posted_rows=posted_rows)
+    snapshot_rows = build_snapshot(assets, rate_table, as_of, posted_rows=posted_rows)
     asset_by_id = {asset.asset_id: asset for asset in assets}
     for row_idx, row in enumerate(snapshot_rows, start=4):
         asset = asset_by_id[str(row["asset_id"])]
@@ -1070,6 +1074,7 @@ def write_one_pager_workbook(
     rate_table: List[Tuple[date, float]],
     posted_rows: Optional[Dict[Tuple[str, str], Dict[str, object]]],
     output_path: Path,
+    as_of: Optional[date] = None,
 ) -> None:
     try:
         from openpyxl import Workbook
@@ -1078,14 +1083,15 @@ def write_one_pager_workbook(
 
     ensure_parent(output_path)
     wb = Workbook()
+    snapshot_date = as_of or date.today()
 
     inventory_ws = wb.active
     inventory_ws.title = "Inventory"
-    write_inventory_sheet(inventory_ws, assets, rate_table, posted_rows=posted_rows)
+    write_inventory_sheet(inventory_ws, assets, rate_table, snapshot_date, posted_rows=posted_rows)
 
     snapshot_by_asset = {
         str(row["asset_id"]): row
-        for row in build_snapshot(assets, rate_table, date.today(), posted_rows=posted_rows)
+        for row in build_snapshot(assets, rate_table, snapshot_date, posted_rows=posted_rows)
     }
 
     for asset in assets:
@@ -1253,7 +1259,13 @@ def run_invoice(args: argparse.Namespace) -> None:
     b = backup_file(one_pager_path, backup_dir, run_id)
     if b:
         backups.append(b)
-    write_one_pager_workbook(assets, rates, posted_invoice_map(merged_posted), one_pager_path)
+    write_one_pager_workbook(
+        assets,
+        rates,
+        posted_invoice_map(merged_posted),
+        one_pager_path,
+        as_of=billing_date,
+    )
     print(f"one-pager workbook refreshed: {one_pager_path}")
 
     post_hashes = collect_hashes(input_paths)
@@ -1421,10 +1433,15 @@ def run_daily(args: argparse.Namespace) -> None:
 
     schedule_rows = build_schedule(assets, rates, posted_rows=posted_rows)
     invoices = invoice_for_month_from_schedule(schedule_rows, billing_month, args.billing_day)
+    previous_billing_date, _ = billing_cycle_window(billing_month, args.billing_day)
     due_count = len(invoices)
     due_amount = round(sum(float(r["invoice_amount"]) for r in invoices), 2)
     print(f"\nmonth_to_invoice: {billing_month.isoformat()}")
     print(f"billing_date: {billing_date.isoformat()}")
+    print(
+        "billing_window_due_dates: "
+        f"({previous_billing_date.isoformat()}, {billing_date.isoformat()}]"
+    )
     print(f"invoice_lines_due: {due_count}")
     print(f"invoice_amount_due: {due_amount}")
 
@@ -1443,6 +1460,8 @@ def run_daily(args: argparse.Namespace) -> None:
         "billing_day": args.billing_day,
         "billing_month": billing_month.isoformat(),
         "billing_date": billing_date.isoformat(),
+        "billing_window_start_exclusive": previous_billing_date.isoformat(),
+        "billing_window_end_inclusive": billing_date.isoformat(),
         "portfolio_totals": totals,
         "invoice_lines_due": due_count,
         "invoice_amount_due": due_amount,

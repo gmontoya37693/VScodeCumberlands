@@ -107,7 +107,7 @@ Baseline is not an invoice run and not a month close.
 
 ## Slide 10: Baseline Command
 - Command:
-  - .op_init_baseline.sh german 2026-07-01 "Production start"
+  - ./scripts/op_init_baseline.sh german 2026-07-01 "Production start"
 - Expected result:
   - baseline config created
   - posted ledger reset to header only
@@ -119,12 +119,16 @@ This is a one-time operation before production use.
 
 ## Slide 11: Daily Run
 - Command:
-  - .op_daily.sh german 2026-07-21 22
+  - ./scripts/op_daily.sh german 2026-07-21 22
 - Daily run monitors, but does not post accounting history
+- Wrapper output includes visual separators for readability:
+  - blank space before and after each run
+  - line separator: `______________`
 - Daily run prints:
   - portfolio totals
-  - billing month
+  - month to invoice
   - billing date
+  - billing window due dates
   - invoice lines due
   - invoice amount due
   - reminder if invoice day is tomorrow or today
@@ -134,14 +138,14 @@ Daily run keeps the process from depending on memory.
 
 ## Slide 12: Invoice-Day Run
 - Command:
-  - .op_invoice.sh german 2026-07 22
+  - ./scripts/op_invoice.sh german 2026-07 22
 - Invoice-day run:
   - reads current assets and rates
   - reads posted history first
   - determines the billing date for the month
   - posts invoice rows due in the billing window
-  - creates invoice CSV
-  - updates posted ledger
+  - creates the monthly invoice CSV handoff for a third person to process
+  - updates the posted invoice ledger as internal invoicing history
   - refreshes the workbook automatically
 
 Presenter note:
@@ -149,7 +153,7 @@ Invoice-day posts history. It does not close the month.
 
 ## Slide 13: Month-End Run
 - Command:
-  - .op_month_end.sh german 2026-07 22
+  - ./scripts/op_month_end.sh german 2026-07 22
 - Month-end run:
   - updates bank_payable.csv
   - stores one row per month
@@ -163,14 +167,33 @@ Month-end records payable and locks the month. It is the control step.
 - Workbook: ALC - Asset Calculation Unit.xlsx
 - First tab: Inventory
 - Remaining tabs: one tab per asset
-- Inventory shows current active/inactive status and balances
+- Inventory shows the portfolio as of the workbook snapshot date and displays that as-of date
 - Asset tabs show lease inputs, lifecycle status, and schedule state
 - Invoice-day refreshes the workbook automatically
+- invoices_YYYY-MM.csv is the monthly outbound billing file for processing
+- posted_invoices.csv is the internal posted invoice history log
 
 Presenter note:
 Operators should review the workbook, not maintain it by hand.
 
-## Slide 15: Validation Checklist
+## Slide 15: Class Drill Sequence
+- Start from a clean workspace: inputs ready, outputs empty, no history yet
+- Use the three training assets: Windblower at WWE, Snow Blower at CHA, Golf Cart at LPA
+- Use billing day 22 for all steps
+- No manual `echo` blocks are needed in class; wrappers already print separators.
+- Run the sequence in order:
+  - ./scripts/op_daily.sh german 2026-07-09 22
+  - ./scripts/op_daily.sh german 2026-07-21 22
+  - ./scripts/op_daily.sh german 2026-07-23 22
+  - ./scripts/op_invoice.sh german 2026-07 22
+  - ./scripts/op_month_end.sh german 2026-07 22
+  - ./scripts/op_invoice.sh german 2026-08 22
+  - ./scripts/op_month_end.sh german 2026-08 22
+
+Presenter note:
+This drill proves preview, post, close, and carry-forward behavior across two billing cycles.
+
+## Slide 16: Validation Checklist
 - assets.csv and rates.csv are valid
 - invoice CSV exists after invoice-day run
 - posted_invoices.csv has new rows after invoice-day run
@@ -178,15 +201,17 @@ Operators should review the workbook, not maintain it by hand.
 - bank_payable.csv has one row for the month after month-end
 - closed_periods.csv includes the month after month-end
 - manifest and backups exist after write operations
+- each run is clearly delimited in terminal by separator blocks
 
 Presenter note:
 Validation is part of the job, not an optional extra.
 
-## Slide 16: Common Errors
+## Slide 17: Common Errors
 - Running inside Python >>> instead of shell terminal
 - Wrong date format in CSV
 - Missing or wrong file path
 - Confusing due date with billing date
+- Using `.op_...` instead of `./scripts/op_...`
 - Trying to post a closed month
 - Trying to invoice before go-live
 - Expecting weekend billing to stay on a weekend date
@@ -194,7 +219,7 @@ Validation is part of the job, not an optional extra.
 Presenter note:
 Explain what each error means and what the safe next action should be.
 
-## Slide 17: Roles and Guardrails
+## Slide 18: Roles and Guardrails
 ### Operator
 - update assets.csv
 - update rates.csv
@@ -214,7 +239,7 @@ Explain what each error means and what the safe next action should be.
 Presenter note:
 The workflow should stay boring and repeatable.
 
-## Slide 18: Success Looks Like
+## Slide 19: Success Looks Like
 - User can explain the 3-step operating cycle
 - User can explain due date vs billing date vs month close
 - User can identify what they edit and what the system controls

@@ -14,6 +14,14 @@ if [[ ! -x "$python_bin" ]]; then
   python_bin="python3"
 fi
 
+echo ""
+echo "______________"
+echo ""
+
 "$python_bin" "$script_dir/alc_item_sheet_tracker.py" bank-payable \
   --operator "$operator" \
   --month "$month"
+
+echo ""
+echo "______________"
+echo ""

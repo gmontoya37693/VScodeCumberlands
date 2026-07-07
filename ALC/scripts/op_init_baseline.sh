@@ -15,9 +15,17 @@ if [[ ! -x "$python_bin" ]]; then
   python_bin="python3"
 fi
 
+echo ""
+echo "______________"
+echo ""
+
 "$python_bin" "$script_dir/alc_item_sheet_tracker.py" init-baseline \
   --operator "$operator" \
   --go-live "$go_live" \
   --reset-posted-ledger \
   --reset-closed-periods \
   --notes "$notes"
+
+echo ""
+echo "______________"
+echo ""

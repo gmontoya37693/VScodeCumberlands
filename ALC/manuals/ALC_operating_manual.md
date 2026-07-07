@@ -91,16 +91,16 @@ Operators should not manually edit during normal operation:
 
 ## Official Operator Command Set
 Routine operation should use only these wrapper scripts:
-- baseline setup: `ALC/scripts/op_init_baseline.sh`
-- daily run: `ALC/scripts/op_daily.sh`
-- invoice-day run: `ALC/scripts/op_invoice.sh`
-- month-end run: `ALC/scripts/op_month_end.sh`
+- baseline setup: `./scripts/op_init_baseline.sh`
+- daily run: `./scripts/op_daily.sh`
+- invoice-day run: `./scripts/op_invoice.sh`
+- month-end run: `./scripts/op_month_end.sh`
 
 Examples:
-- baseline: `ALC/scripts/op_init_baseline.sh german 2026-07-01 "Production start"`
-- daily: `ALC/scripts/op_daily.sh german 2026-07-21 22`
-- invoice day: `ALC/scripts/op_invoice.sh german 2026-07 22`
-- month-end: `ALC/scripts/op_month_end.sh german 2026-07 22`
+- baseline: `./scripts/op_init_baseline.sh german 2026-07-01 "Production start"`
+- daily: `./scripts/op_daily.sh german 2026-07-21 22`
+- invoice day: `./scripts/op_invoice.sh german 2026-07 22`
+- month-end: `./scripts/op_month_end.sh german 2026-07 22`
 
 The optional last argument is the billing day. If omitted, the default is `22`.
 
@@ -189,8 +189,8 @@ What the invoice-day run does:
 - reads posted invoice history first
 - determines the billing date for the selected month
 - selects asset installments due between the previous billing date and the current billing date
-- creates the invoice CSV for the month
-- writes posted rows to `posted_invoices.csv`
+- creates the invoice CSV for the month as the outbound billing handoff file for downstream processing
+- writes the same posted rows to `posted_invoices.csv` as the internal invoicing history ledger
 - refreshes `ALC - Asset Calculation Unit.xlsx`
 - writes a run manifest and any needed backups
 
@@ -255,8 +255,8 @@ Daily run provides terminal monitoring output and a run manifest.
 
 ### Invoice-Day Outputs
 Invoice-day run produces:
-- `invoices_YYYY-MM.csv`
-- updated `posted_invoices.csv`
+- `invoices_YYYY-MM.csv` as the monthly outbound file used by a third person to process billing
+- updated `posted_invoices.csv` as the internal posted invoice history log
 - refreshed `ALC - Asset Calculation Unit.xlsx`
 - run manifest
 - backups when files are overwritten
