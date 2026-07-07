@@ -1,0 +1,4 @@
+asset_id,property_id,allocation,asset_description,asset_value,start_date,term_months,bank_rate_annual,nim_annual,gl_account,status,tax_amount,admin_expense,risk_cost_recovery,salvage_value,salvage_periods
+A1001,WWE,Leasing,Windblower,9500,6/10/26,25,0.051,0,1700,active,570,350,300,300,1
+A1002,CHA,Leasing,Snow Blower,8200,6/21/26,25,0.051,0,1700,active,492,300,260,260,1
+A1003,LPA,Leasing,Golf Cart,14000,6/25/26,25,0.051,0,1705,active,840,500,420,420,1
