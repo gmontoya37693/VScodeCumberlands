@@ -1,0 +1,4 @@
+invoice_month,billing_date,due_date,payment_month,asset_id,property_id,allocation,gl_account,period,term_to_maturity,bank_rate_annual,nim_annual,invoice_amount,interest_amount,amortization_amount,lease_rate_monthly,lease_base,opening_balance,ending_balance,rate_source
+8/1/26,8/24/26,8/10/26,8/10/26,A1001,WWE,Leasing,1700,2,22,0.053,0,477.73,43.16,434.57,0.00431288,10420,10006.21,9571.64,rate_table
+8/1/26,8/24/26,8/21/26,8/21/26,A1002,CHA,Leasing,1700,2,34,0.053,0,273.59,37.24,236.35,0.00431288,8992,8634.92,8398.57,rate_table
+8/1/26,8/24/26,7/25/26,7/25/26,A1003,LPA,Leasing,1705,1,47,0.051,0,359.95,63.72,296.23,0.00415378,15340,15340,15043.77,rate_table

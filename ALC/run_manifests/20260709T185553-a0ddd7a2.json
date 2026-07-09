@@ -1,0 +1,18 @@
+{
+  "asset_filter": "",
+  "assets_processed": 3,
+  "backups": [],
+  "command": "one-pager",
+  "input_hashes": {
+    "assets": "91b8b97208c39a47fd18212dd2ca26fe372d9b2dc36244fb1d0788580458c1d7",
+    "baseline_config": "",
+    "posted_ledger": "",
+    "rates": "1a206af37096602886e819fac183d4fe0c0c84fcb363eb9334776455d73f64c4"
+  },
+  "operator": "german",
+  "output_file": "/Users/germanmontoya/Python/vscode/ALC/ALC - Asset Calculation Unit.xlsx",
+  "output_hash": "799514cdd01e802699c781dfed58545a65912913eaa8ff14d3a3e057e010aa33",
+  "run_id": "20260709T185553-a0ddd7a2",
+  "script_version": "2026.07.10-compliance-v1",
+  "timestamp": "2026-07-09T18:55:53"
+}

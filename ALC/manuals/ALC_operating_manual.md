@@ -208,7 +208,13 @@ Workbook structure:
 Workbook behavior:
 - all assets remain represented, whether active or inactive
 - the Inventory tab shows current asset status and balances
+- the Inventory tab also shows term months and term to maturity (remaining invoiced periods)
 - each asset tab shows lease inputs, lifecycle status, and projected / actual schedule state
+- each asset tab shows workbook as-of date
+- row colors distinguish posted history (green) from projected/pending rows (yellow)
+
+Operational note:
+- close workbook and CSV files before running wrapper scripts so writes are not blocked by desktop apps
 
 ## Month-End Workflow
 Use one month-end run after invoice-day activities are complete.
@@ -245,6 +251,8 @@ The system uses two kinds of schedule rows:
 Rules:
 - posted invoice rows are historical actuals
 - future runs must reuse posted rows instead of recalculating them
+- an asset remains active and invoice-eligible while balance is greater than zero
+- when balance reaches zero at maturity, snapshot/workbook status becomes inactive
 - closed months must not be changed in normal operations
 - if a correction is needed after close, the default rule is to post the correction in a later open month
 - only authorized admin use should invoke a closed-period override route
@@ -309,6 +317,7 @@ Recovery principle:
 - never edit `closed_periods.csv` manually during normal operation
 - never create fake production history after baseline
 - use wrapper scripts for routine operations
+- close workbook/CSV files before running wrappers to avoid write conflicts
 
 ## Recommended Daily Decision Flow
 1. Update `assets.csv` if any asset changed.

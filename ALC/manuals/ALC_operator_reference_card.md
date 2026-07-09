@@ -44,6 +44,7 @@
 - posts the same invoiced rows into `posted_invoices.csv` as the internal invoice history log
 - refreshes `ALC - Asset Calculation Unit.xlsx`
 - creates manifest and backups
+- keeps invoicing active assets until balance reaches zero
 
 ## What Month-End Run Does
 - updates `bank_payable.csv`
@@ -64,11 +65,16 @@
 - separate control step
 - once closed, the month is locked
 
+### Active vs Inactive
+- an asset remains active and invoice-eligible while balance is greater than zero
+- when balance reaches zero at maturity, workbook status becomes inactive
+
 ## Never Do This
 - do not edit `posted_invoices.csv` manually
 - do not edit `closed_periods.csv` manually
 - do not create fake production history after baseline
 - do not rely on memory instead of the daily run
+- do not keep workbook/CSV files open during wrapper runs
 
 ## Quick Validation
 After invoice day:

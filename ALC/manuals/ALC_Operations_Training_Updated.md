@@ -147,6 +147,7 @@ Daily run keeps the process from depending on memory.
   - creates the monthly invoice CSV handoff for a third person to process
   - updates the posted invoice ledger as internal invoicing history
   - refreshes the workbook automatically
+  - continues invoicing until each asset reaches zero balance
 
 Presenter note:
 Invoice-day posts history. It does not close the month.
@@ -168,7 +169,10 @@ Month-end records payable and locks the month. It is the control step.
 - First tab: Inventory
 - Remaining tabs: one tab per asset
 - Inventory shows the portfolio as of the workbook snapshot date and displays that as-of date
+- Inventory includes both Term Months and Term to Maturity (remaining invoiced periods)
 - Asset tabs show lease inputs, lifecycle status, and schedule state
+- Asset tabs also show the workbook as-of date
+- Visual cues: green rows are posted history, yellow rows are projected/pending
 - Invoice-day refreshes the workbook automatically
 - invoices_YYYY-MM.csv is the monthly outbound billing file for processing
 - posted_invoices.csv is the internal posted invoice history log
@@ -213,6 +217,7 @@ Validation is part of the job, not an optional extra.
 - Missing or wrong file path
 - Confusing due date with billing date
 - Using `.op_...` instead of `./scripts/op_...`
+- Keeping workbook/CSV files open while running scripts
 - Trying to post a closed month
 - Trying to invoice before go-live
 - Expecting weekend billing to stay on a weekend date
@@ -236,6 +241,8 @@ Explain what each error means and what the safe next action should be.
 - never edit posted ledger manually in normal operations
 - never edit closed periods manually in normal operations
 - never create fake production history after baseline
+- close open workbook/CSV files before running wrappers to avoid write conflicts
+- an asset stays active and keeps invoicing while balance > 0
 
 Presenter note:
 The workflow should stay boring and repeatable.

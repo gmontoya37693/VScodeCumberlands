@@ -887,6 +887,7 @@ def write_asset_one_pager_sheet(
     asset: Asset,
     rate_table: List[Tuple[date, float]],
     lifecycle_status: str,
+    as_of: date,
     posted_rows: Optional[Dict[Tuple[str, str], Dict[str, object]]] = None,
 ) -> None:
     from openpyxl.styles import Alignment, Font, PatternFill
@@ -894,12 +895,15 @@ def write_asset_one_pager_sheet(
     title_fill = PatternFill(fill_type="solid", fgColor="1F3A68")
     input_fill = PatternFill(fill_type="solid", fgColor="D9EAD3")
     header_fill = PatternFill(fill_type="solid", fgColor="E9EEF5")
+    posted_fill = PatternFill(fill_type="solid", fgColor="F2F2F2")
 
     ws.merge_cells("A1:I1")
     ws["A1"] = "ALC - Acento Leasing Company Asset Calculation Model"
     ws["A1"].font = Font(color="FFFFFF", bold=True, size=14)
     ws["A1"].alignment = Alignment(horizontal="center")
     ws["A1"].fill = title_fill
+    ws["A2"] = f"As of: {as_of.isoformat()} | Light gray rows = posted history"
+    ws["A2"].font = Font(italic=True)
 
     input_rows = [
         ("Asset ID", asset.asset_id, None),
@@ -953,6 +957,17 @@ def write_asset_one_pager_sheet(
         ws[f"G{row_idx}"] = row["interest"]
         ws[f"H{row_idx}"] = row["amortization"]
         ws[f"I{row_idx}"] = row["balance"]
+
+        rate_source = str(row.get("rate_source", ""))
+        if rate_source == "posted_ledger":
+            fill = posted_fill
+        else:
+            fill = None
+
+        if fill is not None:
+            for col in "ABCDEFGHI":
+                ws[f"{col}{row_idx}"].fill = fill
+
         row_idx += 1
 
     for r in range(header_row + 1, row_idx):
@@ -987,8 +1002,9 @@ def write_inventory_sheet(
 
     title_fill = PatternFill(fill_type="solid", fgColor="1F3A68")
     header_fill = PatternFill(fill_type="solid", fgColor="E9EEF5")
+    posted_fill = PatternFill(fill_type="solid", fgColor="F2F2F2")
 
-    ws.merge_cells("A1:N1")
+    ws.merge_cells("A1:O1")
     ws["A1"] = "ALC - Asset Inventory"
     ws["A1"].font = Font(color="FFFFFF", bold=True, size=14)
     ws["A1"].alignment = Alignment(horizontal="center")
@@ -996,6 +1012,8 @@ def write_inventory_sheet(
 
     ws["A2"] = f"As of: {as_of.isoformat()}"
     ws["A2"].font = Font(italic=True)
+    ws["H2"] = "Light gray row = has posted history"
+    ws["H2"].font = Font(italic=True)
 
     headers = [
         "Asset ID",
@@ -1006,6 +1024,7 @@ def write_inventory_sheet(
         "Start Date",
         "Final Date",
         "Term Months",
+        "Term to Maturity",
         "Asset Cost",
         "Lease Base",
         "Current Installment",
@@ -1021,6 +1040,7 @@ def write_inventory_sheet(
 
     snapshot_rows = build_snapshot(assets, rate_table, as_of, posted_rows=posted_rows)
     asset_by_id = {asset.asset_id: asset for asset in assets}
+    posted_asset_ids = {asset_id for asset_id, _ in (posted_rows or {}).keys()}
     for row_idx, row in enumerate(snapshot_rows, start=4):
         asset = asset_by_id[str(row["asset_id"])]
         ws.cell(row=row_idx, column=1, value=row["asset_id"])
@@ -1031,22 +1051,27 @@ def write_inventory_sheet(
         ws.cell(row=row_idx, column=6, value=parse_date(str(row["start_date"])))
         ws.cell(row=row_idx, column=7, value=parse_date(str(row["final_date"])))
         ws.cell(row=row_idx, column=8, value=row["term_months"])
-        ws.cell(row=row_idx, column=9, value=row["asset_value"])
-        ws.cell(row=row_idx, column=10, value=row["lease_base"])
-        ws.cell(row=row_idx, column=11, value=row["current_payment"])
-        ws.cell(row=row_idx, column=12, value=row["balance"])
-        ws.cell(row=row_idx, column=13, value=row["bank_rate_annual_default"])
-        ws.cell(row=row_idx, column=14, value=row["nim_annual"])
+        ws.cell(row=row_idx, column=9, value=row["months_remaining"])
+        ws.cell(row=row_idx, column=10, value=row["asset_value"])
+        ws.cell(row=row_idx, column=11, value=row["lease_base"])
+        ws.cell(row=row_idx, column=12, value=row["current_payment"])
+        ws.cell(row=row_idx, column=13, value=row["balance"])
+        ws.cell(row=row_idx, column=14, value=row["bank_rate_annual_default"])
+        ws.cell(row=row_idx, column=15, value=row["nim_annual"])
+
+        if str(row["asset_id"]) in posted_asset_ids:
+            for col_idx in range(1, 16):
+                ws.cell(row=row_idx, column=col_idx).fill = posted_fill
 
     for row_idx in range(4, len(snapshot_rows) + 4):
         ws.cell(row=row_idx, column=6).number_format = "yyyy-mm-dd"
         ws.cell(row=row_idx, column=7).number_format = "yyyy-mm-dd"
-        ws.cell(row=row_idx, column=9).number_format = "$#,##0.00"
         ws.cell(row=row_idx, column=10).number_format = "$#,##0.00"
         ws.cell(row=row_idx, column=11).number_format = "$#,##0.00"
         ws.cell(row=row_idx, column=12).number_format = "$#,##0.00"
-        ws.cell(row=row_idx, column=13).number_format = "0.00%"
+        ws.cell(row=row_idx, column=13).number_format = "$#,##0.00"
         ws.cell(row=row_idx, column=14).number_format = "0.00%"
+        ws.cell(row=row_idx, column=15).number_format = "0.00%"
 
     widths = {
         "A": 12,
@@ -1057,12 +1082,13 @@ def write_inventory_sheet(
         "F": 12,
         "G": 12,
         "H": 12,
-        "I": 14,
+        "I": 16,
         "J": 14,
-        "K": 18,
+        "K": 14,
         "L": 18,
-        "M": 10,
+        "M": 18,
         "N": 10,
+        "O": 10,
     }
     for col, width in widths.items():
         ws.column_dimensions[col].width = width
@@ -1098,7 +1124,14 @@ def write_one_pager_workbook(
         desired = safe_sheet_title(asset.asset_id)
         ws = wb.create_sheet(desired)
         lifecycle_status = str(snapshot_by_asset.get(asset.asset_id, {}).get("status", "inactive"))
-        write_asset_one_pager_sheet(ws, asset, rate_table, lifecycle_status, posted_rows=posted_rows)
+        write_asset_one_pager_sheet(
+            ws,
+            asset,
+            rate_table,
+            lifecycle_status,
+            snapshot_date,
+            posted_rows=posted_rows,
+        )
 
     wb.save(output_path)
 
