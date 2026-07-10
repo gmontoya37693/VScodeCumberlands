@@ -65,9 +65,10 @@
 - separate control step
 - once closed, the month is locked
 
-### Active vs Inactive
-- an asset remains active and invoice-eligible while balance is greater than zero
-- when balance reaches zero at maturity, workbook status becomes inactive
+### Asset Lifecycle States
+- **Scheduled**: Asset procured but not yet delivered (`as_of < start_date`). Not invoiced. Shown in daily reports as upcoming assets.
+- **Active**: Asset on lease and invoicing (`as_of >= start_date AND balance > 0`). Included in portfolio totals and billing.
+- **Matured**: Lease term complete (`balance == 0 OR as_of >= final_month`). No more invoicing. Remains in workbook for history.
 
 ## Never Do This
 - do not edit `posted_invoices.csv` manually

@@ -169,7 +169,7 @@ Month-end records payable and locks the month. It is the control step.
 - First tab: Inventory
 - Remaining tabs: one tab per asset
 - Inventory shows the portfolio as of the workbook snapshot date and displays that as-of date
-- Inventory includes both Term Months and Term to Maturity (remaining invoiced periods)
+- Inventory includes both Lifespan and Term to Maturity (remaining invoiced periods)
 - Asset tabs show lease inputs, lifecycle status, and schedule state
 - Asset tabs also show the workbook as-of date
 - Visual cues: green rows are posted history, yellow rows are projected/pending
@@ -242,7 +242,7 @@ Explain what each error means and what the safe next action should be.
 - never edit closed periods manually in normal operations
 - never create fake production history after baseline
 - close open workbook/CSV files before running wrappers to avoid write conflicts
-- an asset stays active and keeps invoicing while balance > 0
+- asset lifecycle states: scheduled (not yet started), active (invoicing), matured (complete)
 
 Presenter note:
 The workflow should stay boring and repeatable.

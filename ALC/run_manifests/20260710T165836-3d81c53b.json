@@ -1,0 +1,34 @@
+{
+  "allow_closed_adjustment": false,
+  "backups": [
+    "/Users/germanmontoya/Python/vscode/ALC/backups/20260710T165836-3d81c53b/ALC - Asset Calculation Unit.xlsx"
+  ],
+  "billing_date": "2026-07-22",
+  "billing_day": 22,
+  "close_period": false,
+  "command": "invoice",
+  "input_hashes_after": {
+    "assets": "053a70eaeeb44a39729e78b22081cd086aa5654c06129a67fe93bb89816a4ddf",
+    "baseline_config": "",
+    "closed_periods": "",
+    "posted_ledger": "658f909be356ae0502ff71d75f4693c470087ed42dc3dae920c290373c5552fe",
+    "rates": "1a206af37096602886e819fac183d4fe0c0c84fcb363eb9334776455d73f64c4"
+  },
+  "input_hashes_before": {
+    "assets": "053a70eaeeb44a39729e78b22081cd086aa5654c06129a67fe93bb89816a4ddf",
+    "baseline_config": "",
+    "closed_periods": "",
+    "posted_ledger": "",
+    "rates": "1a206af37096602886e819fac183d4fe0c0c84fcb363eb9334776455d73f64c4"
+  },
+  "invoice_lines": 2,
+  "invoice_total": 752.54,
+  "month": "2026-07-01",
+  "one_pager_output_file": "/Users/germanmontoya/Python/vscode/ALC/ALC - Asset Calculation Unit.xlsx",
+  "operator": "german",
+  "output_file": "/Users/germanmontoya/Python/vscode/ALC/invoices_2026-07.csv",
+  "posted_ledger": "/Users/germanmontoya/Python/vscode/ALC/posted_invoices.csv",
+  "run_id": "20260710T165836-3d81c53b",
+  "script_version": "2026.07.10-compliance-v1",
+  "timestamp": "2026-07-10T16:58:36"
+}

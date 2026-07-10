@@ -105,9 +105,31 @@ Examples:
 The optional last argument is the billing day. If omitted, the default is `22`.
 
 ## Asset Lifecycle and Schedule Logic
-Each asset begins when it is entered in `assets.csv` with its activation / start date.
 
-The script uses that start date to build the asset's full projected lease life.
+### Start Date and Asset Delivery
+Each asset is defined in `assets.csv` with a `start_date` field representing the **delivery date** to the property.
+On that date, the lease term officially begins and the asset becomes active for invoicing.
+
+### Asset Lifecycle States
+Each asset moves through three states:
+
+**1. Scheduled** (`as_of < start_date`)
+- Asset has been procured but not yet delivered
+- Not yet invoiced; not included in active billing calculations
+- Appears in daily report as a list of "scheduled assets" for advance visibility
+- Useful for planning upcoming lease obligations
+
+**2. Active** (`as_of >= start_date AND balance > 0`)
+- Asset is on lease and generating invoices
+- Included in daily portfolio totals and invoicing calculations
+- Each month, one installment is due on the asset's due date (anniversary of start_date)
+
+**3. Matured** (`balance == 0 OR as_of >= final_month`)
+- Lease term has ended; no more invoicing
+- Asset remains in workbook for historical audit trail
+- May retain matured balance due to salvage recovery or rounding scenarios
+
+The script uses the start date to build the asset's full projected lease life.
 
 For each asset, the schedule includes:
 - opening row at the asset start date
@@ -118,7 +140,7 @@ For each asset, the schedule includes:
 The schedule math uses:
 - lease base = asset value + tax + admin expense + risk cost recovery - salvage value
 - effective monthly rate derived from annual bank APR + NIM
-- payment months = term months - salvage periods
+- payment months = lifespan - salvage periods
 
 Future open rows can change when rates change. Closed historical rows must not change.
 
@@ -208,7 +230,7 @@ Workbook structure:
 Workbook behavior:
 - all assets remain represented, whether active or inactive
 - the Inventory tab shows current asset status and balances
-- the Inventory tab also shows term months and term to maturity (remaining invoiced periods)
+- the Inventory tab also shows lifespan and term to maturity (remaining invoiced periods)
 - each asset tab shows lease inputs, lifecycle status, and projected / actual schedule state
 - each asset tab shows workbook as-of date
 - row colors distinguish posted history (green) from projected/pending rows (yellow)

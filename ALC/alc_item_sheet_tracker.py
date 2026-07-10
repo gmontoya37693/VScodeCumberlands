@@ -29,7 +29,7 @@ Inputs
 1) assets.csv
     Required columns:
     asset_id,property_id,allocation,asset_description,asset_value,start_date,
-    term_months,bank_rate_annual,nim_annual,gl_account,status
+    lifespan,bank_rate_annual,nim_annual,gl_account,status
 
     Optional columns:
     tax_amount,admin_expense,risk_cost_recovery,salvage_value,salvage_periods
@@ -290,7 +290,7 @@ class Asset:
     asset_description: str
     asset_value: float
     start_date: date
-    term_months: int
+    lifespan: int
     bank_rate_annual: float
     nim_annual: float
     gl_account: str
@@ -311,7 +311,7 @@ class Asset:
 
     @property
     def payment_months(self) -> int:
-        return max(0, self.term_months - self.salvage_periods)
+        return max(0, self.lifespan - self.salvage_periods)
 
     @property
     def lease_base(self) -> float:
@@ -333,7 +333,7 @@ def load_assets(path: Path) -> List[Asset]:
             "asset_description",
             "asset_value",
             "start_date",
-            "term_months",
+            "lifespan",
             "bank_rate_annual",
             "nim_annual",
             "gl_account",
@@ -352,7 +352,7 @@ def load_assets(path: Path) -> List[Asset]:
                     asset_description=row["asset_description"].strip(),
                     asset_value=float(row["asset_value"]),
                     start_date=parse_date(row["start_date"]),
-                    term_months=int(row["term_months"]),
+                    lifespan=int(row["lifespan"]),
                     bank_rate_annual=float(row["bank_rate_annual"]),
                     nim_annual=float(row["nim_annual"]),
                     gl_account=row["gl_account"].strip(),
@@ -705,20 +705,30 @@ def build_snapshot(
     as_of: date,
     posted_rows: Optional[Dict[Tuple[str, str], Dict[str, object]]] = None,
 ) -> List[Dict[str, object]]:
-    """Return one current-state row per asset for reporting and exports."""
+    """Return one current-state row per asset for reporting and exports.
+    Status is one of: scheduled (not yet started), active (on lease, invoicing),
+    matured (lease complete, no more invoicing).
+    """
     rows: List[Dict[str, object]] = []
     for a in assets:
         m = amortize_until(a, as_of, rate_table, posted_rows=posted_rows)
         final_date = a.final_month
         days_to_maturity = (final_date - as_of).days
-        active = a.status == "active" and m["balance"] > 0 and as_of >= a.start_date
+        
+        # Determine lifecycle state
+        if as_of < a.start_date:
+            lifecycle_status = "scheduled"
+        elif a.status == "active" and m["balance"] > 0:
+            lifecycle_status = "active"
+        else:
+            lifecycle_status = "matured"
 
         rows.append(
             {
                 "asset_id": a.asset_id,
                 "property_id": a.property_id,
                 "allocation": a.allocation,
-                "status": "active" if active else "inactive",
+                "status": lifecycle_status,
                 "asset_value": round(a.asset_value, 2),
                 "tax_amount": round(a.tax_amount, 2),
                 "admin_expense": round(a.admin_expense, 2),
@@ -728,7 +738,7 @@ def build_snapshot(
                 "lease_base": round(a.lease_base, 2),
                 "start_date": a.start_date.isoformat(),
                 "final_date": final_date.isoformat(),
-                "term_months": a.term_months,
+                "lifespan": a.lifespan,
                 "bank_rate_annual_default": round(a.bank_rate_annual, 6),
                 "nim_annual": round(a.nim_annual, 6),
                 "gl_account": a.gl_account,
@@ -744,9 +754,11 @@ def build_snapshot(
     return rows
 
 
-def rows_total(rows: List[Dict[str, object]]) -> Dict[str, float]:
+def rows_total(rows: List[Dict[str, object]]) -> Dict[str, object]:
     total_assets = len(rows)
+    scheduled_assets = sum(1 for r in rows if r["status"] == "scheduled")
     active_assets = sum(1 for r in rows if r["status"] == "active")
+    matured_assets = sum(1 for r in rows if r["status"] == "matured")
     principal = sum(float(r["asset_value"]) for r in rows)
     lease_base = sum(float(r["lease_base"]) for r in rows)
     interest_paid = sum(float(r["interest_paid"]) for r in rows)
@@ -755,7 +767,9 @@ def rows_total(rows: List[Dict[str, object]]) -> Dict[str, float]:
     current_payment = sum(float(r["current_payment"]) for r in rows if r["status"] == "active")
     return {
         "total_assets": total_assets,
+        "scheduled_assets": scheduled_assets,
         "active_assets": active_assets,
+        "matured_assets": matured_assets,
         "asset_value_total": round(principal, 2),
         "lease_base_total": round(lease_base, 2),
         "interest_paid_total": round(interest_paid, 2),
@@ -918,7 +932,7 @@ def write_asset_one_pager_sheet(
         ("Salvage Value", asset.salvage_value, "$#,##0.00"),
         ("Lease Base", asset.lease_base, "$#,##0.00"),
         ("Salvage Periods", asset.salvage_periods, None),
-        ("Lifespan (months)", asset.term_months, None),
+        ("Lifespan (months)", asset.lifespan, None),
         ("NIM (annual)", asset.nim_annual, "0.00%"),
     ]
     for idx, (label, value, number_format) in enumerate(input_rows, start=3):
@@ -1023,7 +1037,7 @@ def write_inventory_sheet(
         "Status",
         "Start Date",
         "Final Date",
-        "Term Months",
+        "Lifespan (months)",
         "Term to Maturity",
         "Asset Cost",
         "Lease Base",
@@ -1050,7 +1064,7 @@ def write_inventory_sheet(
         ws.cell(row=row_idx, column=5, value=row["status"])
         ws.cell(row=row_idx, column=6, value=parse_date(str(row["start_date"])))
         ws.cell(row=row_idx, column=7, value=parse_date(str(row["final_date"])))
-        ws.cell(row=row_idx, column=8, value=row["term_months"])
+        ws.cell(row=row_idx, column=8, value=row["lifespan"])
         ws.cell(row=row_idx, column=9, value=row["months_remaining"])
         ws.cell(row=row_idx, column=10, value=row["asset_value"])
         ws.cell(row=row_idx, column=11, value=row["lease_base"])
@@ -1136,11 +1150,19 @@ def write_one_pager_workbook(
     wb.save(output_path)
 
 
-def print_totals(totals: Dict[str, float], title: str) -> None:
+def print_totals(totals: Dict[str, object], title: str) -> None:
     print(f"\n{title}")
     print("-" * len(title))
-    for k, v in totals.items():
-        print(f"{k}: {v}")
+    print(f"total_assets: {totals['total_assets']}")
+    print(f"  scheduled (not yet started): {totals['scheduled_assets']}")
+    print(f"  active (invoicing): {totals['active_assets']}")
+    print(f"  matured (complete): {totals['matured_assets']}")
+    print(f"\nasset_value_total: {totals['asset_value_total']}")
+    print(f"lease_base_total: {totals['lease_base_total']}")
+    print(f"balance_total: {totals['balance_total']}")
+    print(f"current_payment_active_total: {totals['current_payment_active_total']}")
+    print(f"interest_paid_total: {totals['interest_paid_total']}")
+    print(f"amortization_paid_total: {totals['amortization_paid_total']}")
 
 
 # ----------------------
@@ -1467,6 +1489,14 @@ def run_daily(args: argparse.Namespace) -> None:
     schedule_rows = build_schedule(assets, rates, posted_rows=posted_rows)
     invoices = invoice_for_month_from_schedule(schedule_rows, billing_month, args.billing_day)
     previous_billing_date, _ = billing_cycle_window(billing_month, args.billing_day)
+    
+    # Show scheduled assets if any
+    scheduled_rows = [r for r in rows if r["status"] == "scheduled"]
+    if scheduled_rows:
+        print("\nScheduled assets (not yet active):")
+        for r in scheduled_rows:
+            print(f"  {r['asset_id']}: starts {r['start_date']}")
+    
     due_count = len(invoices)
     due_amount = round(sum(float(r["invoice_amount"]) for r in invoices), 2)
     print(f"\nmonth_to_invoice: {billing_month.isoformat()}")
