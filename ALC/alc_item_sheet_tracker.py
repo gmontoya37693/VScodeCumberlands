@@ -18,7 +18,7 @@ Acento Leasing Company (ALC)
 What the script does
 --------------------
 - Tracks each asset by property/allocation
-- Recalculates the monthly payment using bank APR + NIM converted to an effective monthly lease rate
+- Recalculates the monthly payment using bank APR + NIM converted to a nominal monthly lease rate (APR/12)
 - Produces a point-in-time portfolio snapshot
 - Produces a monthly invoice list
 - Produces a monthly bank-payable summary
@@ -114,7 +114,10 @@ BANK_PAYABLE_FIELDS = [
     "month",
     "billing_date",
     "invoice_lines",
+    "bank_interest_total",
+    "bank_principal_total",
     "bank_payable_total",
+    "payable_basis",
     "operator",
     "updated_at",
 ]
@@ -187,10 +190,10 @@ def pmt(principal: float, monthly_rate: float, n_periods: int) -> float:
 
 
 def effective_monthly_rate(annual_rate: float) -> float:
-    """Convert annual APR to an effective monthly rate."""
+    """Convert annual APR to a nominal monthly rate (APR / 12)."""
     if abs(annual_rate) < 1e-12:
         return 0.0
-    return math.pow(1.0 + annual_rate, 1.0 / 12.0) - 1.0
+    return annual_rate / 12.0
 
 
 def month_key(d: date) -> str:
@@ -494,7 +497,10 @@ def load_bank_payable_rows(path: Path) -> List[Dict[str, object]]:
                     "month": m,
                     "billing_date": (row.get("billing_date") or "").strip(),
                     "invoice_lines": int(row.get("invoice_lines") or 0),
+                    "bank_interest_total": float(row.get("bank_interest_total") or 0.0),
+                    "bank_principal_total": float(row.get("bank_principal_total") or 0.0),
                     "bank_payable_total": float(row.get("bank_payable_total") or 0.0),
+                    "payable_basis": (row.get("payable_basis") or "asset_cost").strip(),
                     "operator": (row.get("operator") or "").strip(),
                     "updated_at": (row.get("updated_at") or "").strip(),
                 }
@@ -511,7 +517,10 @@ def save_bank_payable_rows(path: Path, rows: List[Dict[str, object]]) -> None:
                 "month": str(row["month"]),
                 "billing_date": str(row.get("billing_date", "")),
                 "invoice_lines": int(row.get("invoice_lines", 0)),
+                "bank_interest_total": round(float(row.get("bank_interest_total", 0.0)), 2),
+                "bank_principal_total": round(float(row.get("bank_principal_total", 0.0)), 2),
                 "bank_payable_total": round(float(row.get("bank_payable_total", 0.0)), 2),
+                "payable_basis": str(row.get("payable_basis", "asset_cost")),
                 "operator": str(row.get("operator", "")),
                 "updated_at": str(row.get("updated_at", "")),
             }
@@ -655,6 +664,67 @@ def build_schedule(
     rows: List[Dict[str, object]] = []
     for asset in assets:
         rows.extend(build_asset_schedule(asset, rate_table, posted_rows=posted_rows))
+    return rows
+
+
+def build_bank_funding_schedule(
+    assets: List[Asset],
+    rate_table: List[Tuple[date, float]],
+) -> List[Dict[str, object]]:
+    """Build bank-funding schedule using asset cost as principal base.
+
+    This schedule is independent from lease-base economics and is used only for
+    monthly bank-payable calculations.
+    """
+    rows: List[Dict[str, object]] = []
+    for asset in assets:
+        balance = asset.asset_value
+        for i in range(asset.payment_months):
+            payment_due_date = add_months_keep_day(asset.start_date, i + 1)
+            remaining = asset.payment_months - i
+            annual_bank_rate = bank_rate_for_month(month_start(payment_due_date), asset.bank_rate_annual, rate_table)
+            monthly_rate = effective_monthly_rate(annual_bank_rate)
+            payment = pmt(balance, monthly_rate, remaining)
+            interest = balance * monthly_rate
+            principal = payment - interest
+
+            if principal > balance:
+                principal = balance
+                payment = interest + principal
+
+            ending_balance = balance - principal
+            if ending_balance <= 1e-8:
+                ending_balance = 0.0
+
+            rows.append(
+                {
+                    "asset_id": asset.asset_id,
+                    "property_id": asset.property_id,
+                    "allocation": asset.allocation,
+                    "gl_account": asset.gl_account,
+                    "payment_month": payment_due_date.isoformat(),
+                    "due_date": payment_due_date.isoformat(),
+                    "billing_date": "",
+                    "period": i + 1,
+                    "term_to_maturity": remaining,
+                    "bank_rate_annual": round(annual_bank_rate, 6),
+                    "nim_annual": 0.0,
+                    "lease_rate_monthly": round(monthly_rate, 8),
+                    "lease_base": round(asset.asset_value, 2),
+                    "opening_balance": round(balance, 2),
+                    "payment": round(payment, 2),
+                    "interest": round(interest, 2),
+                    "amortization": round(principal, 2),
+                    "ending_balance": round(ending_balance, 2),
+                    "rate_source": "rate_table"
+                    if rate_override_for_month(month_start(payment_due_date), rate_table)
+                    else "asset_default",
+                }
+            )
+
+            balance = ending_balance
+            if balance <= 0.0:
+                break
     return rows
 
 
@@ -1357,13 +1427,19 @@ def run_bank_payable(args: argparse.Namespace) -> None:
     backup_dir = Path(args.backup_dir)
     assets = load_assets(assets_path)
     rates = load_rates(rates_path)
-    posted_rows = posted_invoice_map(load_posted_invoices(posted_path))
     target_month = month_start(parse_date(args.month + "-01"))
-    schedule_rows = build_schedule(assets, rates, posted_rows=posted_rows)
-    invoices = invoice_for_month_from_schedule(schedule_rows, target_month, args.billing_day)
+    bank_schedule_rows = build_bank_funding_schedule(assets, rates)
+    invoices = invoice_for_month_from_schedule(bank_schedule_rows, target_month, args.billing_day)
     _, billing_date = billing_cycle_window(target_month, args.billing_day)
-    bank_payable = round(sum(float(r["invoice_amount"]) for r in invoices), 2)
-    print(f"bank payable for {target_month.isoformat()} (billing date {billing_date.isoformat()}): {bank_payable}")
+    bank_interest_total = round(sum(float(r["interest_amount"]) for r in invoices), 2)
+    bank_principal_total = round(sum(float(r["amortization_amount"]) for r in invoices), 2)
+    bank_payable = round(bank_interest_total + bank_principal_total, 2)
+    print(
+        f"bank payable for {target_month.isoformat()} "
+        f"(billing date {billing_date.isoformat()}, basis=asset_cost): {bank_payable}"
+    )
+    print(f"  bank interest total: {bank_interest_total}")
+    print(f"  bank principal total: {bank_principal_total}")
 
     backups: List[str] = []
     b = backup_file(bank_payable_path, backup_dir, run_id)
@@ -1378,7 +1454,10 @@ def run_bank_payable(args: argparse.Namespace) -> None:
             "month": month_str,
             "billing_date": billing_date.isoformat(),
             "invoice_lines": len(invoices),
+            "bank_interest_total": bank_interest_total,
+            "bank_principal_total": bank_principal_total,
             "bank_payable_total": bank_payable,
+            "payable_basis": "asset_cost",
             "operator": args.operator,
             "updated_at": datetime.now().isoformat(timespec="seconds"),
         },
@@ -1395,14 +1474,16 @@ def run_bank_payable(args: argparse.Namespace) -> None:
         "billing_day": args.billing_day,
         "billing_date": billing_date.isoformat(),
         "invoice_lines": len(invoices),
+        "bank_interest_total": bank_interest_total,
+        "bank_principal_total": bank_principal_total,
         "bank_payable_total": bank_payable,
+        "payable_basis": "asset_cost",
         "bank_payable_file": str(bank_payable_path),
         "backups": backups,
         "input_hashes": collect_hashes(
             {
                 "assets": assets_path,
                 "rates": rates_path,
-                "posted_ledger": posted_path,
                 "baseline_config": Path(args.baseline_config),
             }
         ),
@@ -1469,6 +1550,7 @@ def run_daily(args: argparse.Namespace) -> None:
     assets_path = Path(args.assets)
     rates_path = Path(args.rates)
     posted_path = Path(args.posted_ledger)
+    closed_periods_path = Path(args.closed_periods)
     assets = load_assets(assets_path)
     rates = load_rates(rates_path)
     posted_rows = posted_invoice_map(load_posted_invoices(posted_path))
@@ -1508,10 +1590,25 @@ def run_daily(args: argparse.Namespace) -> None:
     print(f"invoice_lines_due: {due_count}")
     print(f"invoice_amount_due: {due_amount}")
 
+    billing_month_key = month_key(billing_month)
+    closed_months = load_closed_periods(closed_periods_path)
+    month_is_closed = billing_month_key in closed_months
+    if month_is_closed:
+        print(f"month_end_status: {billing_month_key} already closed")
+    else:
+        print(
+            "month_end_target: "
+            f"{billing_month_key} on {billing_date.isoformat()} (after invoice posting)"
+        )
+
     if as_of == billing_date - timedelta(days=1):
         print("\nREMINDER: Invoice run is due tomorrow.")
+        if not month_is_closed:
+            print("REMINDER: Month-end run is also due tomorrow after invoice posting.")
     elif as_of == billing_date:
         print("\nREMINDER: Invoice run is due today.")
+        if not month_is_closed:
+            print("REMINDER: Month-end run is due today after invoice posting.")
 
     manifest = {
         "run_id": run_id,
@@ -1533,6 +1630,7 @@ def run_daily(args: argparse.Namespace) -> None:
                 "assets": assets_path,
                 "rates": rates_path,
                 "posted_ledger": posted_path,
+                "closed_periods": closed_periods_path,
                 "baseline_config": Path(args.baseline_config),
             }
         ),

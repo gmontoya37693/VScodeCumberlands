@@ -39,7 +39,7 @@ Keep this simple. Routine operations use only three recurring commands after bas
 
 ## Slide 5: Due Date vs Billing Date vs Month Close
 - Due date: each asset has its own anniversary-based installment date
-- Billing date: one monthly batch invoicing date, default example 22nd
+- Billing date: one monthly batch invoicing date, training example 31st (month-end policy)
 - Weekend rule: billing date shifts to the next working day
 - Month close: a separate control step that locks the month
 
@@ -107,7 +107,7 @@ Baseline is not an invoice run and not a month close.
 
 ## Slide 10: Baseline Command
 - Command:
-  - ./scripts/op_init_baseline.sh german 2026-07-01 "Production start"
+  - ./scripts/op_init_baseline.sh ana 2026-07-01 "Production start"
 - Expected result:
   - baseline config created
   - posted ledger reset to header only
@@ -119,7 +119,7 @@ This is a one-time operation before production use.
 
 ## Slide 11: Daily Run
 - Command:
-  - ./scripts/op_daily.sh german 2026-07-21 22
+  - ./scripts/op_daily.sh ana 2026-07-30 31
 - Daily run monitors, but does not post accounting history
 - Wrapper output includes visual separators for readability:
   - blank space before and after each run
@@ -138,7 +138,7 @@ Daily run keeps the process from depending on memory.
 
 ## Slide 12: Invoice-Day Run
 - Command:
-  - ./scripts/op_invoice.sh german 2026-07 22
+  - ./scripts/op_invoice.sh ana 2026-07 31
 - Invoice-day run:
   - reads current assets and rates
   - reads posted history first
@@ -154,9 +154,11 @@ Invoice-day posts history. It does not close the month.
 
 ## Slide 13: Month-End Run
 - Command:
-  - ./scripts/op_month_end.sh german 2026-07 22
+  - ./scripts/op_month_end.sh ana 2026-07 31
 - Month-end run:
   - updates bank_payable.csv
+  - computes payable from asset cost funding basis (not lease base)
+  - records bank interest and bank principal component totals
   - stores one row per month
   - closes the month in closed_periods.csv
   - writes two manifests (bank-payable and close-period) and backups
@@ -183,16 +185,16 @@ Operators should review the workbook, not maintain it by hand.
 ## Slide 15: Class Drill Sequence
 - Start from a clean workspace: inputs ready, outputs empty, no history yet
 - Use the three training assets: Windblower at WWE, Snow Blower at CHA, Golf Cart at LPA
-- Use billing day 22 for all steps
+- Use billing day 31 for all steps
 - No manual `echo` blocks are needed in class; wrappers already print separators.
 - Run the sequence in order:
-  - ./scripts/op_daily.sh german 2026-07-09 22
-  - ./scripts/op_daily.sh german 2026-07-21 22
-  - ./scripts/op_invoice.sh german 2026-07 22
-  - ./scripts/op_daily.sh german 2026-07-23 22
-  - ./scripts/op_month_end.sh german 2026-07 22
-  - ./scripts/op_invoice.sh german 2026-08 22
-  - ./scripts/op_month_end.sh german 2026-08 22
+  - `./scripts/op_daily.sh ana 2026-07-30 31`
+  - `./scripts/op_invoice.sh ana 2026-07 31`
+  - `./scripts/op_daily.sh ana 2026-08-30 31`
+  - `./scripts/op_month_end.sh ana 2026-07 31`
+  - `./scripts/op_invoice.sh ana 2026-08 31`
+  - `./scripts/op_daily.sh ana 2026-09-29 31`
+  - `./scripts/op_month_end.sh ana 2026-08 31`
 
 Presenter note:
 This drill proves preview, post, close, and carry-forward behavior across two billing cycles.
@@ -242,6 +244,9 @@ Explain what each error means and what the safe next action should be.
 - never edit closed periods manually in normal operations
 - never create fake production history after baseline
 - close open workbook/CSV files before running wrappers to avoid write conflicts
+- always pass the operator user name when running wrappers
+- rate convention is nominal monthly (`APR/12`), not monthly compounded
+- invoice-day and month-end may be run on different calendar dates; if you use the same date for both, pass the same billing day in daily/invoice/month-end wrappers
 - asset lifecycle states: scheduled (not yet started), active (invoicing), matured (complete)
 
 Presenter note:

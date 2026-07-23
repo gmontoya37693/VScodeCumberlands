@@ -1,4 +1,28 @@
 asset_id,property_id,allocation,asset_description,asset_value,start_date,lifespan,bank_rate_annual,nim_annual,gl_account,status,tax_amount,admin_expense,risk_cost_recovery,salvage_value,salvage_periods
-A1001,WWE,Leasing,Windblower,9500,6/10/26,24,0.051,0,1700,active,570,350,300,300,1
-A1002,CHA,Leasing,Snow Blower,8200,6/21/26,36,0.051,0,1700,active,492,300,260,260,1
-A1003,LPA,Leasing,Golf Cart,14000,6/25/26,48,0.051,0,1705,active,840,500,420,420,1
+A1001,"SMP Landing SPE, LLC",ALC,Dell Pro 14 Plus,2200,3/3/26,48,0.0665,0,A7500-0100,active,132,198.27,275.03,330,0
+A1002,"SMP Camden Hills SPE, LLC",ALC,Dell Pro 14 Plus,2200,3/3/26,48,0.0665,0,A7500-0100,active,132,198.27,275.03,330,0
+A1003,"SMP Lockwood SPE, LLC",ALC,Dell Pro 14 Plus,2200,3/3/26,48,0.0665,0,A7500-0100,active,132,198.27,275.03,330,0
+A1004,"SMP Lockwood SPE, LLC",ALC,Dell Pro 14 Plus,2200,3/3/26,48,0.0665,0,A7500-0100,active,132,198.27,275.03,330,0
+A1005,"SMP Lockwood SPE, LLC",ALC,Dell Pro 14 Plus,2200,3/3/26,48,0.0665,0,A7500-0100,active,132,198.27,275.03,330,0
+A1006,"Linden Park Associates, LLC",ALC,Dell Pro 14 Plus,2200,3/3/26,48,0.0665,0,A7500-0100,active,132,198.27,275.03,330,0
+A1007,"Hunters Crossing SPE, LLC",ALC,Dell Pro 14 Plus,2200,3/3/26,48,0.0665,0,A7500-0100,active,132,198.27,275.03,330,0
+A1008,"SMP Northampton SPE, LLC",ALC,Dell Pro Slim,1950,3/3/26,48,0.0665,0,A7500-0100,active,117,198.27,246.6,292.5,0
+A1009,"SMP Centre SPE, LLC",ALC,Dell Pro Slim,1950,3/3/26,48,0.0665,0,A7500-0100,active,117,198.27,246.6,292.5,0
+A1010,SMP Lakeview SPE LLC,ALC,Dell Pro Slim,1950,3/3/26,48,0.0665,0,A7500-0100,active,117,198.27,246.6,292.5,0
+A1011,SMP Lakeview SPE LLC,ALC,Dell Pro Slim,1950,3/3/26,48,0.0665,0,A7500-0100,active,117,198.27,246.6,292.5,0
+A1012,"SMP Chelsea Park SPE, LLC",ALC,Dell Pro Slim,1950,3/3/26,48,0.0665,0,A7500-0100,active,117,198.27,246.6,292.5,0
+A1013,"Eaton Inmeta SPE, LLC",ALC,Dell Pro Slim,1950,3/3/26,48,0.0665,0,A7500-0100,active,117,198.27,246.6,292.5,0
+A1014,"Grove at Alban SPE, LLC",ALC,Dell Pro Slim,1950,3/3/26,48,0.0665,0,A7500-0100,active,117,198.27,246.6,292.5,0
+A1015,"Linden Park Associates, LLC",ALC,Dell Pro Slim,1950,3/3/26,48,0.0665,0,A7500-0100,active,117,198.27,246.6,292.5,0
+A1016,SMP Ashland Towne Square SPE LLC,ALC,Dell Pro Slim,1950,3/3/26,48,0.0665,0,A7500-0100,active,117,198.27,246.6,292.5,0
+A1017,"Linden Park Associates, LLC",ALC,Dell Pro 24 All-In-One,1700,3/3/26,48,0.0665,0,A7500-0100,active,102,198.27,218.16,255,0
+A1018,"Acento Management Company, LLC",ALC,Dell Pro 14 Plus,2200,3/3/26,48,0.0665,0,F7005-0010,active,132,237.62,279.95,330,0
+A1019,"Acento Management Company, LLC",ALC,Dell Pro 14 Plus,2200,3/3/26,48,0.0665,0,F7005-0010,active,132,237.62,279.95,330,0
+A1020,"Acento Management Company, LLC",ALC,Dell Pro 14 Plus,2200,3/3/26,48,0.0665,0,F7005-0010,active,132,237.62,279.95,330,0
+A1021,"Acento Management Company, LLC",ALC,Dell Pro 14 Plus,2200,3/3/26,48,0.0665,0,F7005-0010,active,132,237.62,279.95,330,0
+A1022,"Acento Management Company, LLC",ALC,Dell Pro 14 Plus,2200,3/3/26,48,0.0665,0,F7005-0010,active,132,237.62,279.95,330,0
+A1023,"SMP Old Orchard SPE, LLC",ALC,Snowblower,1059,3/3/26,36,0.0665,0,A6020-0630,active,63.54,60,90.37,52.95,0
+A1024,"SMP Northampton SPE, LLC",ALC,Golf Car,4300,5/19/26,60,0.06622,0,A6020-0630,active,258,720,430,1075,0
+A1025,"Acento Management Company, LLC",ALC,Dell Pro 14 Plus,2200,5/19/26,48,0.06622,0,F7005-0010,active,132,144,220,330,0
+A1026,"SMP Chelsea Park SPE, LLC",ALC,K50 - Maintenance Tool,2204,6/10/26,48,0.066171,0,A6020-0630,active,132.24,576,66.12,551,0
+A1027,"SMP, Towne Crest SPE,LLC",ALC,Press Tool,1789.8,6/10/26,48,0.066171,0,A6020-0630,active,107.388,576,53.694,447.45,0

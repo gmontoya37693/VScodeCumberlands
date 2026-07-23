@@ -1,0 +1,34 @@
+{
+  "as_of": "2026-07-30",
+  "billing_date": "2026-07-31",
+  "billing_day": 31,
+  "billing_month": "2026-07-01",
+  "billing_window_end_inclusive": "2026-07-31",
+  "billing_window_start_exclusive": "2026-06-30",
+  "command": "daily",
+  "input_hashes": {
+    "assets": "ad2e2495671ac901ff2ab3a2ae1892f8327074a5dc581f4244bca73adb8efbbf",
+    "baseline_config": "",
+    "closed_periods": "",
+    "posted_ledger": "",
+    "rates": "5e94dbd6e65980af2d53f76bb5891b0e08ee5962145d60006716417180952b1b"
+  },
+  "invoice_amount_due": 1524.48,
+  "invoice_lines_due": 27,
+  "operator": "ana",
+  "portfolio_totals": {
+    "active_assets": 27,
+    "amortization_paid_total": 4241.88,
+    "asset_value_total": 57202.8,
+    "balance_total": 60346.61,
+    "current_payment_active_total": 1524.48,
+    "interest_paid_total": 1240.76,
+    "lease_base_total": 64588.46,
+    "matured_assets": 0,
+    "scheduled_assets": 0,
+    "total_assets": 27
+  },
+  "run_id": "20260723T180301-28ebfc4a",
+  "script_version": "2026.07.10-compliance-v1",
+  "timestamp": "2026-07-23T18:03:01"
+}

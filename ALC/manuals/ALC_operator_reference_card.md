@@ -3,20 +3,20 @@
 ## Routine Commands
 ### 1. Daily Monitoring
 - `./scripts/op_daily.sh <operator> <as-of YYYY-MM-DD> [billing_day]`
-- Example: `./scripts/op_daily.sh german 2026-07-21 22`
+- Example: `./scripts/op_daily.sh ana 2026-07-30 31`
 
 ### 2. Invoice Day
 - `./scripts/op_invoice.sh <operator> <month YYYY-MM> [billing_day]`
-- Example: `./scripts/op_invoice.sh german 2026-07 22`
+- Example: `./scripts/op_invoice.sh ana 2026-07 31`
 
 ### 3. Month-End
 - `./scripts/op_month_end.sh <operator> <month YYYY-MM> [billing_day]`
-- Example: `./scripts/op_month_end.sh german 2026-07 22`
+- Example: `./scripts/op_month_end.sh ana 2026-07 31`
 
 ## One-Time Setup
 ### Baseline
 - `./scripts/op_init_baseline.sh <operator> <go-live YYYY-MM-DD> <notes>`
-- Example: `./scripts/op_init_baseline.sh german 2026-07-01 "Production start"`
+- Example: `./scripts/op_init_baseline.sh ana 2026-07-01 "Production start"`
 
 ## Files Operators Edit
 - `assets.csv`
@@ -49,6 +49,8 @@
 ## What Month-End Run Does
 - updates `bank_payable.csv`
 - stores one row per month
+- computes payable on asset cost funding basis (not lease base)
+- stores bank interest and bank principal component totals
 - closes the month in `closed_periods.csv`
 - creates two manifests (bank-payable + close-period) and backups
 
@@ -58,7 +60,7 @@
 
 ### Billing Date
 - one monthly batch invoicing date
-- default example: 22
+- training example: 31 (month-end policy)
 - weekend shifts to next working day
 
 ### Month Close
@@ -69,6 +71,12 @@
 - **Scheduled**: Asset procured but not yet delivered (`as_of < start_date`). Not invoiced. Shown in daily reports as upcoming assets.
 - **Active**: Asset on lease and invoicing (`as_of >= start_date AND balance > 0`). Included in portfolio totals and billing.
 - **Matured**: Lease term complete (`balance == 0 OR as_of >= final_month`). No more invoicing. Remains in workbook for history.
+
+## Training Reminders
+- always provide the operator user name on every wrapper run
+- rate used is nominal monthly rate (`APR/12`), not monthly compounded
+- invoice date and month-end date may be different by process timing; if you operate them on the same date, use the same billing day on all wrappers (`op_daily.sh`, `op_invoice.sh`, `op_month_end.sh`)
+- close all CSV and XLS/XLSX files before running scripts so wrappers can overwrite outputs
 
 ## Never Do This
 - do not edit `posted_invoices.csv` manually

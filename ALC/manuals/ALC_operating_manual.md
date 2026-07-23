@@ -47,7 +47,7 @@ Baseline is not:
 - a training dataset
 
 Recommended baseline command:
-- `./scripts/op_init_baseline.sh german 2026-07-01 "Production start"`
+- `./scripts/op_init_baseline.sh ana 2026-07-01 "Production start"`
 
 Expected result after baseline:
 - `baseline_config.json` exists with go-live metadata
@@ -97,12 +97,18 @@ Routine operation should use only these wrapper scripts:
 - month-end run: `./scripts/op_month_end.sh`
 
 Examples:
-- baseline: `./scripts/op_init_baseline.sh german 2026-07-01 "Production start"`
-- daily: `./scripts/op_daily.sh german 2026-07-21 22`
-- invoice day: `./scripts/op_invoice.sh german 2026-07 22`
-- month-end: `./scripts/op_month_end.sh german 2026-07 22`
+- baseline: `./scripts/op_init_baseline.sh ana 2026-07-01 "Production start"`
+- daily: `./scripts/op_daily.sh ana 2026-07-30 31`
+- invoice day: `./scripts/op_invoice.sh ana 2026-07 31`
+- month-end: `./scripts/op_month_end.sh ana 2026-07 31`
 
 The optional last argument is the billing day. If omitted, the default is `22`.
+
+Training policy:
+- use billing day `31` so invoice-day and month-end operate together near month-end
+
+Operator reminder:
+- always pass the operator user name in wrapper commands for audit traceability
 
 ## Asset Lifecycle and Schedule Logic
 
@@ -139,8 +145,11 @@ For each asset, the schedule includes:
 
 The schedule math uses:
 - lease base = asset value + tax + admin expense + risk cost recovery - salvage value
-- effective monthly rate derived from annual bank APR + NIM
+- nominal monthly rate derived from annual bank APR + NIM using APR/12
 - payment months = lifespan - salvage periods
+
+Rate convention note:
+- the monthly rate is nominal (`APR/12`), not monthly compounded
 
 Future open rows can change when rates change. Closed historical rows must not change.
 
@@ -159,6 +168,7 @@ Invoices are posted in one monthly batch using the billing day.
 
 Rules:
 - default billing day is `22`
+- training policy billing day is `31`
 - if the billing day falls on a weekend, the script shifts it to the next working day
 - the invoice-day run posts all asset installments whose due dates fall between the previous billing run date and the current billing run date
 
@@ -178,7 +188,7 @@ Command:
 - `./scripts/op_daily.sh <operator> <as-of YYYY-MM-DD> [billing_day]`
 
 Example:
-- `./scripts/op_daily.sh german 2026-07-21 22`
+- `./scripts/op_daily.sh ana 2026-07-30 31`
 
 Daily run does not post history. It monitors the current state.
 
@@ -204,7 +214,7 @@ Command:
 - `./scripts/op_invoice.sh <operator> <month YYYY-MM> [billing_day]`
 
 Example:
-- `./scripts/op_invoice.sh german 2026-07 22`
+- `./scripts/op_invoice.sh ana 2026-07 31`
 
 What the invoice-day run does:
 - reads current assets and rates
@@ -237,6 +247,7 @@ Workbook behavior:
 
 Operational note:
 - close workbook and CSV files before running wrapper scripts so writes are not blocked by desktop apps
+- invoice-day and month-end can be operated on different calendar days; if your process uses the same date for both, pass the same billing day to `op_daily.sh`, `op_invoice.sh`, and `op_month_end.sh`
 
 ## Month-End Workflow
 Use one month-end run after invoice-day activities are complete.
@@ -245,10 +256,10 @@ Command:
 - `./scripts/op_month_end.sh <operator> <month YYYY-MM> [billing_day]`
 
 Example:
-- `./scripts/op_month_end.sh german 2026-07 22`
+- `./scripts/op_month_end.sh ana 2026-07 31`
 
 What the month-end run does:
-- calculates bank payable for the month
+- calculates bank payable for the month using asset cost funding basis (not lease base)
 - updates `bank_payable.csv`
 - writes one row per month in that file
 - closes the month in `closed_periods.csv`
@@ -259,7 +270,10 @@ What the month-end run does:
 - month
 - billing date
 - invoice line count
+- bank interest total (asset-cost component)
+- bank principal total (asset-cost component)
 - bank payable total
+- payable basis (`asset_cost`)
 - operator
 - update timestamp
 
