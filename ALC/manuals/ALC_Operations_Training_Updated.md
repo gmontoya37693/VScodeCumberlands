@@ -184,20 +184,26 @@ Operators should review the workbook, not maintain it by hand.
 
 ## Slide 15: Class Drill Sequence
 - Start from a clean workspace: inputs ready, outputs empty, no history yet
-- Use the three training assets: Windblower at WWE, Snow Blower at CHA, Golf Cart at LPA
+- Use current real-data asset set loaded in `assets.csv`
 - Use billing day 31 for all steps
 - No manual `echo` blocks are needed in class; wrappers already print separators.
 - Run the sequence in order:
+  - `./scripts/op_daily.sh ana 2026-04-29 31`
+  - `./scripts/op_invoice.sh ana 2026-04 31`
+  - `./scripts/op_month_end.sh ana 2026-04 31`
+  - `./scripts/op_daily.sh ana 2026-05-31 31`
+  - `./scripts/op_invoice.sh ana 2026-05 31`
+  - `./scripts/op_month_end.sh ana 2026-05 31`
+  - `./scripts/op_daily.sh ana 2026-06-29 31`
+  - `./scripts/op_invoice.sh ana 2026-06 31`
+  - `./scripts/op_month_end.sh ana 2026-06 31`
   - `./scripts/op_daily.sh ana 2026-07-30 31`
   - `./scripts/op_invoice.sh ana 2026-07 31`
-  - `./scripts/op_daily.sh ana 2026-08-30 31`
   - `./scripts/op_month_end.sh ana 2026-07 31`
-  - `./scripts/op_invoice.sh ana 2026-08 31`
-  - `./scripts/op_daily.sh ana 2026-09-29 31`
-  - `./scripts/op_month_end.sh ana 2026-08 31`
 
 Presenter note:
-This drill proves preview, post, close, and carry-forward behavior across two billing cycles.
+This drill proves preview, post, close, and carry-forward behavior across four billing cycles.
+May is the weekend-shift case: billing day 31 lands on Sunday, so cycle execution date shifts to Monday (2026-06-01) while cycle ownership remains May.
 
 ## Slide 16: Validation Checklist
 - assets.csv and rates.csv are valid
