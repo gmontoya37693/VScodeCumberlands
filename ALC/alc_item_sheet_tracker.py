@@ -809,7 +809,7 @@ def build_snapshot(
                 "start_date": a.start_date.isoformat(),
                 "final_date": final_date.isoformat(),
                 "lifespan": a.lifespan,
-                "bank_rate_annual_default": round(a.bank_rate_annual, 6),
+                "bank_rate_annual_default": round(bank_rate_for_month(month_start(as_of), a.bank_rate_annual, rate_table), 6),
                 "nim_annual": round(a.nim_annual, 6),
                 "gl_account": a.gl_account,
                 "installments_paid": int(m["installments_paid"]),
@@ -1188,7 +1188,7 @@ def write_inventory_sheet(
         "Lease Base",
         "Current Installment",
         "Outstanding Balance",
-        "Bank APR",
+        "Bank APR (effective)",
         "NIM",
     ]
     for idx, header in enumerate(headers, start=1):

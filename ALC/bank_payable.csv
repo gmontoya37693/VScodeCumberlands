@@ -1,0 +1,2 @@
+month,billing_date,invoice_lines,bank_interest_total,bank_principal_total,bank_payable_total,payable_basis,operator,updated_at
+2026-04,2026-04-30,23,258.19,859.71,1117.9,asset_cost,ana,2026-07-29T15:58:19
