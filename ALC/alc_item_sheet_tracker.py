@@ -966,6 +966,49 @@ def asset_schedule_with_opening_row(
     return rows
 
 
+def asset_bank_schedule_with_opening_row(
+    asset: Asset,
+    rate_table: List[Tuple[date, float]],
+) -> List[Dict[str, object]]:
+    """Bank funding schedule (asset_value basis, bank_rate only) for a single asset.
+
+    Used to write the Bank Funding section on each asset workbook tab so operators
+    can verify that bank-payable figures derive from asset cost, not lease base.
+    """
+    rows: List[Dict[str, object]] = []
+    opening_annual = bank_rate_for_month(month_start(asset.start_date), asset.bank_rate_annual, rate_table)
+    opening_monthly = effective_monthly_rate(opening_annual)
+    rows.append(
+        {
+            "ledger_date": asset.start_date,
+            "period": 0,
+            "bank_rate_annual": opening_annual,
+            "bank_rate_monthly": opening_monthly,
+            "term_to_maturity": asset.payment_months,
+            "payment": asset.asset_value,
+            "interest": 0.0,
+            "principal": 0.0,
+            "balance": asset.asset_value,
+        }
+    )
+    bank_rows = build_bank_funding_schedule([asset], rate_table)
+    for row in bank_rows:
+        rows.append(
+            {
+                "ledger_date": parse_date(str(row["payment_month"])),
+                "period": int(row["period"]),
+                "bank_rate_annual": float(row["bank_rate_annual"]),
+                "bank_rate_monthly": float(row["lease_rate_monthly"]),
+                "term_to_maturity": int(row["term_to_maturity"]),
+                "payment": float(row["payment"]),
+                "interest": float(row["interest"]),
+                "principal": float(row["amortization"]),
+                "balance": float(row["ending_balance"]),
+            }
+        )
+    return rows
+
+
 def write_asset_one_pager_sheet(
     ws,
     asset: Asset,
@@ -981,12 +1024,21 @@ def write_asset_one_pager_sheet(
     header_fill = PatternFill(fill_type="solid", fgColor="E9EEF5")
     posted_fill = PatternFill(fill_type="solid", fgColor="F2F2F2")
 
-    ws.merge_cells("A1:I1")
+    from openpyxl.styles import Border, Side
+    from openpyxl.utils import get_column_letter
+
+    thick_left = Border(left=Side(style="medium"))
+
+    ws.merge_cells("A1:M1")
     ws["A1"] = "ALC - Acento Leasing Company Asset Calculation Model"
     ws["A1"].font = Font(color="FFFFFF", bold=True, size=14)
     ws["A1"].alignment = Alignment(horizontal="center")
     ws["A1"].fill = title_fill
-    ws["A2"] = f"As of: {as_of.isoformat()} | Light gray rows = posted history"
+    ws["A2"] = (
+        f"As of: {as_of.isoformat()} | Light gray rows = posted history | "
+        f"Columns A–I: Lease (base ${asset.lease_base:,.2f})  |  "
+        f"Columns J–M: Bank funding (asset cost ${asset.asset_value:,.2f}, bank rate only)"
+    )
     ws["A2"].font = Font(italic=True)
 
     input_rows = [
@@ -1014,20 +1066,38 @@ def write_asset_one_pager_sheet(
         if number_format:
             ws[f"B{idx}"].number_format = number_format
 
+    bank_header_fill = PatternFill(fill_type="solid", fgColor="D6E4F0")
+
     header_row = 3 + len(input_rows) + 2
-    ws[f"A{header_row}"] = "Ledger Date"
-    ws[f"B{header_row}"] = "Period"
-    ws[f"C{header_row}"] = "Loan Rate"
-    ws[f"D{header_row}"] = "Lease Rate"
-    ws[f"E{header_row}"] = "Term to Maturity"
-    ws[f"F{header_row}"] = "Installment"
-    ws[f"G{header_row}"] = "Interest"
-    ws[f"H{header_row}"] = "Amortization"
-    ws[f"I{header_row}"] = "Balance"
-    for cell in ws[header_row]:
+    lease_headers = {
+        "A": "Ledger Date", "B": "Period", "C": "Loan Rate", "D": "Lease Rate",
+        "E": "Term to Maturity", "F": "Installment", "G": "Interest",
+        "H": "Amortization", "I": "Balance",
+    }
+    bank_headers = {
+        "J": "Bank Installment", "K": "Bank Interest",
+        "L": "Bank Principal", "M": "Bank Balance",
+    }
+    for col, label in lease_headers.items():
+        cell = ws[f"{col}{header_row}"]
+        cell.value = label
         cell.font = Font(bold=True)
         cell.fill = header_fill
         cell.alignment = Alignment(horizontal="center")
+    for col, label in bank_headers.items():
+        cell = ws[f"{col}{header_row}"]
+        cell.value = label
+        cell.font = Font(bold=True)
+        cell.fill = bank_header_fill
+        cell.alignment = Alignment(horizontal="center")
+        if col == "J":
+            cell.border = thick_left
+
+    # Build bank schedule keyed by period for side-by-side lookup
+    bank_by_period = {
+        brow["period"]: brow
+        for brow in asset_bank_schedule_with_opening_row(asset, rate_table)
+    }
 
     schedule_rows = asset_schedule_with_opening_row(asset, rate_table, posted_rows=posted_rows)
     row_idx = header_row + 1
@@ -1042,15 +1112,18 @@ def write_asset_one_pager_sheet(
         ws[f"H{row_idx}"] = row["amortization"]
         ws[f"I{row_idx}"] = row["balance"]
 
+        brow = bank_by_period.get(int(row["period"]))
+        if brow:
+            ws[f"J{row_idx}"] = brow["payment"]
+            ws[f"K{row_idx}"] = brow["interest"]
+            ws[f"L{row_idx}"] = brow["principal"]
+            ws[f"M{row_idx}"] = brow["balance"]
+        ws[f"J{row_idx}"].border = thick_left
+
         rate_source = str(row.get("rate_source", ""))
         if rate_source == "posted_ledger":
-            fill = posted_fill
-        else:
-            fill = None
-
-        if fill is not None:
             for col in "ABCDEFGHI":
-                ws[f"{col}{row_idx}"].fill = fill
+                ws[f"{col}{row_idx}"].fill = posted_fill
 
         row_idx += 1
 
@@ -1058,13 +1131,11 @@ def write_asset_one_pager_sheet(
         ws[f"A{r}"].number_format = "yyyy-mm-dd"
         ws[f"C{r}"].number_format = "0.00%"
         ws[f"D{r}"].number_format = "0.00%"
-        ws[f"F{r}"].number_format = "$#,##0.00"
-        ws[f"G{r}"].number_format = "$#,##0.00"
-        ws[f"H{r}"].number_format = "$#,##0.00"
-        ws[f"I{r}"].number_format = "$#,##0.00"
+        for col in "FGHIJKLM":
+            ws[f"{col}{r}"].number_format = "$#,##0.00"
 
     ws.column_dimensions["A"].width = 18
-    ws.column_dimensions["B"].width = 14
+    ws.column_dimensions["B"].width = 10
     ws.column_dimensions["C"].width = 12
     ws.column_dimensions["D"].width = 12
     ws.column_dimensions["E"].width = 16
@@ -1072,6 +1143,10 @@ def write_asset_one_pager_sheet(
     ws.column_dimensions["G"].width = 12
     ws.column_dimensions["H"].width = 14
     ws.column_dimensions["I"].width = 14
+    ws.column_dimensions["J"].width = 16
+    ws.column_dimensions["K"].width = 14
+    ws.column_dimensions["L"].width = 14
+    ws.column_dimensions["M"].width = 14
     ws.freeze_panes = f"A{header_row + 1}"
 
 
