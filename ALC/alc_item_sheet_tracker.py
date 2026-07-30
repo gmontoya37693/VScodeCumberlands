@@ -769,6 +769,29 @@ def amortize_until(
     }
 
 
+def bank_amortize_until(
+    asset: Asset,
+    as_of: date,
+    rate_table: List[Tuple[date, float]],
+) -> Dict[str, float]:
+    """Return current bank installment and outstanding loan balance as of as_of.
+
+    Uses asset_value as principal base and bank_rate only (no NIM), matching the
+    build_bank_funding_schedule logic so Inventory bank columns tie to bank_payable totals.
+    """
+    if as_of < asset.start_date:
+        return {"current_payment": 0.0, "balance": asset.asset_value}
+
+    bank_rows = build_bank_funding_schedule([asset], rate_table)
+    paid_rows = [r for r in bank_rows if parse_date(str(r["payment_month"])) <= as_of]
+    if not paid_rows:
+        return {"current_payment": 0.0, "balance": asset.asset_value}
+
+    current_payment = float(paid_rows[-1]["payment"])
+    balance = float(paid_rows[-1]["ending_balance"])
+    return {"current_payment": current_payment, "balance": balance}
+
+
 def build_snapshot(
     assets: List[Asset],
     rate_table: List[Tuple[date, float]],
@@ -782,6 +805,7 @@ def build_snapshot(
     rows: List[Dict[str, object]] = []
     for a in assets:
         m = amortize_until(a, as_of, rate_table, posted_rows=posted_rows)
+        bm = bank_amortize_until(a, as_of, rate_table)
         final_date = a.final_month
         days_to_maturity = (final_date - as_of).days
         
@@ -819,6 +843,8 @@ def build_snapshot(
                 "balance": round(m["balance"], 2),
                 "months_remaining": int(m["months_remaining"]),
                 "days_to_maturity": days_to_maturity,
+                "bank_current_payment": round(bm["current_payment"], 2),
+                "bank_balance": round(bm["balance"], 2),
             }
         )
     return rows
@@ -1163,7 +1189,7 @@ def write_inventory_sheet(
     header_fill = PatternFill(fill_type="solid", fgColor="E9EEF5")
     posted_fill = PatternFill(fill_type="solid", fgColor="F2F2F2")
 
-    ws.merge_cells("A1:O1")
+    ws.merge_cells("A1:Q1")
     ws["A1"] = "ALC - Asset Inventory"
     ws["A1"].font = Font(color="FFFFFF", bold=True, size=14)
     ws["A1"].alignment = Alignment(horizontal="center")
@@ -1190,6 +1216,8 @@ def write_inventory_sheet(
         "Outstanding Balance",
         "Bank APR (effective)",
         "NIM",
+        "Bank Installment",
+        "Bank Balance",
     ]
     for idx, header in enumerate(headers, start=1):
         cell = ws.cell(row=3, column=idx, value=header)
@@ -1217,9 +1245,11 @@ def write_inventory_sheet(
         ws.cell(row=row_idx, column=13, value=row["balance"])
         ws.cell(row=row_idx, column=14, value=row["bank_rate_annual_default"])
         ws.cell(row=row_idx, column=15, value=row["nim_annual"])
+        ws.cell(row=row_idx, column=16, value=row["bank_current_payment"])
+        ws.cell(row=row_idx, column=17, value=row["bank_balance"])
 
         if str(row["asset_id"]) in posted_asset_ids:
-            for col_idx in range(1, 16):
+            for col_idx in range(1, 18):
                 ws.cell(row=row_idx, column=col_idx).fill = posted_fill
 
     for row_idx in range(4, len(snapshot_rows) + 4):
@@ -1231,6 +1261,8 @@ def write_inventory_sheet(
         ws.cell(row=row_idx, column=13).number_format = "$#,##0.00"
         ws.cell(row=row_idx, column=14).number_format = "0.00%"
         ws.cell(row=row_idx, column=15).number_format = "0.00%"
+        ws.cell(row=row_idx, column=16).number_format = "$#,##0.00"
+        ws.cell(row=row_idx, column=17).number_format = "$#,##0.00"
 
     widths = {
         "A": 12,
@@ -1248,6 +1280,8 @@ def write_inventory_sheet(
         "M": 18,
         "N": 10,
         "O": 10,
+        "P": 18,
+        "Q": 14,
     }
     for col, width in widths.items():
         ws.column_dimensions[col].width = width
