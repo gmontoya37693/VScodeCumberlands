@@ -384,7 +384,11 @@ def load_rates(path: Path) -> List[Tuple[date, float]]:
             raise ValueError(f"rates.csv missing columns: {sorted(missing)}")
 
         for row in reader:
-            rates.append((month_start(parse_date(row["effective_date"])), float(row["bank_rate_annual"])))
+            effective_date = (row.get("effective_date") or "").strip()
+            bank_rate_annual = (row.get("bank_rate_annual") or "").strip()
+            if not effective_date or not bank_rate_annual:
+                continue
+            rates.append((month_start(parse_date(effective_date)), float(bank_rate_annual)))
 
     rates.sort(key=lambda x: x[0])
     return rates
@@ -1183,11 +1187,12 @@ def write_inventory_sheet(
     as_of: date,
     posted_rows: Optional[Dict[Tuple[str, str], Dict[str, object]]] = None,
 ) -> None:
-    from openpyxl.styles import Alignment, Font, PatternFill
+    from openpyxl.styles import Alignment, Border, Font, PatternFill, Side
 
     title_fill = PatternFill(fill_type="solid", fgColor="1F3A68")
     header_fill = PatternFill(fill_type="solid", fgColor="E9EEF5")
     posted_fill = PatternFill(fill_type="solid", fgColor="F2F2F2")
+    thick_left = Border(left=Side(style="medium"))
 
     ws.merge_cells("A1:Q1")
     ws["A1"] = "ALC - Asset Inventory"
@@ -1224,6 +1229,8 @@ def write_inventory_sheet(
         cell.font = Font(bold=True)
         cell.fill = header_fill
         cell.alignment = Alignment(horizontal="center")
+        if idx == 14:
+            cell.border = thick_left
 
     snapshot_rows = build_snapshot(assets, rate_table, as_of, posted_rows=posted_rows)
     asset_by_id = {asset.asset_id: asset for asset in assets}
@@ -1247,6 +1254,7 @@ def write_inventory_sheet(
         ws.cell(row=row_idx, column=15, value=row["nim_annual"])
         ws.cell(row=row_idx, column=16, value=row["bank_current_payment"])
         ws.cell(row=row_idx, column=17, value=row["bank_balance"])
+        ws.cell(row=row_idx, column=14).border = thick_left
 
         if str(row["asset_id"]) in posted_asset_ids:
             for col_idx in range(1, 18):
