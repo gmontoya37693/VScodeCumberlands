@@ -1,0 +1,12 @@
+{
+  "effective_date": "2026-07-01",
+  "input_file": "rates.csv",
+  "input_hash": "3844f47c9f542dd4c99d392cb49b9dc3a8d3ae9464af51678974608e763a74bc",
+  "new_value": 0.067,
+  "old_value": "0.066171",
+  "proposal_id": "b1e10616ee204148b5d1e3b4b16dfbb2",
+  "requested_at": "2026-08-21T23:04:13+00:00",
+  "requested_by": "ana",
+  "status": "pending_approval",
+  "type": "rate_change"
+}
