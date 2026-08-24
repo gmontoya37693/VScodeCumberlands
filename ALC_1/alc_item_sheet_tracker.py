@@ -78,9 +78,10 @@ from typing import Dict, List, Optional, Tuple
 
 
 BASE_DIR = Path(__file__).resolve().parent
+INPUT_DIR = BASE_DIR / "inputs"
 SCRIPT_VERSION = "2026.07.10-compliance-v1"
-DEFAULT_ASSETS = BASE_DIR / "assets.csv"
-DEFAULT_RATES = BASE_DIR / "rates.csv"
+DEFAULT_ASSETS = INPUT_DIR / "assets.csv"
+DEFAULT_RATES = INPUT_DIR / "rates.csv"
 DEFAULT_POSTED_LEDGER = BASE_DIR / "posted_invoices.csv"
 DEFAULT_CLOSED_PERIODS = BASE_DIR / "closed_periods.csv"
 DEFAULT_BASELINE_CONFIG = BASE_DIR / "baseline_config.json"

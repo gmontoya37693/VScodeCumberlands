@@ -184,6 +184,7 @@ def get_manifest(run_id: str) -> dict[str, Any]:
 
 
 @app.post("/api/v1/runs/daily")
+@app.post("/api/v1/runs/daily-preview")
 def run_daily(request: DailyRunRequest) -> dict[str, Any]:
     result = _execute(
         "daily",
@@ -226,6 +227,34 @@ def run_bank_payable(request: MonthRunRequest) -> dict[str, Any]:
         billing_day=request.billing_day,
     )
     return _run_response(result, month=request.month)
+
+
+@app.post("/api/v1/runs/month-end")
+def run_month_end(request: MonthRunRequest) -> dict[str, Any]:
+    bank_result = _execute(
+        "bank-payable",
+        request.operator,
+        month=request.month,
+        billing_day=request.billing_day,
+    )
+    bank_response = _run_response(bank_result, month=request.month)
+    close_result = _execute(
+        "close-period",
+        request.operator,
+        month=request.month,
+        billing_day=request.billing_day,
+    )
+    close_response = _run_response(close_result, month=request.month)
+    return {
+        "status": "completed",
+        "run_id": close_result.run_id,
+        "command": "month-end",
+        "month": request.month,
+        "bank_payable_run_id": bank_result.run_id,
+        "close_period_run_id": close_result.run_id,
+        "bank_payable": bank_response,
+        "close_period": close_response,
+    }
 
 
 @app.post("/api/v1/runs/one-pager")

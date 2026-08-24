@@ -70,7 +70,7 @@ def run_engine(
             raise ValueError("as_of is required for snapshot runs")
         args.extend(["--as-of", as_of.isoformat(), "--output", str(run_dir / "snapshot.csv")])
         output_date = output_date or as_of
-    elif command in {"invoice", "bank-payable"}:
+    elif command in {"invoice", "bank-payable", "close-period"}:
         if month is None:
             raise ValueError(f"month is required for {command} runs")
         args.extend(["--month", month])
@@ -84,7 +84,7 @@ def run_engine(
                     str(run_dir / f"one-pager_{month}.xlsx"),
                 ]
             )
-        else:
+        elif command == "bank-payable":
             args.extend(["--bank-payable-file", str(run_dir / f"bank-payable_{month}.csv")])
     elif command == "schedule":
         args.extend(["--output", str(run_dir / "schedule.csv")])

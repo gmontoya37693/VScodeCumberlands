@@ -184,7 +184,7 @@ Operators should review the workbook, not maintain it by hand.
 
 ## Slide 15: Class Drill Sequence
 - Start from a clean workspace: inputs ready, outputs empty, no history yet
-- Use current real-data asset set loaded in `assets.csv`
+- Use current real-data asset set loaded in `inputs/assets.csv`
 - Use billing day 31 for all steps
 - No manual `echo` blocks are needed in class; wrappers already print separators.
 - Run the sequence in order:

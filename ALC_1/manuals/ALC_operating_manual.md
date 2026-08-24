@@ -60,8 +60,8 @@ Expected result after baseline:
 The live ALC folder should use one official file set.
 
 ### User-Managed Business Inputs
-- `ALC/assets.csv`
-- `ALC/rates.csv`
+- `ALC/inputs/assets.csv`
+- `ALC/inputs/rates.csv`
 
 ### System / Control Files
 - `ALC/baseline_config.json`
@@ -79,8 +79,8 @@ The live ALC folder should use one official file set.
 
 ## What Operators Edit
 Operators should edit only:
-- `assets.csv`
-- `rates.csv`
+- `inputs/assets.csv`
+- `inputs/rates.csv`
 
 Operators should not manually edit during normal operation:
 - `posted_invoices.csv`
@@ -113,7 +113,7 @@ Operator reminder:
 ## Asset Lifecycle and Schedule Logic
 
 ### Start Date and Asset Delivery
-Each asset is defined in `assets.csv` with a `start_date` field representing the **delivery date** to the property.
+Each asset is defined in `inputs/assets.csv` with a `start_date` field representing the **delivery date** to the property.
 On that date, the lease term officially begins and the asset becomes active for invoicing.
 
 ### Asset Lifecycle States
@@ -337,8 +337,8 @@ Recovery principle:
 
 ## Roles and Guardrails
 ### Operator
-- update `assets.csv`
-- update `rates.csv`
+- update `inputs/assets.csv`
+- update `inputs/rates.csv`
 - run the wrapper scripts
 - review daily output and generated files
 - verify that invoice-day and month-end outputs were produced
@@ -356,8 +356,8 @@ Recovery principle:
 - close workbook/CSV files before running wrappers to avoid write conflicts
 
 ## Recommended Daily Decision Flow
-1. Update `assets.csv` if any asset changed.
-2. Update `rates.csv` if the bank published a new rate.
+1. Update `inputs/assets.csv` if any asset changed.
+2. Update `inputs/rates.csv` if the bank published a new rate.
 3. Run the daily script.
 4. Review totals, billing date, and reminders.
 5. If today is invoice day, run the invoice-day script.

@@ -13,7 +13,7 @@ class LocalStorage:
 
     def __init__(self, root: Path) -> None:
         self.root = root.resolve()
-        self.inputs = self.root
+        self.inputs = self.root / "inputs"
         self.state = self.root / "state"
         self.working = self.root / "working"
         self.outputs = self.root / "outputs"

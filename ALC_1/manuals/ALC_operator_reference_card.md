@@ -19,8 +19,8 @@
 - Example: `./scripts/op_init_baseline.sh ana 2026-07-01 "Production start"`
 
 ## Files Operators Edit
-- `assets.csv`
-- `rates.csv`
+- `inputs/assets.csv`
+- `inputs/rates.csv`
 
 ## Files Operators Review But Do Not Edit
 - `posted_invoices.csv`

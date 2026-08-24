@@ -69,8 +69,8 @@ Common request fields for run endpoints:
   "operator": "ana",
   "as_of": "2026-04-29",
   "billing_day": 31,
-  "assets_path": "assets.csv",
-  "rates_path": "rates.csv"
+  "assets_path": "inputs/assets.csv",
+  "rates_path": "inputs/rates.csv"
 }
 
 ### Invoice request
@@ -78,8 +78,8 @@ Common request fields for run endpoints:
   "operator": "ana",
   "month": "2026-04",
   "billing_day": 31,
-  "assets_path": "assets.csv",
-  "rates_path": "rates.csv"
+  "assets_path": "inputs/assets.csv",
+  "rates_path": "inputs/rates.csv"
 }
 
 ### Month-end request
@@ -87,8 +87,8 @@ Common request fields for run endpoints:
   "operator": "ana",
   "month": "2026-04",
   "billing_day": 31,
-  "assets_path": "assets.csv",
-  "rates_path": "rates.csv"
+  "assets_path": "inputs/assets.csv",
+  "rates_path": "inputs/rates.csv"
 }
 
 ## 7) Proposed Response Contract
