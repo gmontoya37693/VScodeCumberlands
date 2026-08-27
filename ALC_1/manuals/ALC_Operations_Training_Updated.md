@@ -59,8 +59,8 @@ Make it clear they do not need to use developer commands or non-routine helper s
 
 ## Slide 7: File Map
 ### User-managed inputs
-- assets.csv
-- rates.csv
+- inputs/assets.csv
+- inputs/rates.csv
 
 ### System / control files
 - baseline_config.json
@@ -81,8 +81,8 @@ Only assets and rates are operator-maintained business inputs.
 
 ## Slide 8: What Operators Edit vs Never Edit
 ### Operators edit
-- assets.csv
-- rates.csv
+- inputs/assets.csv
+- inputs/rates.csv
 
 ### Operators do not edit manually
 - posted_invoices.csv
@@ -107,7 +107,7 @@ Baseline is not an invoice run and not a month close.
 
 ## Slide 10: Baseline Command
 - Command:
-  - ./scripts/op_init_baseline.sh ana 2026-07-01 "Production start"
+  - ./scripts/op_init_baseline.sh ana 2026-04-01 "Production start"
 - Expected result:
   - baseline config created
   - posted ledger reset to header only
@@ -206,7 +206,7 @@ This drill proves preview, post, close, and carry-forward behavior across four b
 May is the weekend-shift case: billing day 31 lands on Sunday, so cycle execution date shifts to Monday (2026-06-01) while cycle ownership remains May.
 
 ## Slide 16: Validation Checklist
-- assets.csv and rates.csv are valid
+- inputs/assets.csv and inputs/rates.csv are valid
 - invoice CSV exists after invoice-day run
 - posted_invoices.csv has new rows after invoice-day run
 - workbook refreshed and Inventory tab is first
@@ -235,8 +235,8 @@ Explain what each error means and what the safe next action should be.
 
 ## Slide 18: Roles and Guardrails
 ### Operator
-- update assets.csv
-- update rates.csv
+- update inputs/assets.csv
+- update inputs/rates.csv
 - run wrappers
 - validate outputs
 
