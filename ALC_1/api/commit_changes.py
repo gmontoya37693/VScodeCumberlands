@@ -144,4 +144,5 @@ def commit_input_change(
         }
     )
     proposal_path.write_text(json.dumps(proposal, indent=2, sort_keys=True), encoding="utf-8")
+    storage.sync_up()
     return proposal

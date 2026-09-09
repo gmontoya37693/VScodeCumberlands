@@ -87,7 +87,9 @@ def propose_rate_change(
         "old_value": old_value,
         "new_value": bank_rate_annual,
     }
-    return _save_proposal(storage, proposal)
+    saved = _save_proposal(storage, proposal)
+    storage.sync_up()
+    return saved
 
 
 def propose_asset_change(
@@ -131,4 +133,6 @@ def propose_asset_change(
         "old_value": existing,
         "new_value": changes,
     }
-    return _save_proposal(storage, proposal)
+    saved = _save_proposal(storage, proposal)
+    storage.sync_up()
+    return saved

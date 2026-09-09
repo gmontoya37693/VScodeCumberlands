@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import os
+import threading
 from datetime import date
 from pathlib import Path
 from typing import Any
@@ -12,13 +13,25 @@ from pydantic import BaseModel, Field
 from .engine_runner import run_engine
 from .commit_changes import commit_input_change
 from .input_changes import propose_asset_change, propose_rate_change
-from .storage import LocalStorage
+from .storage import BlobStorage, LocalStorage
 
 
 ROOT = Path(os.environ.get("ALC_ROOT", Path(__file__).resolve().parents[1]))
-storage = LocalStorage(ROOT)
+STORAGE_MODE = os.environ.get("ALC_STORAGE_MODE", "local").lower()
+if STORAGE_MODE == "blob":
+    storage = BlobStorage(
+        ROOT,
+        os.environ["AZURE_STORAGE_ACCOUNT_URL"],
+        os.environ.get("ALC_BLOB_CONTAINER", "alc"),
+    )
+else:
+    storage = LocalStorage(ROOT)
 storage.ensure_runtime_directories()
 app = FastAPI(title="ALC V1 API", version="1.0.0")
+
+# Single-instance deployment (replica=1): guards shared state files from
+# overlapping requests within this one process. Not a distributed lock.
+_write_lock = threading.Lock()
 
 
 class DailyRunRequest(BaseModel):
@@ -139,15 +152,16 @@ def create_asset_proposal(request: AssetProposalRequest) -> dict[str, Any]:
 
 @app.post("/api/v1/input-changes/commit")
 def commit_change(request: InputCommitRequest) -> dict[str, Any]:
-    try:
-        return commit_input_change(
-            storage,
-            request.proposal_id,
-            request.approver,
-            request.approval_id,
-        )
-    except (OSError, ValueError) as exc:
-        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    with _write_lock:
+        try:
+            return commit_input_change(
+                storage,
+                request.proposal_id,
+                request.approver,
+                request.approval_id,
+            )
+        except (OSError, ValueError) as exc:
+            raise HTTPException(status_code=400, detail=str(exc)) from exc
 
 
 def _state_response(name: str) -> dict[str, Any]:
@@ -209,52 +223,55 @@ def run_schedule(request: ScheduleRunRequest) -> dict[str, Any]:
 
 @app.post("/api/v1/runs/invoice")
 def run_invoice(request: MonthRunRequest) -> dict[str, Any]:
-    result = _execute(
-        "invoice",
-        request.operator,
-        month=request.month,
-        billing_day=request.billing_day,
-    )
-    return _run_response(result, month=request.month)
+    with _write_lock:
+        result = _execute(
+            "invoice",
+            request.operator,
+            month=request.month,
+            billing_day=request.billing_day,
+        )
+        return _run_response(result, month=request.month)
 
 
 @app.post("/api/v1/runs/bank-payable")
 def run_bank_payable(request: MonthRunRequest) -> dict[str, Any]:
-    result = _execute(
-        "bank-payable",
-        request.operator,
-        month=request.month,
-        billing_day=request.billing_day,
-    )
-    return _run_response(result, month=request.month)
+    with _write_lock:
+        result = _execute(
+            "bank-payable",
+            request.operator,
+            month=request.month,
+            billing_day=request.billing_day,
+        )
+        return _run_response(result, month=request.month)
 
 
 @app.post("/api/v1/runs/month-end")
 def run_month_end(request: MonthRunRequest) -> dict[str, Any]:
-    bank_result = _execute(
-        "bank-payable",
-        request.operator,
-        month=request.month,
-        billing_day=request.billing_day,
-    )
-    bank_response = _run_response(bank_result, month=request.month)
-    close_result = _execute(
-        "close-period",
-        request.operator,
-        month=request.month,
-        billing_day=request.billing_day,
-    )
-    close_response = _run_response(close_result, month=request.month)
-    return {
-        "status": "completed",
-        "run_id": close_result.run_id,
-        "command": "month-end",
-        "month": request.month,
-        "bank_payable_run_id": bank_result.run_id,
-        "close_period_run_id": close_result.run_id,
-        "bank_payable": bank_response,
-        "close_period": close_response,
-    }
+    with _write_lock:
+        bank_result = _execute(
+            "bank-payable",
+            request.operator,
+            month=request.month,
+            billing_day=request.billing_day,
+        )
+        bank_response = _run_response(bank_result, month=request.month)
+        close_result = _execute(
+            "close-period",
+            request.operator,
+            month=request.month,
+            billing_day=request.billing_day,
+        )
+        close_response = _run_response(close_result, month=request.month)
+        return {
+            "status": "completed",
+            "run_id": close_result.run_id,
+            "command": "month-end",
+            "month": request.month,
+            "bank_payable_run_id": bank_result.run_id,
+            "close_period_run_id": close_result.run_id,
+            "bank_payable": bank_response,
+            "close_period": close_response,
+        }
 
 
 @app.post("/api/v1/runs/one-pager")
