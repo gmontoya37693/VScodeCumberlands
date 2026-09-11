@@ -2,12 +2,13 @@ from __future__ import annotations
 
 import json
 import os
+import secrets
 import threading
 from datetime import date
 from pathlib import Path
 from typing import Any
 
-from fastapi import FastAPI, HTTPException
+from fastapi import Depends, FastAPI, Header, HTTPException
 from pydantic import BaseModel, Field
 
 from .engine_runner import run_engine
@@ -32,6 +33,14 @@ app = FastAPI(title="ALC V1 API", version="1.0.0")
 # Single-instance deployment (replica=1): guards shared state files from
 # overlapping requests within this one process. Not a distributed lock.
 _write_lock = threading.Lock()
+_api_key = os.environ.get("ALC_API_KEY")
+
+
+def require_api_key(x_api_key: str | None = Header(default=None, alias="X-API-Key")) -> None:
+    if not _api_key or not x_api_key:
+        raise HTTPException(status_code=401, detail="Invalid or missing API key")
+    if not secrets.compare_digest(x_api_key, _api_key):
+        raise HTTPException(status_code=401, detail="Invalid or missing API key")
 
 
 class DailyRunRequest(BaseModel):
@@ -113,17 +122,17 @@ def health() -> dict[str, str]:
     return {"status": "ok", "service": "alc-v1-api"}
 
 
-@app.get("/api/v1/assets")
+@app.get("/api/v1/assets", dependencies=[Depends(require_api_key)])
 def get_assets() -> dict[str, Any]:
     return _input_response("assets.csv")
 
 
-@app.get("/api/v1/rates")
+@app.get("/api/v1/rates", dependencies=[Depends(require_api_key)])
 def get_rates() -> dict[str, Any]:
     return _input_response("rates.csv")
 
 
-@app.post("/api/v1/rates/propose")
+@app.post("/api/v1/rates/propose", dependencies=[Depends(require_api_key)])
 def create_rate_proposal(request: RateProposalRequest) -> dict[str, Any]:
     try:
         return propose_rate_change(
@@ -136,7 +145,7 @@ def create_rate_proposal(request: RateProposalRequest) -> dict[str, Any]:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
 
 
-@app.post("/api/v1/assets/propose")
+@app.post("/api/v1/assets/propose", dependencies=[Depends(require_api_key)])
 def create_asset_proposal(request: AssetProposalRequest) -> dict[str, Any]:
     try:
         return propose_asset_change(
@@ -150,7 +159,7 @@ def create_asset_proposal(request: AssetProposalRequest) -> dict[str, Any]:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
 
 
-@app.post("/api/v1/input-changes/commit")
+@app.post("/api/v1/input-changes/commit", dependencies=[Depends(require_api_key)])
 def commit_change(request: InputCommitRequest) -> dict[str, Any]:
     with _write_lock:
         try:
@@ -172,22 +181,22 @@ def _state_response(name: str) -> dict[str, Any]:
     }
 
 
-@app.get("/api/v1/state/posted-invoices")
+@app.get("/api/v1/state/posted-invoices", dependencies=[Depends(require_api_key)])
 def get_posted_invoices() -> dict[str, Any]:
     return _state_response("posted_invoices.csv")
 
 
-@app.get("/api/v1/state/bank-payable")
+@app.get("/api/v1/state/bank-payable", dependencies=[Depends(require_api_key)])
 def get_bank_payable() -> dict[str, Any]:
     return _state_response("bank_payable.csv")
 
 
-@app.get("/api/v1/state/closed-periods")
+@app.get("/api/v1/state/closed-periods", dependencies=[Depends(require_api_key)])
 def get_closed_periods() -> dict[str, Any]:
     return _state_response("closed_periods.csv")
 
 
-@app.get("/api/v1/manifests/{run_id}")
+@app.get("/api/v1/manifests/{run_id}", dependencies=[Depends(require_api_key)])
 def get_manifest(run_id: str) -> dict[str, Any]:
     if not run_id or Path(run_id).name != run_id or not run_id.isalnum():
         raise HTTPException(status_code=400, detail="Invalid run ID")
@@ -197,8 +206,8 @@ def get_manifest(run_id: str) -> dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
-@app.post("/api/v1/runs/daily")
-@app.post("/api/v1/runs/daily-preview")
+@app.post("/api/v1/runs/daily-preview", dependencies=[Depends(require_api_key)])
+@app.post("/api/v1/runs/daily", dependencies=[Depends(require_api_key)])
 def run_daily(request: DailyRunRequest) -> dict[str, Any]:
     result = _execute(
         "daily",
@@ -209,19 +218,19 @@ def run_daily(request: DailyRunRequest) -> dict[str, Any]:
     return _run_response(result, as_of=request.as_of.isoformat())
 
 
-@app.post("/api/v1/runs/snapshot")
+@app.post("/api/v1/runs/snapshot", dependencies=[Depends(require_api_key)])
 def run_snapshot(request: SnapshotRunRequest) -> dict[str, Any]:
     result = _execute("snapshot", request.operator, as_of=request.as_of)
     return _run_response(result, as_of=request.as_of.isoformat())
 
 
-@app.post("/api/v1/runs/schedule")
+@app.post("/api/v1/runs/schedule", dependencies=[Depends(require_api_key)])
 def run_schedule(request: ScheduleRunRequest) -> dict[str, Any]:
     result = _execute("schedule", request.operator, asset_id=request.asset_id)
     return _run_response(result, asset_id=request.asset_id or "")
 
 
-@app.post("/api/v1/runs/invoice")
+@app.post("/api/v1/runs/invoice", dependencies=[Depends(require_api_key)])
 def run_invoice(request: MonthRunRequest) -> dict[str, Any]:
     with _write_lock:
         result = _execute(
@@ -233,7 +242,7 @@ def run_invoice(request: MonthRunRequest) -> dict[str, Any]:
         return _run_response(result, month=request.month)
 
 
-@app.post("/api/v1/runs/bank-payable")
+@app.post("/api/v1/runs/bank-payable", dependencies=[Depends(require_api_key)])
 def run_bank_payable(request: MonthRunRequest) -> dict[str, Any]:
     with _write_lock:
         result = _execute(
@@ -245,7 +254,7 @@ def run_bank_payable(request: MonthRunRequest) -> dict[str, Any]:
         return _run_response(result, month=request.month)
 
 
-@app.post("/api/v1/runs/month-end")
+@app.post("/api/v1/runs/month-end", dependencies=[Depends(require_api_key)])
 def run_month_end(request: MonthRunRequest) -> dict[str, Any]:
     with _write_lock:
         bank_result = _execute(
@@ -274,7 +283,7 @@ def run_month_end(request: MonthRunRequest) -> dict[str, Any]:
         }
 
 
-@app.post("/api/v1/runs/one-pager")
+@app.post("/api/v1/runs/one-pager", dependencies=[Depends(require_api_key)])
 def run_one_pager(request: OnePagerRunRequest) -> dict[str, Any]:
     result = _execute("one-pager", request.operator, asset_id=request.asset_id)
     return _run_response(result, asset_id=request.asset_id or "")
