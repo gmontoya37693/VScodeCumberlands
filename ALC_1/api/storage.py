@@ -3,7 +3,7 @@ from __future__ import annotations
 import csv
 import hashlib
 import shutil
-from datetime import date
+from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
 
@@ -100,6 +100,7 @@ class BlobStorage(LocalStorage):
 
         credential = DefaultAzureCredential()
         service_client = BlobServiceClient(account_url=account_url, credential=credential)
+        self._service_client = service_client
         self.container = service_client.get_container_client(container)
 
     def _pull_prefix(self, prefix: str, local_dir: Path) -> None:
@@ -154,3 +155,43 @@ class BlobStorage(LocalStorage):
         published = super().publish_outputs(run_dir, output_date, run_id)
         self.sync_up()
         return published
+
+    def list_outputs(self) -> list[dict[str, Any]]:
+        """List generated files directly from Blob, independent of the local mirror."""
+        return [
+            {
+                "name": blob.name,
+                "size": blob.size,
+                "last_modified": blob.last_modified.isoformat() if blob.last_modified else None,
+            }
+            for blob in self.container.list_blobs(name_starts_with="outputs/")
+        ]
+
+    def generate_download_url(self, blob_name: str, ttl_minutes: int = 15) -> str:
+        """Return a short-lived, read-only SAS URL for one output file or input file."""
+        from azure.storage.blob import BlobSasPermissions, generate_blob_sas
+
+        allowed_inputs = {"inputs/assets.csv", "inputs/rates.csv"}
+        if not blob_name.startswith("outputs/") and blob_name not in allowed_inputs:
+            raise ValueError("only files under outputs/ or the input CSVs can be shared")
+
+        blob_client = self.container.get_blob_client(blob_name)
+        if not blob_client.exists():
+            raise ValueError(f"file not found: {blob_name}")
+
+        now = datetime.now(timezone.utc)
+        expiry = now + timedelta(minutes=ttl_minutes)
+
+        account_name = blob_client.account_name
+        user_delegation_key = self._service_client.get_user_delegation_key(
+            key_start_time=now, key_expiry_time=expiry
+        )
+        sas_token = generate_blob_sas(
+            account_name=account_name,
+            container_name=self.container.container_name,
+            blob_name=blob_name,
+            user_delegation_key=user_delegation_key,
+            permission=BlobSasPermissions(read=True),
+            expiry=expiry,
+        )
+        return f"{blob_client.url}?{sas_token}"
