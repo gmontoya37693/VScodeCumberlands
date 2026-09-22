@@ -29,7 +29,7 @@ def run_engine(
     month: str | None = None,
     asset_id: str | None = None,
     output_date: date | None = None,
-    billing_day: int = 22,
+    billing_day: int = 31,
 ) -> EngineResult:
     """Run one engine command against an isolated copy of the source inputs."""
     run_id = uuid.uuid4().hex
