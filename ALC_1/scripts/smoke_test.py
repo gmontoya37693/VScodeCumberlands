@@ -116,7 +116,7 @@ def main() -> int:
             "POST",
             f"{base}/api/v1/runs/daily-preview",
             api_key=args.api_key,
-            body={"operator": "smoke-test", "as_of": as_of, "billing_day": 22},
+            body={"operator": "smoke-test", "as_of": as_of, "billing_day": 31},
         )
         _check(
             "daily-preview returns 200 with request_id and summary",
