@@ -1930,7 +1930,7 @@ def build_parser() -> argparse.ArgumentParser:
     )
     common.add_argument("--backup-dir", default=str(DEFAULT_BACKUP_DIR), help="directory for pre-write backups")
     common.add_argument("--operator", default="unknown", help="operator name or id for audit logs")
-    common.add_argument("--billing-day", type=int, default=22, help="monthly invoice run day (shifted to next working day)")
+    common.add_argument("--billing-day", type=int, default=31, help="monthly invoice run day (shifted to next working day)")
 
     s1 = sub.add_parser("snapshot", parents=[common], help="point-in-time asset snapshot")
     s1.add_argument("--as-of", required=True, help="YYYY-MM-DD")

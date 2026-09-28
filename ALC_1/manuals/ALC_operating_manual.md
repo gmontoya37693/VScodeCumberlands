@@ -102,7 +102,7 @@ Examples:
 - invoice day: `./scripts/op_invoice.sh ana 2026-07 31`
 - month-end: `./scripts/op_month_end.sh ana 2026-07 31`
 
-The optional last argument is the billing day. If omitted, the default is `22`.
+The optional last argument is the billing day. If omitted, the default is `31`.
 
 Training policy:
 - use billing day `31` so invoice-day and month-end operate together near month-end
@@ -167,8 +167,7 @@ Examples:
 Invoices are posted in one monthly batch using the billing day.
 
 Rules:
-- default billing day is `22`
-- training policy billing day is `31`
+- default billing day is `31`
 - if the billing day falls on a weekend, the script shifts it to the next working day
 - the invoice-day run posts all asset installments whose due dates fall between the previous billing run date and the current billing run date
 

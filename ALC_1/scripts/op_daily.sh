@@ -8,7 +8,7 @@ fi
 
 operator="$1"
 as_of="$2"
-billing_day="${3:-22}"
+billing_day="${3:-31}"
 script_dir="$(cd -- "$(dirname -- "$0")/.." && pwd)"
 python_bin="/opt/anaconda3/bin/python"
 if [[ ! -x "$python_bin" ]]; then
