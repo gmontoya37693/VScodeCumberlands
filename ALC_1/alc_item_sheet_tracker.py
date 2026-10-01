@@ -97,6 +97,7 @@ POSTED_LEDGER_FIELDS = [
     "payment_month",
     "due_date",
     "billing_date",
+    "invoice_month",
     "period",
     "term_to_maturity",
     "bank_rate_annual",
@@ -415,6 +416,8 @@ def load_posted_invoices(path: Path) -> List[Dict[str, object]]:
                     "payment_month": due_date,
                     "due_date": due_date,
                     "billing_date": billing_date,
+                    # Absent on rows posted before this field existed; guard treats those as unknown.
+                    "invoice_month": (row.get("invoice_month") or "").strip(),
                     "period": int(row["period"]),
                     "term_to_maturity": int(row["term_to_maturity"]),
                     "bank_rate_annual": float(row["bank_rate_annual"]),
@@ -454,6 +457,7 @@ def save_posted_invoices(path: Path, rows: List[Dict[str, object]]) -> None:
                 "payment_month": row["payment_month"],
                 "due_date": row.get("due_date", row["payment_month"]),
                 "billing_date": row.get("billing_date", ""),
+                "invoice_month": row.get("invoice_month", ""),
                 "period": int(row["period"]),
                 "term_to_maturity": int(row["term_to_maturity"]),
                 "bank_rate_annual": round(float(row["bank_rate_annual"]), 6),
@@ -1440,11 +1444,17 @@ def run_invoice(args: argparse.Namespace) -> None:
     posted_rows = posted_invoice_map(posted_existing)
 
     # Portfolio-wide guard: block skipping ahead more than one month past the
-    # last invoiced month. Re-invoicing an already-invoiced (not closed) month
-    # for corrections is still allowed.
-    billing_dates = [parse_date(str(r["billing_date"])) for r in posted_existing if r.get("billing_date")]
-    if billing_dates:
-        last_invoiced_month = month_start(max(billing_dates))
+    # last invoiced month. Uses the recorded invoice_month (the batch's target
+    # month), not billing_date -- a weekend shift can push billing_date into
+    # the following calendar month and misidentify the last invoiced month.
+    # Re-invoicing an already-invoiced (not closed) month for corrections is
+    # still allowed. Rows posted before this field existed have no
+    # invoice_month and are skipped here (the guard activates once the ledger
+    # contains at least one row posted under this fix).
+    invoiced_months = [str(r.get("invoice_month") or "").strip() for r in posted_existing]
+    invoiced_months = [m for m in invoiced_months if m]
+    if invoiced_months:
+        last_invoiced_month = month_start(parse_date(max(invoiced_months) + "-01"))
         expected_next_month = add_months(last_invoiced_month, 1)
         if target_month > expected_next_month:
             raise ValueError(
@@ -1487,6 +1497,7 @@ def run_invoice(args: argparse.Namespace) -> None:
                 "amortization": row["amortization_amount"],
                 "ending_balance": row["ending_balance"],
                 "rate_source": row["rate_source"],
+                "invoice_month": target_month_key,
                 "posted_timestamp": timestamp,
             }
         )
@@ -1580,22 +1591,27 @@ def run_bank_payable(args: argparse.Namespace) -> None:
         backups.append(b)
 
     month_str = month_key(target_month)
-    upsert_bank_payable_month(
-        bank_payable_path,
-        month_str,
-        {
-            "month": month_str,
-            "billing_date": billing_date.isoformat(),
-            "invoice_lines": len(invoices),
-            "bank_interest_total": bank_interest_total,
-            "bank_principal_total": bank_principal_total,
-            "bank_payable_total": bank_payable,
-            "payable_basis": "asset_cost",
-            "operator": args.operator,
-            "updated_at": datetime.now().isoformat(timespec="seconds"),
-        },
-    )
+    bank_payable_row = {
+        "month": month_str,
+        "billing_date": billing_date.isoformat(),
+        "invoice_lines": len(invoices),
+        "bank_interest_total": bank_interest_total,
+        "bank_principal_total": bank_principal_total,
+        "bank_payable_total": bank_payable,
+        "payable_basis": "asset_cost",
+        "operator": args.operator,
+        "updated_at": datetime.now().isoformat(timespec="seconds"),
+    }
+    upsert_bank_payable_month(bank_payable_path, month_str, bank_payable_row)
     print(f"bank payable summary updated: {bank_payable_path}")
+
+    if args.output:
+        output_path = Path(args.output)
+        b = backup_file(output_path, backup_dir, run_id)
+        if b:
+            backups.append(b)
+        write_csv(output_path, [bank_payable_row])
+        print(f"bank payable file written to {args.output}")
 
     manifest = {
         "run_id": run_id,
@@ -1975,6 +1991,7 @@ def build_parser() -> argparse.ArgumentParser:
         default=str(DEFAULT_BANK_PAYABLE),
         help="csv file storing one bank-payable row per month",
     )
+    s3.add_argument("--output", help="optional csv output path for this run's single bank-payable row")
     s3.set_defaults(func=run_bank_payable)
 
     s8 = sub.add_parser("close-period", parents=[common], help="mark a month as closed without reposting invoices")

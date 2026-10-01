@@ -87,6 +87,7 @@ def run_engine(
         elif command == "bank-payable":
             # Persistent state file, not a per-run artifact (matches posted-ledger/closed-periods).
             args.extend(["--bank-payable-file", str(state_dir / "bank_payable.csv")])
+            args.extend(["--output", str(run_dir / f"bank-payable_{month}.csv")])
     elif command == "schedule":
         args.extend(["--output", str(run_dir / "schedule.csv")])
     elif command == "one-pager":
