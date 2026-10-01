@@ -344,6 +344,23 @@ def get_input_download_link(
     return {"request_id": request_id, "blob_name": f"inputs/{name}", "url": url, "expires_in_minutes": 15}
 
 
+@app.get("/api/v1/state/download", dependencies=[Depends(require_api_key)])
+def get_state_download_link(
+    name: str, request_id: str = Depends(get_request_id)
+) -> dict[str, Any]:
+    logger.info("request_id=%s endpoint=state/download name=%s", request_id, name)
+    if not isinstance(storage, BlobStorage):
+        raise HTTPException(status_code=400, detail="Download links require blob storage mode")
+    allowed_names = {"posted_invoices.csv", "bank_payable.csv", "closed_periods.csv"}
+    if name not in allowed_names:
+        raise HTTPException(status_code=400, detail=f"name must be one of {sorted(allowed_names)}")
+    try:
+        url = storage.generate_download_url(f"state/{name}")
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    return {"request_id": request_id, "blob_name": f"state/{name}", "url": url, "expires_in_minutes": 15}
+
+
 @app.post("/api/v1/runs/daily-preview", dependencies=[Depends(require_api_key)])
 @app.post("/api/v1/runs/daily", dependencies=[Depends(require_api_key)])
 def run_daily(request: DailyRunRequest, request_id: str = Depends(get_request_id)) -> dict[str, Any]:

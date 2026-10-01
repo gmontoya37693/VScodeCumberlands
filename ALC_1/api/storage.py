@@ -180,8 +180,13 @@ class BlobStorage(LocalStorage):
         from azure.storage.blob import BlobSasPermissions, generate_blob_sas
 
         allowed_inputs = {"inputs/assets.csv", "inputs/rates.csv"}
-        if not blob_name.startswith("outputs/") and blob_name not in allowed_inputs:
-            raise ValueError("only files under outputs/ or the input CSVs can be shared")
+        allowed_state = {"state/posted_invoices.csv", "state/bank_payable.csv", "state/closed_periods.csv"}
+        if (
+            not blob_name.startswith("outputs/")
+            and blob_name not in allowed_inputs
+            and blob_name not in allowed_state
+        ):
+            raise ValueError("only files under outputs/, the input CSVs, or the state ledgers can be shared")
 
         blob_client = self.container.get_blob_client(blob_name)
         if not blob_client.exists():
