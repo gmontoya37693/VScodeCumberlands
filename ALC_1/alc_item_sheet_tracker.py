@@ -1605,14 +1605,6 @@ def run_bank_payable(args: argparse.Namespace) -> None:
     upsert_bank_payable_month(bank_payable_path, month_str, bank_payable_row)
     print(f"bank payable summary updated: {bank_payable_path}")
 
-    if args.output:
-        output_path = Path(args.output)
-        b = backup_file(output_path, backup_dir, run_id)
-        if b:
-            backups.append(b)
-        write_csv(output_path, [bank_payable_row])
-        print(f"bank payable file written to {args.output}")
-
     manifest = {
         "run_id": run_id,
         "timestamp": datetime.now().isoformat(timespec="seconds"),
@@ -1991,7 +1983,6 @@ def build_parser() -> argparse.ArgumentParser:
         default=str(DEFAULT_BANK_PAYABLE),
         help="csv file storing one bank-payable row per month",
     )
-    s3.add_argument("--output", help="optional csv output path for this run's single bank-payable row")
     s3.set_defaults(func=run_bank_payable)
 
     s8 = sub.add_parser("close-period", parents=[common], help="mark a month as closed without reposting invoices")
