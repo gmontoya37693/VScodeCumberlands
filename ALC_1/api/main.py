@@ -145,7 +145,7 @@ def _input_response(name: str, request_id: str) -> dict[str, Any]:
 
 
 def _run_response(result: Any, request_id: str, **details: str) -> dict[str, Any]:
-    files = storage.publish_outputs(result.run_dir, result.output_date, result.run_id)
+    files = storage.publish_outputs(result.run_dir, result.output_date, result.run_id, result.command)
     manifest_path = storage.manifest_path(result.run_id)
     summary: dict[str, Any] = {}
     if manifest_path.exists():

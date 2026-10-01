@@ -70,9 +70,15 @@ class LocalStorage:
             if path.is_file() and path.name not in {"assets.csv", "rates.csv"}
         ]
 
-    def publish_outputs(self, run_dir: Path, output_date: date, run_id: str) -> list[dict[str, Any]]:
+    def publish_outputs(
+        self, run_dir: Path, output_date: date, run_id: str, command: str = ""
+    ) -> list[dict[str, Any]]:
         """Copy run artifacts into a dated, non-overwriting output folder."""
-        output_dir = self.outputs / f"{output_date:%Y}" / f"{output_date:%m}" / f"{output_date:%d}"
+        # Monthly commands have no real day component, so skip the day folder.
+        if command in {"invoice", "bank-payable", "close-period"}:
+            output_dir = self.outputs / f"{output_date:%Y}" / f"{output_date:%m}"
+        else:
+            output_dir = self.outputs / f"{output_date:%Y}" / f"{output_date:%m}" / f"{output_date:%d}"
         output_dir.mkdir(parents=True, exist_ok=True)
         published: list[dict[str, Any]] = []
         for source in sorted(run_dir.rglob("*")):
@@ -151,8 +157,10 @@ class BlobStorage(LocalStorage):
         ):
             self._push_dir(local_dir, prefix)
 
-    def publish_outputs(self, run_dir: Path, output_date: date, run_id: str) -> list[dict[str, Any]]:
-        published = super().publish_outputs(run_dir, output_date, run_id)
+    def publish_outputs(
+        self, run_dir: Path, output_date: date, run_id: str, command: str = ""
+    ) -> list[dict[str, Any]]:
+        published = super().publish_outputs(run_dir, output_date, run_id, command)
         self.sync_up()
         return published
 
