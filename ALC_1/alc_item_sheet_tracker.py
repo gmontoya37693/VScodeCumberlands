@@ -1438,6 +1438,21 @@ def run_invoice(args: argparse.Namespace) -> None:
     rates = load_rates(rates_path)
     posted_existing = load_posted_invoices(posted_path)
     posted_rows = posted_invoice_map(posted_existing)
+
+    # Portfolio-wide guard: block skipping ahead more than one month past the
+    # last invoiced month. Re-invoicing an already-invoiced (not closed) month
+    # for corrections is still allowed.
+    billing_dates = [parse_date(str(r["billing_date"])) for r in posted_existing if r.get("billing_date")]
+    if billing_dates:
+        last_invoiced_month = month_start(max(billing_dates))
+        expected_next_month = add_months(last_invoiced_month, 1)
+        if target_month > expected_next_month:
+            raise ValueError(
+                f"invoice month {target_month_key} is ahead of schedule. "
+                f"Last invoiced month was {month_key(last_invoiced_month)}; "
+                f"next allowed month is {month_key(expected_next_month)}."
+            )
+
     schedule_rows = build_schedule(assets, rates, posted_rows=posted_rows)
     invoices = invoice_for_month_from_schedule(schedule_rows, target_month, args.billing_day)
     _, billing_date = billing_cycle_window(target_month, args.billing_day)
