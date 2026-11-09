@@ -68,3 +68,12 @@ for c in classes:
     parts = [f"{prior[c]}"]
     for w in kept:
         score *= likelihood(w, c)
+        parts.append(f"P({w}|{c})={likelihood(w, c)}")
+    log_score[c] = log(prior[c]) + sum(log(likelihood(w, c)) for w in kept)
+    print(f"        {c}: {' x '.join(parts)}")
+    print(f"           = {score}  (decimal {float(score):.5f}, log {log_score[c]:.4f})")
+
+# Step 8: argmax = the class with the highest score
+winner = max(classes, key=lambda c: log_score[c])
+ratio = exp(log_score["-"] - log_score["+"])
+print(f"\nStep 8. Prediction (argmax): {winner}   negative/positive ratio = {ratio:.2f}")
